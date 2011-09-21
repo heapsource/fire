@@ -3,7 +3,7 @@ Specification for Structures of incoming and out-coming messages of REST operati
 ***
 
 ## How JSON gets involved
-*.pmd.js* files are plain JSON files that describes the structure of a Priest Message. To make the editing of those files very convenient for everyone the official file system extension is **pdm.js**.
+*.pmd.js* files are plain JSON files that describes the structure of a Priest Message. To make the editing of those files very convenient for everyone the official file system extension is **pmd.js**.
 
 ## Structure
 
@@ -14,7 +14,7 @@ The definition is basically the name of the message, properties and base message
 #### name(String)
 *Required:* String that describes the name of the message. This is the only attribute required to define a structure.
 
-Example: the following pdm file describes the input for a login operation of an app called "HelloWorld":
+Example: the following pmd file describes the input for a login operation of an app called "HelloWorld":
 
     {
 		name:"HelloWorld.Accounts.LoginCredentials",
@@ -25,7 +25,7 @@ Example: the following pdm file describes the input for a login operation of an 
 #### properties(Hash)
 *Optional:* Hash where the key is the name of the property and the value is a string with the name of the datatype or structure.
 
-Example: the following pdm file describes the input for a login operation of an app called "HelloWorld":
+Example: the following pmd file describes the input for a login operation of an app called "HelloWorld":
 
     {
 		name:"HelloWorld.Accounts.LoginCredentials",
@@ -78,7 +78,7 @@ Other priest messages can be used as datatypes for other messages properties as 
 		}
     }
 
-    // Canvas.Line.pdm.js
+    // Canvas.Line.pmd.js
     {
 		name:"Canvas.Line",
 		properties: {
@@ -135,7 +135,7 @@ Custom messages can inherit the properties of other messages. When the message d
 		}
     }
     
-    // App.Generic.NameEnabled.pdm.js
+    // App.Generic.NameEnabled.pmd.js
     {
 		name:"App.Generic.CreateWithName",
 		properties: {
@@ -143,7 +143,7 @@ Custom messages can inherit the properties of other messages. When the message d
 		}
     }
     
-    // App.Generic.IdEnabled.pdm.js
+    // App.Generic.IdEnabled.pmd.js
     {
 		name:"App.Generic.CreateWithName",
 		properties: {
@@ -151,7 +151,7 @@ Custom messages can inherit the properties of other messages. When the message d
 		}
     }
     
-    // App.Generic.LangNameIdEnabled.pdm.js
+    // App.Generic.LangNameIdEnabled.pmd.js
     {
 		name:"App.Generic.LangNameIdEnabled",
 		bases: ["App.Generic.LangEnabled", "App.Generic.NameEnabled", "App.Generic.IdEnabled"]
@@ -220,10 +220,10 @@ Examples of **Bad** property names:
 
 The last two properties listed will cause a PMD3 error.
 
-## The Priest Messaging Universe and Errors
+## The Priest Universe and Errors
 A universe is a collection of Priest Messages Definitions loaded at runtime to be used in the app.
 
-When loading the message definitions out of the .pdm.json files the runtime some errors can occurs.
+When loading the message definitions out of the .pmd.json files the runtime some errors can occurs.
 
 ### Errors Table
     Error Code			Message
