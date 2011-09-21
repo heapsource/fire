@@ -53,10 +53,11 @@ Priest Messaging supports most of all built-in JSON data types and other custom 
 
 ### Supported JSON Built-in types:
 
-* Number: double precision floating-point format.
-* String: double-quoted Unicode, with backslash escaping.
-* Boolean: true or false.
-* Date: Date values.
+* Number: double precision floating-point format. Supports null.
+* String: double-quoted Unicode, with backslash escaping. Supports null.
+* Boolean: true or false. Supports null.
+* Date: Date values. Supports null.
+* Null: Accepts any data type, from a build type to compound messages and null itself.
 
 ### Unsupported JSON Built-in types:
 
