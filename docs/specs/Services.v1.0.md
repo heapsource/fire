@@ -237,6 +237,7 @@ Full example:
 	PSE5				Endpoint ENDPOINT_NAME uses the converter CONVERTER_NAME but the options provided are not compliant with the message expected.
 	PSE6				Endpoint ENDPOINT_NAME action has an empty name.
 	PSE7				Endpoint ENDPOINT_NAME action ACTION was not recognized as a valid action.
+	PSE8				Source SOURCE_NAME does not conforms the JSON format.
 
 ### Replacement tokens for the Error Messages.
 
