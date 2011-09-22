@@ -178,14 +178,14 @@ Full example:
 
 	// blog.posts.psd.js
 	{
-		method: 'GET',
-		route: '/blog/:blog_name/posts',
+		method: "GET",
+		route: "/blog/:blog_name/posts",
 		in: {
 				message: "My.Blog.PostsQuery",
 				routeBindings: [
 					{
-						from: ':blog_name',
-						to: 'blogName',
+						from: ":blog_name",
+						to: "blogName",
 						converters: [
 							// Put some converters here
 						]
@@ -193,18 +193,18 @@ Full example:
 				filters: [
 					{
 						property: "content",
-						name:"System.NonEmpty",
+						name: "System.NonEmpty",
 					}
 				]
 			}
-		result: 'My.Blog.PostsResult'
+		result: "My.Blog.PostsResult"
 		as: [
 			{
-				action: 'dataQuery',
+				action: "dataQuery",
 				payload: {
-					collection:'Posts',
+					collection: "Posts",
 					condition: {
-						'blog_name': {
+						"blog_name": {
 								$inputPath: "blogName"
 							}
 						}
@@ -212,13 +212,13 @@ Full example:
 				}
 			},
 			{
-				action: 'transform', // transform is smart enough to transform arrays or a single object.
+				action: "transform", // transform is smart enough to transform arrays or a single object.
 				payload: {
-					name: 'My.Blog.PostFromData'
+					name: "My.Blog.PostFromData"
 				}
 			},
 			{
-				action: 'set',
+				action: "set",
 				payload: {
 					target: {
 						$outputPath: "posts"
