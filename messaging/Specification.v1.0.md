@@ -171,7 +171,7 @@ Base messages can be inspected at runtime depending on the implementation.
 Priest Messaging defines how to solve conflicts with inheritance using the following table of rules:
 
 * Same field name in multiple bases with same data type: It's ok.
-* Same field name in multiple bases with different data type: Error code "PMD1"
+* Same field name in multiple bases with different data type: Error code "PME1"
 
 ## Naming
 
@@ -219,7 +219,7 @@ Examples of **Bad** property names:
 * $
 * Security.Lang
 
-The last two properties listed will cause a PMD3 error.
+The last two properties listed will cause a PME3 error.
 
 ## The Priest Universe and Errors
 A universe is a collection of Priest Messages Definitions loaded at runtime to be used in the app.
@@ -228,13 +228,15 @@ When loading the message definitions out of the .pmd.json files the runtime some
 
 ### Errors Table
     Error Code			Message
-    PMD1				Property PROP_NAME data type in message MESSAGE_NAME is conflicting with another property of a inherited property.
-    PMD2				Property PROP_NAME in message MESSAGE_NAME must be unique.
-	PMD3				Property PROP_NAME in message MESSAGE_NAME contains illegal characters.
-	PMD4				MESSAGE_NAME contains illegal characters.
-	PMD5				MESSAGE_NAME is defined multiple times in the Universe.
-	PMD6				SOURCE_NAME defines a message with no name.
-	PMD7				SOURCE_NAME does not conforms the JSON format.
+    PME1				Property PROP_NAME data type in message MESSAGE_NAME is conflicting with another property of a inherited property.
+    PME2				Property PROP_NAME in message MESSAGE_NAME must be unique.
+	PME3				Property PROP_NAME in message MESSAGE_NAME contains illegal characters.
+	PME4				Name of message MESSAGE_NAME in source SOURCE_NAME contains illegal characters.
+	PME5				Message MESSAGE_NAME is defined multiple times in the Universe.
+	PME6				Source SOURCE_NAME defines a message with no name.
+	PME7				Source SOURCE_NAME does not conforms the JSON format.
+	PME8				DataType or Message MESSAGE_NAME was not found in the Universe.
+	PME9				Property PROP_NAME was not found in message MESSAGE_NAME.
 
 ### Replacement tokens for the Error Messages.
 **PROP_NAME** Name of the property involved in the error.
