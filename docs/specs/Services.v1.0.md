@@ -6,7 +6,7 @@ Services works as a set of exposed RESTful endpoints in express.js.
 
 ## Defining an Endpoint
 
-A *endpoint* defines a reachable operation with URI and HTTP method. Endpoints files uses *.psd.js* file extensions.
+A *endpoint* defines a reachable operation with URI and HTTP method. Endpoints files uses *.endpoint.json* file extensions.
 
 The following attributes are part of an endpoint definition.
 
@@ -49,6 +49,17 @@ Example 3: The following endpoint allows to update a blog information:
 	}
 
 **Note: The combination of route and method must be unique in the Priest Universe.**
+
+//////////////////////////////////////
+TODO:
+
+New Concepts:
+
+* ContextRequest: Object that is used as a common space to share info of the current request. Is completely separated from express.js request object to avoid conflicts.
+* Endpoint filters(acts over the endpoint itself instead of the input message and set stuff in the context of the request)
+* 
+
+//////////////////////////////////////
 
 ### in(Hash)
 *Optional:* Define how the incoming message should be processed.
@@ -176,52 +187,52 @@ Example:
 
 Full example:
 
-	// blog.posts.psd.js
+	// blog.posts.endpoint.json
 	{
-		method: "GET",
-		route: "/blog/:blog_name/posts",
-		in: {
-				message: "My.Blog.PostsQuery",
-				routeBindings: [
+		"method": "GET",
+		"route": "/blog/:blog_name/posts",
+		"in": {
+				"message": "My.Blog.PostsQuery",
+				"routeBindings": [
 					{
-						from: ":blog_name",
-						to: "blogName",
-						converters: [
+						"from": ":blog_name",
+						"to": "blogName",
+						"converters": [
 							// Put some converters here
 						]
 				],
-				filters: [
+				"filters": [
 					{
-						property: "content",
-						name: "System.NonEmpty",
+						"property": "content",
+						"name": "System.NonEmpty",
 					}
 				]
 			}
-		result: "My.Blog.PostsResult"
-		as: [
+		"result": "My.Blog.PostsResult"
+		"as": [
 			{
-				action: "dataQuery",
-				payload: {
-					collection: "Posts",
-					condition: {
+				"action": "System.Data.Find",
+				"payload": {
+					"collection": "Posts",
+					"condition": {
 						"blog_name": {
-								$inputPath: "blogName"
+								"$inputPath": "blogName"
 							}
 						}
 					}
 				}
 			},
 			{
-				action: "transform", // transform is smart enough to transform arrays or a single object.
-				payload: {
-					name: "My.Blog.PostFromData"
+				"action": "transform", // transform is smart enough to transform arrays or a single object.
+				"payload": {
+					"name": "My.Blog.PostFromData"
 				}
 			},
 			{
-				action: "set",
-				payload: {
-					target: {
-						$outputPath: "posts"
+				"action": "set",
+				"payload": {
+					"target": {
+						"$outputPath": "posts"
 					}
 				}
 			}
@@ -231,13 +242,12 @@ Full example:
 ### Errors Table
     Error Code			Message
 	PSE1				Endpoint ENDPOINT_NAME is defined multiple times in the Universe.
-	PSE2				Source SOURCE_NAME defines an endpoint with no HTTP method.
-	PSE3				Source SOURCE_NAME defines an endpoint with no Route.
-	PSE4				Endpoint ENDPOINT_NAME has no implementation.
+	PSE10002			Endpoint in SOURCE_NAME defines an endpoint with no HTTP method.
+	PSE10003			Endpoint in SOURCE_NAME defines an endpoint with no Route.
+	PSE10004			Endpoint in SOURCE_NAME has an implementation issue, ERROR
 	PSE5				Endpoint ENDPOINT_NAME uses the converter CONVERTER_NAME but the options provided are not compliant with the message expected.
 	PSE6				Endpoint ENDPOINT_NAME action has an empty name.
 	PSE7				Endpoint ENDPOINT_NAME action ACTION was not recognized as a valid action.
-	PSE8				Source SOURCE_NAME does not conforms the JSON format.
 
 ### Replacement tokens for the Error Messages.
 
@@ -245,7 +255,7 @@ Full example:
 
 **CONVERTER_NAME** is the name of the converter involved in the error.
 
-**SOURCE_NAME** name of the definition source. Usually is the name of the *.psd.js* ile where the error occurred.
+**SOURCE_NAME** name of the definition source. Usually is the name of the *.endpoint.json* ile where the error occurred.
 
 **MESSAGE_NAME** is the name of the message involved in the error.
 

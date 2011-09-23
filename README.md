@@ -2,7 +2,7 @@
 
 Currently in Development, stay tuned!
 
-# Specifications v1.0
+## Specifications v1.0
 
 The specifications for version 1.0 are ready.
 
@@ -10,9 +10,45 @@ The specifications for version 1.0 are ready.
 * [Services.v1.0](https://github.com/firebaseco/priest/blob/master/docs/specs/Services.v1.0.md)
 * [Transformations.v1.0](https://github.com/firebaseco/priest/blob/master/docs/specs/Transformations.v1.0.md)
 
+## Contributing
+
+1. Clone the Repository
+2. Run the Tests
+3. Read the Specifications all the specifications for the current version at docs/specs
+4. Inspect the Source code at src
+5. Send your patch to *johan@firebase.co*
+
+### Collaborating
+
+* Johan (author). Email: *johan@firebase.co*, Skype: *thepumpkin1979*
+
+### Cloning the Repository
+
+    git clone https://github.com/firebaseco/priest.git
+
+### Preparing your Development Environment and running the Tests
+
+priest depends on [vows](http://vowsjs.org/) and other development tools, you can install all of them by simply running:
+
+     make install-dev-dependencies
+
+Once it's finished then you can run the tests
+
+    make run-tests
+
+Or you can let [vows](http://vowsjs.org/) run the test automatically as you change them:
+
+    run-tests-forever
+
+### Cleaning your development Environment
+
+By running `make install-dev-dependencies` you will create a bunch of crap inside node_modules that we don't really want to commit as part of your patches, so when you are ready to create the patch run the following command first:
+
+    make remove-dev-dependencies
+
+
 ## Author
 Johan Hernandez: johan@firebase.co
-Drop me an email if you need anything, thanks!
 
 ## License
 
