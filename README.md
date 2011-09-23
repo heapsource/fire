@@ -9,6 +9,7 @@ The specifications for version 1.0 are ready.
 * [Messaging.v1.0](https://github.com/firebaseco/priest/blob/master/docs/specs/Messaging.v1.0.md)
 * [Services.v1.0](https://github.com/firebaseco/priest/blob/master/docs/specs/Services.v1.0.md)
 * [Transformations.v1.0](https://github.com/firebaseco/priest/blob/master/docs/specs/Transformations.v1.0.md)
+* [JSONCode.v1.0](https://github.com/firebaseco/priest/blob/master/docs/specs/JSONCode.v.1.0.md)
 
 ## Contributing
 
