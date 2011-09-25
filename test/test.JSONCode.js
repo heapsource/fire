@@ -390,4 +390,44 @@ vows.describe('JSONCode').addBatch({
 			}
 		}
 	},
+	'When I have a JSON document with a set expression, other expressions on the same level should see the variable': {
+		topic: function() {
+			return {
+				"@set(point)": {
+					x:22.3,
+					y:56.2
+				},
+				"@get(point)": null
+			};    
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				jsonCode._testOnly_runJSONObject(topic,{passedVariable:"This is my Variable"}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"")
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be an object with the variable value on it, the last result in the expression block" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, {
+					x:22.3,
+					y:56.2
+				});
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
+	},
 }).export(module); 

@@ -295,10 +295,17 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, variables, inputCallba
 		console.trace()
 		throw "hint is required"
 	}
+	var localVariables = {}; 
+	if(variables != undefined && variables != null) {
+		for(var k in variables) {
+			localVariables[k] = variables[k]
+		}
+	}
 	var context = {
 		_blockContext: {
 			"_runtime": this,
-			"_variables": variables,
+			"_variables": localVariables,
+			"_parentVariables": variables,
 			"_inputCallback": inputCallback,
 			"_breakCallback": breakCallback,
 			"_resultCallback": resultCallback,

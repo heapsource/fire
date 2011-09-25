@@ -279,7 +279,7 @@ Returns the input expression as a result. Typically is the last expression in a 
 Returns the variable name in the hint. If no hint is given it returns undefined.
 
 ### @set
-Sets the input as the value of the variable name provided in the hint. If no hint is given it does nothing. Always returns the input.
+Sets the input as the value of the variable name provided in the hint. If no hint is given it process the input without setting it to any variable. Always returns the input.
 
 ### @if
 Conditional expression, takes a hint as a JS expression and executes and return the result of the input if the condition is met.  If there is no hint, it uses `lastStatusFlag` to determinate if it should return the input or not.
