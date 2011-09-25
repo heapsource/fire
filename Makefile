@@ -6,8 +6,8 @@ install-dev-dependencies:
 remove-dev-dependencies:
 	npm uninstall vows
 
-run-tests:
+run-tests: test/*.js
 	node_modules/.bin/vows test/*.js
 
-run-tests-forever:
+run-tests-forever: test/*.js
 	node_modules/.bin/vows -w test/*.js

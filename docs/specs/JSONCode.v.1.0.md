@@ -12,7 +12,7 @@ JSONCode is basically a set of special expressions embedded as 'keys' with the i
 
 Result:
 
-    20
+    25
 
 ## Example 1.2:
 
@@ -84,8 +84,9 @@ Result:
 			"@loop": {
 				"@set(i)": {
 					"@sum": [
-						"@get(i)":null,
-						"@literal": 1
+						{
+						"@get(i)":null},
+						{"@literal": 1}
 					]
 				},
 				"@if(i < 21)": {
@@ -346,9 +347,43 @@ Result:
 
     "Awesome"
 
+## Variables Names
+
+Variable names that you provide via hint to `@get` and `@set` can not contain any punctuation marks including _ $ or any other special character.
+
+## Dealing with JSON Keys with the same name
+
+JSON keys must be unique, if there is a repeated key the parser will ignore it.
+
+Example, the following JsonCode is a valid JSON Document but only one @set expression will reach the JSONCode compiler:
+
+    {
+		"@set(x)": 23,
+		"@set(x)": 25
+        "@return": {
+			"@get(x)": null
+		}
+    }
+
+The result will be usually 23 but since this is an error of the JSON Document the JSON parser is free to take any decision. TO solve this situation JSONCode compiler will ignore any whitespace before the `@` symbol, so for JSON you actually have different keys but for JSONCode compiler is just a repeated expression.
+
+Example:
+
+    {
+		"@set(x)": 23,
+		" @set(x)": 25
+        "@return": {
+			"@get(x)": null
+		}
+    }
+
+You can place as many whitespaces as you want.
+
+
 ### Errors Table
     Error Code			Message
-	XXX					XXX
+	JS1001				Key KEY was found in a expression block. Regular JSON keys and expression keys can not be mixed at the same level of the document.
+	JS1002				Expression EXPRESSION_NAME is not registered or was not loaded.
 
 
 ### Replacement tokens for the Error Messages.
