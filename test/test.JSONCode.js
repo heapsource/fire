@@ -473,5 +473,50 @@ vows.describe('JSONCode').addBatch({
 				assert.equal(expressionResult.count, 1)
 			}
 		}
+	},
+	'When I have expressions inside an array': {
+		topic: function() {
+			return [
+				{
+					"@return": 1
+				},
+				{
+					"@return": {
+						x:64.2,
+						y: 934.1
+					}
+				}
+			]
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"")
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be the array with the result of all expressions as items, the last result in the expression block" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, [1,{
+					x:64.2,
+					y: 934.1
+				}
+					]);
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
 	}
 }).export(module); 

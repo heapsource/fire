@@ -8,10 +8,18 @@ module.exports = function() {
 	var hint = this._blockContext._hint
 	var validHint = hint != undefined && v != undefined && v != null 
 	
-	this._blockContext._inputCallback(function(res) {
-		if(validHint) {
+	if(this._blockContext._inputExpression) {
+		this._runExp(this._blockContext._inputExpression, {
+			_resultCallback: function(res) {
+				if(validHint) {
 			 v[hint] = res
 		}
 		rc(res)
-	});
+			}
+		});
+	}
+	/*
+	this._blockContext._inputCallback(function(res) {
+		
+	});*/
 }

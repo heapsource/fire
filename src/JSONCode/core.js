@@ -74,7 +74,14 @@ function isPureJSONValue(jsonObj) {
 	else if(typeof(jsonObj) === 'object') {
 		if(jsonObj instanceof Array) {
 			// Check all the items.
-			throwInternalError("Can't process arrays yet")
+			for(var index in jsonObj) {
+				var item = jsonObj[index]
+				if(!isPureJSONValue(item)) {
+					return false
+				}
+			}
+			return true;
+			//throwInternalError("Can't process arrays yet")
 		} else if(jsonObj instanceof Object) {
 			for(var propName in jsonObj) {
 				if(isSpecialKey(propName)) {
@@ -134,9 +141,25 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 		buffer.writeLine("this._blockContext._resultCallback(" + resultVarName +  ");")
 	} else {
 		if(jsonObj instanceof Array) {
-			throwInternalError("Can't process arrays yet or generate code")
+			// Second level blocks
+				buffer.writeLine(resultVarName + " = [];")
+				for(var index in jsonObj) {
+					var childInputJsonObj = jsonObj[index]
+					var isLast = index == jsonObj.length - 1
+					generateExpressionBlockFunctionWrapper(childInputJsonObj, buffer, names, function(blockBuffer, blockNames) {
+						blockBuffer.writeLine("function("+ blockNames.name("subLevelResArg") +"){")
+						blockBuffer.indent()
+						blockBuffer.writeLine(resultVarName + ".push(" + blockNames.name("subLevelResArg") + ");")
+						if(isLast) {
+							// if this is the last expression of the array, call the result callback.
+							blockBuffer.writeLine(names.name("callbackVar") + "("+ resultVarName +");")
+						}
+						blockBuffer.unindent()
+						blockBuffer.writeLine("}")
+					},null)
+				}
 		}
-		if(jsonObj instanceof Object) {
+		else if(jsonObj instanceof Object) {
 			if(objectIsExpression(jsonObj)) {
 				checkIfIsIsNotMixingKeys(jsonObj)
 				// Render all the block expressions.
@@ -149,25 +172,11 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 					buffer.indent()
 					var childExprName = getExpressionNameFromSpecialKey(propName)
 					buffer.writeLine('"' + childExprName + '"')
-					buffer.writeLine(",{_inputCallback:")
 					
 					// Begin Input Callback Generation
-					buffer.writeLine("function(" + names.name("sendInputCb") + ") {")
-					buffer.indent()
+					buffer.writeLine(",{_inputExpression:")
+					generateExpressionReadyFunction(childInputJsonObj, buffer, names.createInner());
 					
-					buffer.writeLine(names.name("localContext") +"._runExp(")
-					buffer.indent()
-					generateExpressionReadyFunction(childInputJsonObj, buffer, names.createInner())
-					buffer.writeLine(",{ _resultCallback: ")
-					buffer.writeLine("function(" + names.name("childResult") + "){")
-					buffer.indent()
-					buffer.writeLine(names.name("sendInputCb") + "("+names.name("childResult")+");")
-					buffer.unindent()
-					buffer.writeLine("}}")
-					buffer.unindent()
-					buffer.writeLine(");")
-					buffer.unindent()
-					buffer.writeLine("}")
 					//End of Input Callback Generation
 					
 					// Begin Result Callback Generation
@@ -186,7 +195,7 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 					buffer.writeLine("});")
 				}); // end of properties iteration
 			} else {
-			//	throwInternalError("Can't work with second level blocks yet")
+				// Second level blocks
 				buffer.writeLine(resultVarName + " = {};")
 				navigateKeys(jsonObj, function(iteration) {
 					var propName = iteration.key
@@ -240,17 +249,15 @@ function generateFunctionFromJSONExpression(jsonBlock, virtualFileName, hint) {
 	var names = new NameGenerator()
 
 	buffer.writeLine("var _expressionFunc = function() {")
-
 	buffer.indent()
-
-	generateExpressionBlockFunctionWrapper(jsonBlock, buffer,names, function() {
-		buffer.writeLine("this._blockContext._resultCallback")
-	},hint)
-
+	buffer.writeLine("this._runExp(")
+	buffer.indent()
+	generateExpressionReadyFunction(jsonBlock, buffer, names.createInner())
+	buffer.writeLine(",null");
+	buffer.unindent()
+	buffer.writeLine(");")
 	buffer.unindent()
 	buffer.writeLine("};")
-
-	//console.warn("generate js for " + virtualFileName +": \n", buffer.toString())
 
 	return buffer.toString()
 }
@@ -301,8 +308,8 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	if(block_context_base._breakCallback === undefined || block_context_base._breakCallback === null  || typeof(block_context_base._breakCallback) != 'function') {
 		throwInternalError("block_context_base._breakCallback must be a function")
 	}
-	if(block_context_base._inputCallback === undefined || block_context_base._inputCallback === null  || typeof(block_context_base._inputCallback) != 'function') {
-		throwInternalError("block_context_base._inputCallback must be a function")
+	if(block_context_base._inputExpression === undefined || block_context_base._inputExpression === null  || typeof(block_context_base._inputExpression) != 'function') {
+		throwInternalError("block_context_base._inputExpression must be a function")
 	}
 	if(block_context_base._variables === undefined || block_context_base._variables === null  || typeof(block_context_base._variables) != 'object') {
 		throwInternalError("block_context_base._variables must be an object")
@@ -313,7 +320,7 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 		{
 			_resultCallback: <Function>,
 			_breakCallback: <Function>,
-			_inputCallback: <Function>,
+			_inputExpression: <Function>, // needs to be called with _runExp
 			_variables: <Object>,
 			_hint: <Object> (optional)
 		}
@@ -342,9 +349,11 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	
 	var context = {
 		_blockContext: _blockContext,
-		
+		_runExp: _runExp,
+		//_runExpForResult: _runExpForResult,
+		//_runExpForLastResult: _runExpForLastResult
 	};
-	context._runExp = _runExp.bind(context)
+	//context._runExp = _runExp.bind(context)
 	var blockFunc = expFunc.bind(context) // copy the function and bind it to the context
 	//console.warn("runExpressionByFunc is calling block with context", context)
 	blockFunc(); // run it
@@ -361,6 +370,31 @@ function _runExp(exp, context_block_overrides) {
 	}
 }
 
+/*
+function _runExpForResult(exp, context_block_overrides, postResultCallback) {
+	var localBlockContext = this._blockContext;
+	this._runExp(exp, {
+		context_block_overrides: {
+			_resultCallback: function(resultVal) {
+				localBlockContext._lastResult = resultVal
+				if(postResultCallback !== undefined && postResultCallback !== null) {
+					postResultCallback(resultVal);
+				}
+			}
+		}
+	});
+}
+
+function _runExpForLastResult(exp, context_block_overrides, postResultCallback) {
+	var localBlockContext = this._blockContext;
+	this._runExpForResult(exp, context_block_overrides,  function(res) {
+		localBlockContext._resultCallback(res)
+		if(postResultCallback !== undefined && postResultCallback !== null) {
+			postResultCallback(res);
+		}
+	})
+}*/
+
 module.exports.Runtime = Runtime
 
 function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, breakCallback, resultCallback, outputFileName, hint) {
@@ -372,7 +406,7 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, br
 	var contextBase = {
 		_resultCallback: resultCallback,
 		_breakCallback: breakCallback,
-		_inputCallback: inputCallback,
+		_inputExpression: inputCallback,
 		_variables: variables,
 		_parentVariables:variables,
 		_hint: hint
