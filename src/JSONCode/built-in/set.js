@@ -1,4 +1,5 @@
 module.exports = function() {
+	console.warn("calling SET")
 	var rc = this._blockContext._resultCallback
 	var v = this._blockContext._parentVariables
 	var val = undefined;

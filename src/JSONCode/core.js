@@ -23,7 +23,7 @@ function trimString(str) {
 }
 //Untested
 function isSpecialKey(propName) {
-	//	console.log(propName)
+	//	console.warn(propName)
 	var n = trimString(propName)
 	return n.indexOf(SPECIAL_KEY_SYMBOL) == 0
 }
@@ -33,7 +33,7 @@ function keyHasHint(propName) {
 }
 
 function getHint(propName) {
-	if(!keyHasHint(propName)) return "";
+	if(!keyHasHint(propName)) return undefined;
 	var hintEndIndex = propName.indexOf(HINT_END_SYMBOL)
 	if(hintEndIndex > 1) {
 		return propName.substring(propName.indexOf(HINT_START_SYMBOL) + 1,hintEndIndex)
@@ -41,9 +41,13 @@ function getHint(propName) {
 	return propName.substring(propName.indexOf(HINT_START_SYMBOL) + 1,propName.length)
 }
 
-function getHint4Js(propName) {
+function getHint4Js(hint) {
+	return JSON.stringify(hint)
+}
+
+function getHint4JsFromPropName(propName) {
 	var hint = getHint(propName)
-	return '"' + hint +  '"'
+	return getHint4Js(hint)
 }
 
 function getExpressionNameFromSpecialKey(propName) {
@@ -123,6 +127,7 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 	buffer.writeLine("var " + resultVarName +  " = undefined;")
 	buffer.writeLine("var " + names.name("callbackVar") + " = this._blockContext._resultCallback;")
 	buffer.writeLine("var " + names.name("localBlockContext") + " = this._blockContext;")
+	buffer.writeLine("var " + names.name("localContext") + " = this;")
 	
 	if(isPureJSONValue(jsonObj)) {
 		buffer.writeLine(resultVarName + " = " + JSON.stringify(jsonObj) + ";")
@@ -137,39 +142,36 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 				// Render all the block expressions.
 				navigateKeys(jsonObj, function(iteration) {
 					var propName = iteration.key
-					//console.log("propName =============================== , ", propName)
+					//console.warn("propName =============================== , ", propName)
 					var childInputJsonObj = jsonObj[propName];
-
-					buffer.writeLine("this._blockContext._runtime.runExpressionByName(")
+					
+					buffer.writeLine("this._runExp(")
 					buffer.indent()
 					var childExprName = getExpressionNameFromSpecialKey(propName)
 					buffer.writeLine('"' + childExprName + '"')
-					buffer.writeLine(",this._blockContext._variables,")
+					buffer.writeLine(",{_inputCallback:")
 					
 					// Begin Input Callback Generation
 					buffer.writeLine("function(" + names.name("sendInputCb") + ") {")
 					buffer.indent()
 					
-					buffer.writeLine(names.name("localBlockContext") +"._runtime.runExpressionByFunc(")
+					buffer.writeLine(names.name("localContext") +"._runExp(")
 					buffer.indent()
 					generateExpressionReadyFunction(childInputJsonObj, buffer, names.createInner())
-					buffer.writeLine("," + names.name("localBlockContext") +"._variables,")
-					buffer.writeLine(names.name("localBlockContext") +"._inputCallback,")
-					buffer.writeLine(names.name("localBlockContext") +"._breakCallback,")
+					buffer.writeLine(",{ _resultCallback: ")
 					buffer.writeLine("function(" + names.name("childResult") + "){")
 					buffer.indent()
 					buffer.writeLine(names.name("sendInputCb") + "("+names.name("childResult")+");")
 					buffer.unindent()
-					buffer.writeLine("},")
-					buffer.writeLine(getHint4Js("")); // anonymous blocks don't use hints
+					buffer.writeLine("}}")
 					buffer.unindent()
 					buffer.writeLine(");")
 					buffer.unindent()
-					buffer.writeLine("},")
-					//End of Input
+					buffer.writeLine("}")
+					//End of Input Callback Generation
 					
-					buffer.writeLine("this._blockContext._breakCallback,")
-					buffer.writeLine("function(" + names.name("incResult") + "){")
+					// Begin Result Callback Generation
+					buffer.writeLine(", _resultCallback: function(" + names.name("incResult") + "){")
 					buffer.indent()
 					buffer.writeLine(resultVarName + " = " + names.name("incResult") + ";")
 					if(iteration.isLast) {
@@ -178,17 +180,17 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 					}
 					buffer.unindent()
 					buffer.writeLine("}")
-					buffer.write(","),
-					buffer.writeLine(getHint4Js(propName))
+					//End of Result Callback Generation
+					buffer.writeLine(", _hint: " + getHint4JsFromPropName(propName))
 					buffer.unindent()
-					buffer.writeLine(");")
+					buffer.writeLine("});")
 				}); // end of properties iteration
 			} else {
 			//	throwInternalError("Can't work with second level blocks yet")
 				buffer.writeLine(resultVarName + " = {};")
 				navigateKeys(jsonObj, function(iteration) {
 					var propName = iteration.key
-					//console.log("regular propName =============================== , ", propName)
+					//console.warn("regular propName =============================== , ", propName)
 					var childInputJsonObj = jsonObj[propName];
 					
 					generateExpressionBlockFunctionWrapper(childInputJsonObj, buffer, names, function(blockBuffer, blockNames) {
@@ -216,19 +218,19 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 }
 
 function generateExpressionBlockFunctionWrapper(jsonObj, buffer, names, writeResultCallback, hint) {
-	if(hint === undefined){
+	/*if(hint === undefined){
 		throwInternalError("generateExpressionBlockFunctionWrapper requires hint")
-	}
+	}*/
 		// Create call to runExpressionByFunc, check signature to understand what we are doing here.
-	buffer.writeLine("this._blockContext._runtime.runExpressionByFunc(")
+	buffer.writeLine("this._runExp(")
 	buffer.indent()
 	generateExpressionReadyFunction(jsonObj, buffer, names.createInner())
-	buffer.writeLine(",this._blockContext._variables,")
-	buffer.writeLine("this._blockContext._inputCallback,")
-	buffer.writeLine("this._blockContext._breakCallback,")
+	buffer.writeLine(",{")
+	buffer.writeLine("_resultCallback: ");
 	writeResultCallback(buffer, names),
 	buffer.write(","),
-	buffer.writeLine(getHint4Js(hint))
+	buffer.writeLine("_hint: " + getHint4Js(hint))
+	buffer.write("}"),
 	buffer.unindent()
 	buffer.writeLine(");")
 }
@@ -248,7 +250,7 @@ function generateFunctionFromJSONExpression(jsonBlock, virtualFileName, hint) {
 	buffer.unindent()
 	buffer.writeLine("};")
 
-	//console.log("generate js for " + virtualFileName +": \n", buffer.toString())
+	//console.warn("generate js for " + virtualFileName +": \n", buffer.toString())
 
 	return buffer.toString()
 }
@@ -261,16 +263,10 @@ var compileExpressionFuncFromJSON = function(jsonBlock, virtualFileName, outputF
 	} else {
 		generatedSourceCode = generateFunctionFromJSONExpression(jsonBlock, virtualFileName, hint);
 	}
-	//console.log("ABOUT TO LOAD THE FOLLOWING JS INTO THE VM:", generatedSourceCode)
+	//console.warn("ABOUT TO LOAD THE FOLLOWING JS INTO THE VM:", generatedSourceCode)
 
 	vm.runInThisContext(generatedSourceCode,virtualFileName, true)
 	return _expressionFunc; // defined inside the script.
-}
-
-var createExpressionBlockFunc = function(f, context) {
-	if(context == null || context === undefined)
-	throwInternalError("Can't create expression block instance function without context")
-	return f.bind(context)
 }
 
 var Runtime = function() {
@@ -281,50 +277,107 @@ var Runtime = function() {
 	}, this)
 }
 
-Runtime.prototype.runExpressionByName = function(expressionName, variables, inputCallback, breakCallback, resultCallback, hint) {
-
+Runtime.prototype.runExpressionByName = function(expressionName, base_context, context_overrides) {
+	console.warn("Calling expression with name ", expressionName)
 	var expFunc = this.loadedExpressions[expressionName]
 	if(expFunc == undefined) {
 		throw new Error('JS1002', "Expression '" + expressionName +  "' is not registered or was not loaded.");
 	}
-	this.runExpressionByFunc(expFunc, variables, inputCallback, breakCallback, resultCallback, hint)
+	this.runExpressionByFunc(expFunc, base_context, context_overrides)
 }
 
-Runtime.prototype.runExpressionByFunc = function(expFunc, variables, inputCallback, breakCallback, resultCallback, hint) {
-	if(hint === undefined) {
-		console.trace()
-		throw "hint is required"
+Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, context_block_overrides) {
+	//console.warn("block_context_base",block_context_base)
+	//console.warn("context_block_overrides",context_block_overrides)
+	if(expFunc === undefined || expFunc == null || typeof(expFunc) != 'function') {
+		throwInternalError("expFunc is required and must be a function")
 	}
+	if(block_context_base === undefined || typeof(block_context_base) != 'object' || block_context_base == null) {
+		throwInternalError("block_context_base is required and must be an non-null object")
+	}
+	if(context_block_overrides === undefined) {
+		throwInternalError("context_block_overrides must be an object or null")
+	}
+	if(block_context_base._breakCallback === undefined || block_context_base._breakCallback === null  || typeof(block_context_base._breakCallback) != 'function') {
+		throwInternalError("block_context_base._breakCallback must be a function")
+	}
+	if(block_context_base._inputCallback === undefined || block_context_base._inputCallback === null  || typeof(block_context_base._inputCallback) != 'function') {
+		throwInternalError("block_context_base._inputCallback must be a function")
+	}
+	if(block_context_base._variables === undefined || block_context_base._variables === null  || typeof(block_context_base._variables) != 'object') {
+		throwInternalError("block_context_base._variables must be an object")
+	}
+	//console.warn("runExpressionByFunc validation passed")
+	/* 
+		// block_context_base members structure
+		{
+			_resultCallback: <Function>,
+			_breakCallback: <Function>,
+			_inputCallback: <Function>,
+			_variables: <Object>,
+			_hint: <Object> (optional)
+		}
+	*/
 	var localVariables = {}; 
-	if(variables != undefined && variables != null) {
-		for(var k in variables) {
-			localVariables[k] = variables[k]
+	if(block_context_base._variables != undefined && block_context_base._variables != null) {
+		for(var k in block_context_base._variables) {
+			localVariables[k] = block_context_base._variables[k]
 		}
 	}
-	var context = {
-		_blockContext: {
-			"_runtime": this,
-			"_variables": localVariables,
-			"_parentVariables": variables,
-			"_inputCallback": inputCallback,
-			"_breakCallback": breakCallback,
-			"_resultCallback": resultCallback,
-			"_hint": hint
+	
+	var _blockContext = {};
+	_blockContext._variables = localVariables;
+	for(var k in block_context_base) {
+		_blockContext[k] = block_context_base[k]
+	}
+	_blockContext._runtime = this;
+	_blockContext._hint == undefined;
+	
+	if(context_block_overrides != null) {
+		for(var k in context_block_overrides) {
+			if(k == "_runtime") continue; // can't replace _runtime
+ 			_blockContext[k] = context_block_overrides[k]
 		}
+	}
+	
+	var context = {
+		_blockContext: _blockContext,
+		
 	};
-	var blockFunc = createExpressionBlockFunc(expFunc, context)
+	context._runExp = _runExp.bind(context)
+	var blockFunc = expFunc.bind(context) // copy the function and bind it to the context
+	//console.warn("runExpressionByFunc is calling block with context", context)
 	blockFunc(); // run it
 };
+
+function _runExp(exp, context_block_overrides) {
+	//console.warn("Calling expression ", exp)
+	if(typeof(exp) == 'function') {
+		this._blockContext._runtime.runExpressionByFunc(exp, this._blockContext, context_block_overrides )
+	} else if(typeof(exp) == 'string') {
+		this._blockContext._runtime.runExpressionByName(exp, this._blockContext, context_block_overrides )
+	} else {
+		throwInternalError("exp must be a expression name or a function")
+	}
+}
 
 module.exports.Runtime = Runtime
 
 function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, breakCallback, resultCallback, outputFileName, hint) {
 	if(hint === undefined) {
-		hint = ""
+		hint = undefined
 	}
 	var baseFunc = compileExpressionFuncFromJSON(jsonBlock, outputFileName === undefined? "test-in-memory.js" : outputFileName, outputFileName, hint)
 	var runtime = new Runtime()
-	runtime.runExpressionByFunc(baseFunc, variables, inputCallback, breakCallback, resultCallback, hint)
+	var contextBase = {
+		_resultCallback: resultCallback,
+		_breakCallback: breakCallback,
+		_inputCallback: inputCallback,
+		_variables: variables,
+		_parentVariables:variables,
+		_hint: hint
+	};
+	runtime.runExpressionByFunc(baseFunc, contextBase, null)
 }
 
 module.exports.exportTestOnlyFunctions = function() {

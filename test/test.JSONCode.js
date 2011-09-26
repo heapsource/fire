@@ -13,6 +13,7 @@ function getTempTestOutputFileName(filename) {
 }
 
 vows.describe('JSONCode').addBatch({
+		
 	'When I have a object with no JSONCode special keys': {
 		topic: function() {
 			return {
@@ -37,7 +38,7 @@ vows.describe('JSONCode').addBatch({
 		"and I run it": {
 			topic:function(topic) {
 				var cb = this.callback
-			jsonCode._testOnly_runJSONObject(topic,{/*No vars*/}, function(sendInput) {
+			jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
 				//sendInput("")
 			}, function(){
 				// break
@@ -120,7 +121,7 @@ vows.describe('JSONCode').addBatch({
 		"and I run it": {
 			topic:function(topic) {
 				var cb = this.callback
-				jsonCode._testOnly_runJSONObject(topic,{/*No vars*/}, function(sendInput) {
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
 					sendInput("Lots of Crap")
 				}, function(){
 					// break
@@ -147,7 +148,7 @@ vows.describe('JSONCode').addBatch({
 			topic:function(topic) {
 				var cb = this.callback
 				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{/*No vars*/}, function(sendInput) {
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
 					sendInput("Lots of Crap")
 				}, function(){
 					// break
@@ -183,7 +184,7 @@ vows.describe('JSONCode').addBatch({
 			topic:function(topic) {
 				var cb = this.callback
 				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{/*No vars*/}, function(sendInput) {
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
 					sendInput("Lots of Crap")
 				}, function(){
 					// break
@@ -257,7 +258,7 @@ vows.describe('JSONCode').addBatch({
 			topic:function(topic) {
 				var cb = this.callback
 				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{/*No vars*/}, function(sendInput) {
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
 					sendInput("Lots of Crap")
 				}, function(){
 					// break
@@ -282,6 +283,7 @@ vows.describe('JSONCode').addBatch({
 			}
 		}
 	}
+
 	,'When I have a JSON doc with one expression at the first level, a property with regular key and the value of that regular key is and a expression at third level': {
 		topic: function() {
 			return {
@@ -296,6 +298,7 @@ vows.describe('JSONCode').addBatch({
 				}
 			};    
 		},
+		
 		"and I run it": {
 			topic:function(topic) {
 				var cb = this.callback
@@ -430,4 +433,45 @@ vows.describe('JSONCode').addBatch({
 			}
 		}
 	},
+	'When I have nested up three nested expresions': {
+		topic: function() {
+			return {
+				" @return": {
+					" @return": {
+						" @return": {
+							name: "John"
+						}
+					}
+				}
+			};    
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"")
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be the last nested value, the last result in the expression block" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, {
+							name: "John"
+						});
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
+	}
 }).export(module); 

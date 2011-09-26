@@ -379,22 +379,20 @@ Example:
 
 You can place as many whitespaces as you want.
 
+## Error Handling
 
-### Errors Table
+
+## Compiler & Runtime Errors Table
     Error Code			Message
-	JS1001				Key KEY was found in a expression block. Regular JSON keys and expression keys can not be mixed at the same level of the document.
+	JS1001				Key KEY_NAME was found in a expression block. Regular JSON keys and expression keys can not be mixed at the same level of the document.
 	JS1002				Expression EXPRESSION_NAME is not registered or was not loaded.
 
 
 ### Replacement tokens for the Error Messages.
 
-**PROP_NAME** Name of the property involved in the error.
+**KEY_NAME** Name of the key or property involved in the error.
 
-**CONVERTER_NAME** is the name of the converter involved in the error.
-
-**SOURCE_NAME** name of the definition source. Usually is the name of the *.endpoint.json* ile where the error occurred.
-
-**MESSAGE_NAME** is the name of the message involved in the error.
+**EXPRESSION_NAME** is the name of the expression involved in the error.
 
 ## Credits
 **Author**: Johan Hernandez. *johan@firebase.co*
