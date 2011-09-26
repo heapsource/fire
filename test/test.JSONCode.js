@@ -518,5 +518,58 @@ vows.describe('JSONCode').addBatch({
 				assert.equal(expressionResult.count, 1)
 			}
 		}
+	},
+	'When a nested exception raises an error and is not handled by any of the nested expressions': {
+		topic: function() {
+			return  {
+					"@return": {
+						"@testExpThatRaisesError":null
+					}
+				}
+			
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var errorCount = 0
+				var tResult = undefined
+				var testExpThatRaisesErrorFilePath = path.join(__dirname, "JSONCodeExpressions/testExpThatRaisesError.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				},[testExpThatRaisesErrorFilePath])
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.count, 0)
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 1)
+			},
+			"the result callback not be undefined" : function(expressionResult) {
+				assert.equal(expressionResult.result, undefined)
+			}
+			,
+			"the result callback not be undefined" : function(expressionResult) {
+				assert.equal(expressionResult.errorInfo.error, "Help!!!... Chuck Norris is in da house!") // check JSONCodeExpressions/testExpThatRaisesError.js
+			}
+		}
 	}
 }).export(module); 

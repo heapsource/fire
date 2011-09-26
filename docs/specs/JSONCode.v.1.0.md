@@ -381,6 +381,9 @@ You can place as many whitespaces as you want.
 
 ## Error Handling
 
+### @try
+
+Catches the 
 
 ## Compiler & Runtime Errors Table
     Error Code			Message

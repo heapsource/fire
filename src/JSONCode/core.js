@@ -5,6 +5,7 @@ var NameGenerator = require('./NameGenerator')
 var Error = require('./Error')
 var fs = require('fs')
 var path = require('path')
+var RuntimeError = require('./RuntimeError')
 module.exports.Error = Error
 
 function throwInternalError(msg) {
@@ -277,11 +278,29 @@ var compileExpressionFuncFromJSON = function(jsonBlock, virtualFileName, outputF
 }
 
 var Runtime = function() {
-	this.loadedExpressions = {};
-	var fileNames = fs.readdirSync(path.join(__dirname, "built-in"))
+	this.loadedExpressions = {}; // Contains a member per expression implementation <Function>
+	this.loadedExpressionsMeta = {}; // Contains a member per full definition of the expression, like {title:<String>, implementation:<Function>}
+	var dirName = path.join(__dirname, "built-in")
+	this.registerWellKnownExpressionDir(dirName)
+	
+}
+
+Runtime.prototype.registerWellKnownExpressionDir = function(absoluteDirPath) {
+	var fileNames = fs.readdirSync(absoluteDirPath)
 	fileNames.forEach(function(file) {
-		this.loadedExpressions[file.substring(0, file.length -3)] = require('./built-in/' + file)
+		var absoluteFileName = path.join(absoluteDirPath, file)
+		this.registerWellKnownExpressionFile(absoluteFileName)
 	}, this)
+}
+
+Runtime.prototype.registerWellKnownExpressionFile = function(absoluteFilePath) {
+	var definition = require(absoluteFilePath)
+	this.registerWellKnownExpressionDefinition(definition)
+}
+
+Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDefinition) {
+	this.loadedExpressions[expressionDefinition.name] = expressionDefinition.implementation 
+	this.loadedExpressionsMeta[expressionDefinition.name] = expressionDefinition
 }
 
 Runtime.prototype.runExpressionByName = function(expressionName, base_context, context_overrides) {
@@ -322,7 +341,8 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 			_breakCallback: <Function>,
 			_inputExpression: <Function>, // needs to be called with _runExp
 			_variables: <Object>,
-			_hint: <Object> (optional)
+			_hint: <Object> (optional),
+			_errorCallback: <Function>
 		}
 	*/
 	var localVariables = {}; 
@@ -350,6 +370,7 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	var context = {
 		_blockContext: _blockContext,
 		_runExp: _runExp,
+		_raiseError: _raiseError
 		//_runExpForResult: _runExpForResult,
 		//_runExpForLastResult: _runExpForLastResult
 	};
@@ -368,6 +389,11 @@ function _runExp(exp, context_block_overrides) {
 	} else {
 		throwInternalError("exp must be a expression name or a function")
 	}
+}
+
+function _raiseError(err) {
+	var errorInfo = new RuntimeError(this._blockContext, err)
+	this._blockContext._errorCallback(errorInfo)
 }
 
 /*
@@ -397,19 +423,32 @@ function _runExpForLastResult(exp, context_block_overrides, postResultCallback) 
 
 module.exports.Runtime = Runtime
 
-function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, breakCallback, resultCallback, outputFileName, hint) {
+function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, breakCallback, resultCallback, outputFileName, hint, errorCallback, additionalExpressionsFiles) {
+	if(errorCallback === undefined) {
+		errorCallback = function(errInfo) {
+			console.warn("_testOnly_runJSONObjectFromJSON default errorCallback just catched an error:", errInfo)
+		}
+	}
 	if(hint === undefined) {
 		hint = undefined
 	}
 	var baseFunc = compileExpressionFuncFromJSON(jsonBlock, outputFileName === undefined? "test-in-memory.js" : outputFileName, outputFileName, hint)
 	var runtime = new Runtime()
+	
+	if(additionalExpressionsFiles !== undefined && additionalExpressionsFiles !== null) {
+		additionalExpressionsFiles.forEach(function(fileName) {
+			runtime.registerWellKnownExpressionFile(fileName)
+		})
+	}
+	
 	var contextBase = {
 		_resultCallback: resultCallback,
 		_breakCallback: breakCallback,
 		_inputExpression: inputCallback,
 		_variables: variables,
 		_parentVariables:variables,
-		_hint: hint
+		_hint: hint,
+		_errorCallback: errorCallback
 	};
 	runtime.runExpressionByFunc(baseFunc, contextBase, null)
 }
