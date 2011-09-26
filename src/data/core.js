@@ -1,1 +1,0 @@
-module.exports.SPECIAL_DIR_NAME = "collections"

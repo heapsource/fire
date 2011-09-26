@@ -1,8 +1,8 @@
-#JSONCode Compiler 1.0
+#priest.js Compiler 1.0
 Specification for JSONCode compiler.
 ***
 
-JSONCode is basically a set of special expressions embedded as 'keys' with the intention to manipulate and transform the document.
+priest.js is basically a set of special expressions embedded as 'keys' with the intention to manipulate and transform the document.
 
 ## Example 1:
 
@@ -377,13 +377,19 @@ Example:
 		}
     }
 
-You can place as many whitespaces as you want.
+You can place as many white-spaces as you want.
 
 ## Error Handling
 
+priest uses expressions to catch and respond to errors.
+
 ### @try
 
-Catches the 
+Catches any error originated in the input and returns it, otherwise, it returns the value from the input so other expressions like `@catch` can work properly.
+
+### @catch
+
+Returns the input as a result if any errors was catch by @try. Otherwise it returns the current value in the expression block.
 
 ## Compiler & Runtime Errors Table
     Error Code			Message

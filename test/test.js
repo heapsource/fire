@@ -1,8 +1,6 @@
 var vows = require('vows')
 var assert = require('assert')
-var servicesCore = require('../src/services/core.js')
-var priest = require('../src/main.js')
-var jsonCode = require('../src/JSONCode/core.js')
+var jsonCode = require('../src/core.js')
 jsonCode.exportTestOnlyFunctions();
 
 var fs = require('fs'),
@@ -12,9 +10,9 @@ function getTempTestOutputFileName(filename) {
 	return "/tmp/" + filename
 }
 
-vows.describe('JSONCode').addBatch({
+vows.describe('priest').addBatch({
 		
-	'When I have a object with no JSONCode special keys': {
+	'When I have a object with no priest special keys': {
 		topic: function() {
 			return {
 				"name":"Johan", 
@@ -112,7 +110,7 @@ vows.describe('JSONCode').addBatch({
 			})
 		}
 	}
-	,'When I have a simple JSONCode expression that returns 2': {
+	,'When I have a simple priest expression that returns 2': {
 		topic: function() {
 			return {
 				"@return": 2
@@ -519,7 +517,7 @@ vows.describe('JSONCode').addBatch({
 			}
 		}
 	},
-	'When a nested exception raises an error and is not handled by any of the nested expressions': {
+	'When a nested expression raises an error and is not handled by any of the nested expressions': {
 		topic: function() {
 			return  {
 					"@return": {
@@ -534,7 +532,7 @@ vows.describe('JSONCode').addBatch({
 				var count = 0;
 				var errorCount = 0
 				var tResult = undefined
-				var testExpThatRaisesErrorFilePath = path.join(__dirname, "JSONCodeExpressions/testExpThatRaisesError.js")
+				var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
 				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
 					sendInput("Lots of Crap")
 				}, function(){
@@ -560,16 +558,166 @@ vows.describe('JSONCode').addBatch({
 			"the result callback should not be called at all":  function(expressionResult) {
 				assert.equal(expressionResult.count, 0)
 			},
-			"the result callback should be called only once":  function(expressionResult) {
+			"the error callback should be called only once":  function(expressionResult) {
 				assert.equal(expressionResult.errorCount, 1)
 			},
-			"the result callback not be undefined" : function(expressionResult) {
+			"the result should be undefined" : function(expressionResult) {
 				assert.equal(expressionResult.result, undefined)
 			}
 			,
 			"the result callback not be undefined" : function(expressionResult) {
-				assert.equal(expressionResult.errorInfo.error, "Help!!!... Chuck Norris is in da house!") // check JSONCodeExpressions/testExpThatRaisesError.js
+				assert.equal(expressionResult.errorInfo.error, "Help!!!... Chuck Norris is in da house!") // check expressions/testExpThatRaisesError.js
+			}
+		}
+	},
+	'When a nested expression raises an error and a @try expression catches the error': {
+		topic: function() {
+			return  {
+					"@try":{
+						"@return": {
+							"@testExpThatRaisesError":null
+						}
+					}
+				}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var errorCount = 0
+				var tResult = undefined
+				var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				},[testExpThatRaisesErrorFilePath])
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the result should be the error" : function(expressionResult) {
+				assert.equal(expressionResult.result.error, "Help!!!... Chuck Norris is in da house!") // check expressions/testExpThatRaisesError.js
+			}
+		}
+	},
+	'When a nested expression inside @try does not raises any error': {
+		topic: function() {
+			return  {
+					"@try":{
+						"@return": "I'm not an error :)"
+					}
+				}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var errorCount = 0
+				var tResult = undefined
+				//var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				})
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the result should be the input of the @try expression" : function(expressionResult) {
+				assert.equal(expressionResult.result, "I'm not an error :)") // check expressions/testExpThatRaisesError.js
 			}
 		}
 	}
 }).export(module); 
+
+
+vows.describe('priest _result tests').addBatch({
+	'When the first expression in a block sets a value, the second expression': {
+		topic: function() {
+			return  {
+				"@try":{
+					"@return": "I'm not an error :)"
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var errorCount = 0
+				var tResult = undefined
+				//var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				})
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the result should be the input of the @try expression" : function(expressionResult) {
+				assert.equal(expressionResult.result, "I'm not an error :)") // check expressions/testExpThatRaisesError.js
+			}
+		}
+	}
+}).export(module);

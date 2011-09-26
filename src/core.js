@@ -9,7 +9,7 @@ var RuntimeError = require('./RuntimeError')
 module.exports.Error = Error
 
 function throwInternalError(msg) {
-	console.trace()
+	//console.trace()
 	throw "JSONCode internal error, " + msg
 }
 
@@ -131,8 +131,9 @@ function navigateKeys(obj,callback) {
 function generateExpressionReadyFunction(jsonObj, buffer, names) {
 	buffer.writeLine("function() {")
 	buffer.indent()
-	var resultVarName = names.name("result")
-	buffer.writeLine("var " + resultVarName +  " = undefined;")
+	var selfVarname = names.name("self")
+	var resultVarName = selfVarname + "._blockContext._result"
+	buffer.writeLine("var " + selfVarname +  " = this;")
 	buffer.writeLine("var " + names.name("callbackVar") + " = this._blockContext._resultCallback;")
 	buffer.writeLine("var " + names.name("localBlockContext") + " = this._blockContext;")
 	buffer.writeLine("var " + names.name("localContext") + " = this;")
@@ -304,7 +305,7 @@ Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDef
 }
 
 Runtime.prototype.runExpressionByName = function(expressionName, base_context, context_overrides) {
-	console.warn("Calling expression with name ", expressionName)
+	//console.warn("Calling expression with name ", expressionName)
 	var expFunc = this.loadedExpressions[expressionName]
 	if(expFunc == undefined) {
 		throw new Error('JS1002', "Expression '" + expressionName +  "' is not registered or was not loaded.");
@@ -341,8 +342,11 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 			_breakCallback: <Function>,
 			_inputExpression: <Function>, // needs to be called with _runExp
 			_variables: <Object>,
+			_parentVariables: <Object>,
 			_hint: <Object> (optional),
-			_errorCallback: <Function>
+			_errorCallback: <Function>,
+			_parentResult: <Object>, // Caller Expression Block last Result
+			_result: <Object>
 		}
 	*/
 	var localVariables = {}; 
@@ -359,10 +363,11 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	}
 	_blockContext._runtime = this;
 	_blockContext._hint == undefined;
+//	_blockContext._parentVariables = block_context_base._variables
 	
 	if(context_block_overrides != null) {
 		for(var k in context_block_overrides) {
-			if(k == "_runtime") continue; // can't replace _runtime
+			if(k == "_runtime" ||  k == "_parentVariables") continue; // can't replace _runtime
  			_blockContext[k] = context_block_overrides[k]
 		}
 	}
@@ -370,9 +375,8 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	var context = {
 		_blockContext: _blockContext,
 		_runExp: _runExp,
-		_raiseError: _raiseError
-		//_runExpForResult: _runExpForResult,
-		//_runExpForLastResult: _runExpForLastResult
+		_raiseError: _raiseError,
+		_runInput: _runInput
 	};
 	//context._runExp = _runExp.bind(context)
 	var blockFunc = expFunc.bind(context) // copy the function and bind it to the context
@@ -396,30 +400,10 @@ function _raiseError(err) {
 	this._blockContext._errorCallback(errorInfo)
 }
 
-/*
-function _runExpForResult(exp, context_block_overrides, postResultCallback) {
-	var localBlockContext = this._blockContext;
-	this._runExp(exp, {
-		context_block_overrides: {
-			_resultCallback: function(resultVal) {
-				localBlockContext._lastResult = resultVal
-				if(postResultCallback !== undefined && postResultCallback !== null) {
-					postResultCallback(resultVal);
-				}
-			}
-		}
-	});
+function _runInput(context_block_overrides) {
+	this._runExp(this._blockContext._inputExpression, context_block_overrides);
 }
 
-function _runExpForLastResult(exp, context_block_overrides, postResultCallback) {
-	var localBlockContext = this._blockContext;
-	this._runExpForResult(exp, context_block_overrides,  function(res) {
-		localBlockContext._resultCallback(res)
-		if(postResultCallback !== undefined && postResultCallback !== null) {
-			postResultCallback(res);
-		}
-	})
-}*/
 
 module.exports.Runtime = Runtime
 
@@ -446,7 +430,7 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, br
 		_breakCallback: breakCallback,
 		_inputExpression: inputCallback,
 		_variables: variables,
-		_parentVariables:variables,
+		_parentVariables: variables,
 		_hint: hint,
 		_errorCallback: errorCallback
 	};
