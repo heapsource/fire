@@ -3,5 +3,6 @@ module.exports = {
 	implementation:function() {
 		var self = this
 		self._resetError()
+		self._skip();
 	}
 }

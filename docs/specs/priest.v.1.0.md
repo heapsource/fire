@@ -292,7 +292,7 @@ Conditional expression, takes a hint as a JS expression and executes and return 
 Loops are repetitive expressions that process the input many times return an array of results.
 
 ### @loop
-Process the input forever or until it founds a @break statement. Returns an array with the results of every input processing.
+Process the input forever or until it founds a loop control expression. Returns an array with the results of every input processing.
 
 ### @while
 Process the input as long as the expression given in the hint is true or until it founds a loop control statement statement. Returns an array with the results of every input processing.
@@ -304,48 +304,9 @@ Takes a hint as a variable name or uses the last result of the expression-block 
 
 Immediately stops the execution of the current or any other iteration. Any result in the current iteration will *NOT* be added to the loop.
 
-### @skip
-
-Immediately stops the execution of the current iteration.  Any result in the current iteration will *NOT* be added to the loop.
-
 ### @continue
 
-Immediately stops the execution of the current iteration. Unless you specify an input, any result in the current iteration will be added to the loop.
-
-### @finish
-
-Immediately stops the execution of the current or any other iteration. Unless you specify an input, any result in the current iteration will be added to the loop.
-
-## @finish and @continue vs @break and @skip
-
-All the loops generates arrays as results, this behavior can not be changed. Every time the input is executed the results are added to the array unless `@undefined` is returned (`@null` can be added though).
-
-@break and @finish perform the same thing, prevent that any sentence in the loop from being executed; except that @finish let the last result of the current iteration or any input to be added as result of the loop array.
-
-Same with @continue and @skip, @skip ignores the results while @continue adds any result or input.
-
-
-## lastStatusFlag
-It's a `level-scope` internal boolean field being set every time an expression is executed, true when the previous expression took place or false when it didn't.
-
-## level-scope and conditional expressions
-level-scope refers to a set of artifacts that are not transferred to inner scopes. The perfect example is the flag called `lastStatusFlag`.
-
-Example:
-
-    {
-		"@if(true)": "meh...", //lastStatusFlag is being set as true because the expression took place.
-		"@else(true)": "meh..." //lastStatusFlah is being set as false because the expression didn't take place(@else expects the conditional value to be negative)
-		"@if(true)": { //lastStatusFlag is being set as true
-			@else: "Yes!", // This is a new level, lastStatusFlag before this expression was undefined and now is being set as true.
-			@else: "Never used" // Id doesn't execute because the last expression took place.
-		}
-		@if: "Awesome" //Executes successfully because the last expression took place and we didn't provided any hint as condition.
-    }
-
-Result:
-
-    "Awesome"
+Immediately stops the execution of the current iteration. Any result in the current iteration will be added to the loop.
 
 ## Variables Names
 

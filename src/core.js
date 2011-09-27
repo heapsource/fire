@@ -6,6 +6,8 @@ var Error = require('./Error')
 var fs = require('fs')
 var path = require('path')
 var RuntimeError = require('./RuntimeError')
+var Iterator = require('./Iterator')
+
 module.exports.Error = Error
 
 function throwInternalError(msg) {
@@ -128,6 +130,70 @@ function navigateKeys(obj,callback) {
 	}
 }
 
+function genExpressionHashChain(iterator,jsonObj, buffer, blockNames, names,resultVarName) {
+	if (!iterator.next()) return;
+	var propName = iterator.current()
+	//console.warn("propName =============================== , ", propName)
+	var childInputJsonObj = jsonObj[propName];
+
+	buffer.writeLine(blockNames.name("self") + "._runExp(")
+	buffer.indent()
+	var childExprName = getExpressionNameFromSpecialKey(propName)
+	buffer.writeLine('"' + childExprName + '"')
+
+	// Begin Input Callback Generation
+	buffer.writeLine(",{_inputExpression:")
+	buffer.indent()
+	generateExpressionReadyFunction(childInputJsonObj, buffer, names.createInner());
+	buffer.unindent()
+	//End of Input Callback Generation
+
+	// Begin Result Callback Generation
+	buffer.writeLine(", _resultCallback: function(" + blockNames.name("incResult") + "){")
+	buffer.indent()
+
+
+	buffer.writeLine(resultVarName + " = " + blockNames.name("incResult") + ";")
+	if(iterator.isLast()) {
+		// if this is the last expression of the array, call the result callback.
+		buffer.writeLine(blockNames.name("callbackVar") + "("+ resultVarName +");")
+	} else {
+		buffer.indent()
+		genExpressionHashChain(iterator, jsonObj, buffer, blockNames, names.createInner(),resultVarName)
+		buffer.unindent()
+	}
+
+	buffer.unindent()
+	buffer.writeLine("}")
+	//End of Result Callback Generation
+	buffer.writeLine(", _hint: " + getHint4JsFromPropName(propName))
+	buffer.unindent()
+	buffer.writeLine("});")
+}
+
+function genExpressionArrayChain(iterator, buffer,jsonObj, blockNames, names,resultVarName) {
+	if (!iterator.next()) return;
+
+	var childInputJsonObj = jsonObj[iterator.current()]
+	var isLast = iterator.isLast()
+	//buffer.writeLine("var " + names.name("self") + "=" + blockNames.name("self") + ";")
+	generateExpressionBlockFunctionWrapper(childInputJsonObj, buffer, blockNames, names, function(blockBuffer, callbackBlockNames) {
+		blockBuffer.writeLine("function("+ names.name("subLevelResArg") +"){")
+		blockBuffer.indent()
+		blockBuffer.writeLine(resultVarName + ".push(" + names.name("subLevelResArg") + ");")
+		if(isLast) {
+			// if this is the last expression of the array, call the result callback.
+			blockBuffer.writeLine(blockNames.name("callbackVar") + "("+ resultVarName +");")
+		} else {
+			blockBuffer.indent()
+			genExpressionArrayChain(iterator, blockBuffer,jsonObj, blockNames, names.createInner(), resultVarName)
+			blockBuffer.unindent()
+		}
+		blockBuffer.unindent()
+		blockBuffer.writeLine("}")
+		},null)
+	}
+
 function generateExpressionReadyFunction(jsonObj, buffer, names) {
 	buffer.writeLine("function() {")
 	buffer.indent()
@@ -144,58 +210,17 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 	} else {
 		if(jsonObj instanceof Array) {
 			// Second level blocks
-				buffer.writeLine(resultVarName + " = [];")
-				for(var index in jsonObj) {
-					var childInputJsonObj = jsonObj[index]
-					var isLast = index == jsonObj.length - 1
-					generateExpressionBlockFunctionWrapper(childInputJsonObj, buffer, names, function(blockBuffer, blockNames) {
-						blockBuffer.writeLine("function("+ blockNames.name("subLevelResArg") +"){")
-						blockBuffer.indent()
-						blockBuffer.writeLine(resultVarName + ".push(" + blockNames.name("subLevelResArg") + ");")
-						if(isLast) {
-							// if this is the last expression of the array, call the result callback.
-							blockBuffer.writeLine(names.name("callbackVar") + "("+ resultVarName +");")
-						}
-						blockBuffer.unindent()
-						blockBuffer.writeLine("}")
-					},null)
-				}
+			buffer.writeLine(resultVarName + " = [];")
+			var iterator = new Iterator(Object.keys(jsonObj))
+			genExpressionArrayChain(iterator,buffer,jsonObj, names, names.createInner(), resultVarName)
 		}
 		else if(jsonObj instanceof Object) {
 			if(objectIsExpression(jsonObj)) {
 				checkIfIsIsNotMixingKeys(jsonObj)
-				// Render all the block expressions.
-				navigateKeys(jsonObj, function(iteration) {
-					var propName = iteration.key
-					//console.warn("propName =============================== , ", propName)
-					var childInputJsonObj = jsonObj[propName];
-					
-					buffer.writeLine("this._runExp(")
-					buffer.indent()
-					var childExprName = getExpressionNameFromSpecialKey(propName)
-					buffer.writeLine('"' + childExprName + '"')
-					
-					// Begin Input Callback Generation
-					buffer.writeLine(",{_inputExpression:")
-					generateExpressionReadyFunction(childInputJsonObj, buffer, names.createInner());
-					
-					//End of Input Callback Generation
-					
-					// Begin Result Callback Generation
-					buffer.writeLine(", _resultCallback: function(" + names.name("incResult") + "){")
-					buffer.indent()
-					buffer.writeLine(resultVarName + " = " + names.name("incResult") + ";")
-					if(iteration.isLast) {
-						// if this is the last expression of the block, call the result callback.
-						buffer.writeLine(names.name("callbackVar") + "("+ names.name("incResult") +");")
-					}
-					buffer.unindent()
-					buffer.writeLine("}")
-					//End of Result Callback Generation
-					buffer.writeLine(", _hint: " + getHint4JsFromPropName(propName))
-					buffer.unindent()
-					buffer.writeLine("});")
-				}); // end of properties iteration
+				// Render all the block expressions as a chain, one expression after the result of the other
+				var iterator = new Iterator(Object.keys(jsonObj))
+				genExpressionHashChain(iterator,jsonObj, buffer, names, names.createInner(),resultVarName)
+				
 			} else {
 				// Second level blocks
 				buffer.writeLine(resultVarName + " = {};")
@@ -203,8 +228,7 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 					var propName = iteration.key
 					//console.warn("regular propName =============================== , ", propName)
 					var childInputJsonObj = jsonObj[propName];
-					
-					generateExpressionBlockFunctionWrapper(childInputJsonObj, buffer, names, function(blockBuffer, blockNames) {
+					generateExpressionBlockFunctionWrapper(childInputJsonObj, buffer, names, names, function(blockBuffer, blockNames) {
 						blockBuffer.writeLine("function("+ blockNames.name("subLevelResArg") +"){")
 						blockBuffer.indent()
 						blockBuffer.writeLine(resultVarName + "['"+ propName +"'] = " + blockNames.name("subLevelResArg") + ";")
@@ -228,12 +252,8 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 	buffer.writeLine("}")
 }
 
-function generateExpressionBlockFunctionWrapper(jsonObj, buffer, names, writeResultCallback, hint) {
-	/*if(hint === undefined){
-		throwInternalError("generateExpressionBlockFunctionWrapper requires hint")
-	}*/
-		// Create call to runExpressionByFunc, check signature to understand what we are doing here.
-	buffer.writeLine("this._runExp(")
+function generateExpressionBlockFunctionWrapper(jsonObj, buffer, blockNames, names, writeResultCallback, hint) {
+	buffer.writeLine(blockNames.name("self") + "._runExp(")
 	buffer.indent()
 	generateExpressionReadyFunction(jsonObj, buffer, names.createInner())
 	buffer.writeLine(",{")
@@ -283,7 +303,6 @@ var Runtime = function() {
 	this.loadedExpressionsMeta = {}; // Contains a member per full definition of the expression, like {title:<String>, implementation:<Function>}
 	var dirName = path.join(__dirname, "built-in")
 	this.registerWellKnownExpressionDir(dirName)
-	
 }
 
 Runtime.prototype.registerWellKnownExpressionDir = function(absoluteDirPath) {
@@ -325,8 +344,8 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	if(context_block_overrides === undefined) {
 		throwInternalError("context_block_overrides must be an object or null")
 	}
-	if(block_context_base._breakCallback === undefined || block_context_base._breakCallback === null  || typeof(block_context_base._breakCallback) != 'function') {
-		throwInternalError("block_context_base._breakCallback must be a function")
+	if(block_context_base._loopCallback === undefined || block_context_base._loopCallback === null  || typeof(block_context_base._loopCallback) != 'function') {
+		throwInternalError("block_context_base._loopCallback must be a function")
 	}
 	if(block_context_base._inputExpression === undefined || block_context_base._inputExpression === null  || typeof(block_context_base._inputExpression) != 'function') {
 		throwInternalError("block_context_base._inputExpression must be a function")
@@ -339,7 +358,7 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 		// block_context_base members structure
 		{
 			_resultCallback: <Function>,
-			_breakCallback: <Function>,
+			_loopCallback: <Function>,
 			_inputExpression: <Function>, // needs to be called with _runExp
 			_variables: <Object>,
 			_parentVariables: <Object>,
@@ -382,7 +401,9 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 		_raiseError: _raiseError,
 		_runInput: _runInput,
 		_setError: _setError,
-		_resetError: _resetError
+		_resetError: _resetError,
+		_loopControl: _loopControl,
+		_skip: _skip
 	};
 	//context._runExp = _runExp.bind(context)
 	var blockFunc = expFunc.bind(context) // copy the function and bind it to the context
@@ -419,9 +440,17 @@ function _resetError() {
 	this._blockContext._parentContext._errorInfo = undefined
 }
 
+function _loopControl(payload) {
+	this._blockContext._loopCallback(payload)
+}
+
+function _skip() {
+	this._blockContext._resultCallback(this._blockContext._parentResult)
+}
+
 module.exports.Runtime = Runtime
 
-function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, breakCallback, resultCallback, outputFileName, hint, errorCallback, additionalExpressionsFiles) {
+function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, loopCallback, resultCallback, outputFileName, hint, errorCallback, additionalExpressionsFiles) {
 	if(errorCallback === undefined) {
 		errorCallback = function(errInfo) {
 			console.warn("_testOnly_runJSONObjectFromJSON default errorCallback just catched an error:", errInfo)
@@ -441,7 +470,7 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, br
 	
 	var contextBase = {
 		_resultCallback: resultCallback,
-		_breakCallback: breakCallback,
+		_loopCallback: loopCallback,
 		_inputExpression: inputCallback,
 		//_parentVariables: variables,
 		_variables:variables,

@@ -997,6 +997,7 @@ vows.describe('priest error handling').addBatch({
 				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
 					sendInput("Lots of Crap")
 				}, function(){
+					console.warn("break here")
 					// break
 				}, function(result) {
 					tResult = result
@@ -1027,4 +1028,528 @@ vows.describe('priest error handling').addBatch({
 			}
 		}
 	}
+}).export(module);
+
+vows.describe('priest loop control').addBatch({
+	'When an expression contains a loop control expression, the loopCallback should be called': {
+		topic: function() {
+			return  {
+					"@testDoLoopControl": null
+				}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var breakCount = 0
+				var tResult = undefined
+				var errorCount = 0
+				var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					breakCount++ // loop
+					cb(null, {
+						result: tResult,
+						count: count,
+						breakCount: breakCount,
+						errorCount: errorCount
+					})
+				}, function(result) {
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				},[expPath])
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.count, 0)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 1)
+			}
+		}
+	},
+	'When an expression block contains a loop control expression as the input': {
+		topic: function() {
+			return  {
+				"@return": {
+					"@return": 1,
+					"@return": {
+						"@set(x)": 26,
+						"@get(x)": null,
+						"@testDoLoopControl": null,
+						"@return": 51
+					}
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var breakCount = 0
+				var tResult = undefined
+				var errorCount = 0
+				var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					breakCount++ // loop
+					cb(null, {
+						result: tResult,
+						count: count,
+						breakCount: breakCount,
+						errorCount: errorCount
+					})
+				}, function(result) {
+					
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				},[expPath])
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+				
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 1)
+			}
+		}
+	},
+	'When an expression array contains a loop control expression nested in the input': {
+		topic: function() {
+			return  {
+				"@return": {
+					"@return": 1,
+					"@return": [
+						{
+							"@set(x)": 26
+						},
+						{
+							"@get(x)": null
+						},
+						{
+							"@testDoLoopControl": null
+						},
+						{
+							"@return": 51
+						}
+					]
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var breakCount = 0
+				var tResult = undefined
+				var errorCount = 0
+				var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					breakCount++ // loop
+					cb(null, {
+						result: tResult,
+						count: count,
+						breakCount: breakCount,
+						errorCount: errorCount
+					})
+				}, function(result) {
+					
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				},[expPath])
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+				
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 1)
+			}
+		}
+	},
+	'When an expression array contains a loop control expression nested two levels down in the input': {
+		topic: function() {
+			return  {
+				"@return": {
+					"@return": 1,
+					"@return": [
+						{
+							"@set(x)": 26
+						},
+						{
+							"@get(x)": null
+						}, {
+							"@return": {
+								x:500,
+								y:400
+							},
+							"@testDoLoopControl":null,
+							"@return": "something"
+						},
+						{
+							"@return": 51
+						}
+					]
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var breakCount = 0
+				var tResult = undefined
+				var errorCount = 0
+				var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					breakCount++ // loop
+					cb(null, {
+						result: tResult,
+						count: count,
+						breakCount: breakCount,
+						errorCount: errorCount
+					})
+				}, function(result) {
+					
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				},[expPath])
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+				
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 1)
+			}
+		}
+	},
+	'When I have a @break at the first level': {
+		topic: function() {
+			return  {
+				"@break": null
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var breakCount = 0
+				var tResult = undefined
+				var errorCount = 0
+				//var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					breakCount++ // loop
+					cb(null, {
+						result: tResult,
+						count: count,
+						breakCount: breakCount,
+						errorCount: errorCount
+					})
+				}, function(result) {
+					
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				})
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+				
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 1)
+			}
+		}
+	},
+	
+	'When I have a @break at a second level': {
+		topic: function() {
+			return  {
+				"@return": {
+					"@break": null
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var breakCount = 0
+				var tResult = undefined
+				var errorCount = 0
+				//var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					breakCount++ // loop
+					cb(null, {
+						result: tResult,
+						count: count,
+						breakCount: breakCount,
+						errorCount: errorCount
+					})
+				}, function(result) {
+					
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				})
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+				
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 1)
+			}
+		}
+	},
+	'When I have a @loop at a second level and a expression that breaks at third time': {
+		topic: function() {
+			return  {
+				"@loop": {
+					"@testExecAtThirdTime":{
+						"@break": null	
+					},
+					"@return": "Item"
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var breakCount = 0
+				var tResult = undefined
+				var errorCount = 0
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					breakCount++ // loop
+					cb(null, {
+						result: tResult,
+						count: count,
+						breakCount: breakCount,
+						errorCount: errorCount
+					})
+				}, function(result) {
+					
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				},[path.join(__dirname, "expressions/testExecAtThirdTime.js")])
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 0)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 0)
+			},
+			"the result should be an array with three items":  function(expressionResult) {
+				assert.deepEqual(expressionResult.result, ["Item", "Item", "Item"])
+			}
+		}
+	},
+	'When I have a @loop at a second level and a expression continue at second time': {
+		topic: function() {
+			return  {
+				"@loop": {
+					"@testIncrementedName(Item)": null,
+					"@testExecAtFirstTime":{
+						"@continue": null
+					},
+					"@testExecAtThirdTime": {
+						"@break": null
+					}
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var breakCount = 0
+				var tResult = undefined
+				var errorCount = 0
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					breakCount++ // loop
+					cb(null, {
+						result: tResult,
+						count: count,
+						breakCount: breakCount,
+						errorCount: errorCount
+					})
+				}, function(result) {
+					
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						breakCount: breakCount,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				},[path.join(__dirname, "expressions/testExecAtFirstTime.js"), path.join(__dirname, "expressions/testExecAtThirdTime.js"),path.join(__dirname, "expressions/testIncrementedName.js")])
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 0)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 0)
+			},
+			"the result should be an array with two items":  function(expressionResult) {
+				assert.deepEqual(expressionResult.result, ["Item0", "Item1", "Item3"])
+			}
+		}
+	},
 }).export(module);

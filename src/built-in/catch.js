@@ -16,7 +16,7 @@ module.exports = {
 			});
 		} else {
 			// No errors found, return the parent result inmediately
-			this._blockContext._resultCallback(self._blockContext._parentResult)
+			self._skip()
 		}
 	}
 }
