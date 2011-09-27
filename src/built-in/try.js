@@ -4,7 +4,9 @@ module.exports = {
 		var self = this
 		this._runInput({
 			_errorCallback: function(error) {
-				self._blockContext._resultCallback(error)
+				//console.warn("try catched an error:", error)
+				self._setError(error)
+				self._blockContext._resultCallback(self._blockContext._parentResult)
 			},
 			_resultCallback: function(res) {
 				self._blockContext._resultCallback(res)

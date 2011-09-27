@@ -361,14 +361,17 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	for(var k in block_context_base) {
 		_blockContext[k] = block_context_base[k]
 	}
-	_blockContext._runtime = this;
-	_blockContext._hint == undefined;
+	_blockContext._runtime = this; 
+	_blockContext._hint = undefined; //formality
+	_blockContext._result = undefined; //formality
+	_blockContext._parentResult = block_context_base._result
 	
 	_blockContext._parentVariables = block_context_base._variables
+	_blockContext._parentContext = block_context_base
 	
 	if(context_block_overrides != null) {
 		for(var k in context_block_overrides) {
-			if(k == "_runtime" ||  k == "_parentVariables" || k == "_variables") continue; // can't replace _runtime
+			if(k == "_runtime" ||  k == "_parentVariables" || k == "_variables" || k == "_result" || k == "_parentContext" || k == "_errorInfo") continue; // can't replace these
  			_blockContext[k] = context_block_overrides[k]
 		}
 	}
@@ -377,7 +380,9 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 		_blockContext: _blockContext,
 		_runExp: _runExp,
 		_raiseError: _raiseError,
-		_runInput: _runInput
+		_runInput: _runInput,
+		_setError: _setError,
+		_resetError: _resetError
 	};
 	//context._runExp = _runExp.bind(context)
 	var blockFunc = expFunc.bind(context) // copy the function and bind it to the context
@@ -397,6 +402,7 @@ function _runExp(exp, context_block_overrides) {
 }
 
 function _raiseError(err) {
+	//console.warn("_raiseError:", err)
 	var errorInfo = new RuntimeError(this._blockContext, err)
 	this._blockContext._errorCallback(errorInfo)
 }
@@ -405,6 +411,13 @@ function _runInput(context_block_overrides) {
 	this._runExp(this._blockContext._inputExpression, context_block_overrides);
 }
 
+function _setError(errorInfo) {
+	this._blockContext._parentContext._errorInfo = errorInfo
+}
+
+function _resetError() {
+	this._blockContext._parentContext._errorInfo = undefined
+}
 
 module.exports.Runtime = Runtime
 

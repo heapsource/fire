@@ -389,7 +389,11 @@ Catches any error originated in the input and returns it, otherwise, it returns 
 
 ### @catch
 
-Returns the input as a result if any errors was catch by @try. Otherwise it returns the current value in the expression block.
+Returns the input as a result if any errors was catch by @try. Otherwise it returns the current value in the expression block. Catche clears the last error.
+
+### @returnError
+
+Returns the error in the current expression block.
 
 ## Compiler & Runtime Errors Table
     Error Code			Message
