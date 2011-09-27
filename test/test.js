@@ -391,46 +391,7 @@ vows.describe('priest').addBatch({
 			}
 		}
 	},
-	'When I have a JSON document with a set expression, other expressions on the same level should see the variable': {
-		topic: function() {
-			return {
-				"@set(point)": {
-					x:22.3,
-					y:56.2
-				},
-				"@get(point)": null
-			};    
-		},
-		"and I run it": {
-			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{passedVariable:"This is my Variable"}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
-			},
-			"the result should not be null" : function(expressionResult) {
-				assert.isNotNull(expressionResult.result)
-			},
-			"the result should be an object with the variable value on it, the last result in the expression block" : function(expressionResult) {
-				assert.deepEqual(expressionResult.result, {
-					x:22.3,
-					y:56.2
-				});
-			},
-			"the result callback should be called only once":  function(expressionResult) {
-				assert.equal(expressionResult.count, 1)
-			}
-		}
-	},
+	
 	'When I have nested up three nested expresions': {
 		topic: function() {
 			return {
@@ -670,6 +631,104 @@ vows.describe('priest').addBatch({
 	}
 }).export(module); 
 
+vows.describe('priest variables scopes').addBatch({
+	'When I have a JSON document with a set expression, other expressions on the same level should see the variable': {
+		topic: function() {
+			return {
+				"@set(point)": {
+					x:22.3,
+					y:56.2
+				},
+				"@get(point)": null
+			};    
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				jsonCode._testOnly_runJSONObject(topic,{passedVariable:"This is my Variable"}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"")
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be an object with the variable value on it, the last result in the expression block" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, {
+					x:22.3,
+					y:56.2
+				});
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
+	},'When I have a @set expression in a inner scope of a previous statement ': {
+		topic: function() {
+			return {
+				"@return": {
+					"@set(v)": "Value"
+				},
+				"@get(v)": null
+			};    
+		},
+		"and I run it outter context should not see the value ": {
+			topic:function(topic) {
+				var cb = this.callback
+				jsonCode._testOnly_runJSONObject(topic,{passedVariable:"This is my Variable"}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					cb(null, result)
+				},getTempTestOutputFileName('json2code.js'),"")
+			},
+			"the result should be undefined" : function(expressionResult) {
+				assert.equal(expressionResult.result, undefined)
+			},
+			"the result should be undefined, the value of an undefined variable" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, undefined);
+			}
+		}
+	},'When I have a @set expression in a outer scope of a previous statement ': {
+		topic: function() {
+			return {
+				"@set(v)": {
+					"@set(something)": "Value",
+					"@return": {
+						"@return": {
+							"@get(something)": null
+						}
+					}
+				},
+				"@get(v)": null
+			};    
+		},
+		"and I run it inner context should see the value ": {
+			topic:function(topic) {
+				var cb = this.callback
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					cb(null, result)
+				},getTempTestOutputFileName('json2code.js'),"")
+			},
+			"the result should be the value of the most inner expression" : function(expressionResult) {
+				assert.equal(expressionResult, "Value")
+			},
+		}
+	},
+}).export(module);
 
 vows.describe('priest _result tests').addBatch({
 	'When the first expression in a block sets a value, the second expression': {

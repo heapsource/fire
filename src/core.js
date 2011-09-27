@@ -9,7 +9,7 @@ var RuntimeError = require('./RuntimeError')
 module.exports.Error = Error
 
 function throwInternalError(msg) {
-	//console.trace()
+	console.trace()
 	throw "JSONCode internal error, " + msg
 }
 
@@ -363,11 +363,12 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	}
 	_blockContext._runtime = this;
 	_blockContext._hint == undefined;
-//	_blockContext._parentVariables = block_context_base._variables
+	
+	_blockContext._parentVariables = block_context_base._variables
 	
 	if(context_block_overrides != null) {
 		for(var k in context_block_overrides) {
-			if(k == "_runtime" ||  k == "_parentVariables") continue; // can't replace _runtime
+			if(k == "_runtime" ||  k == "_parentVariables" || k == "_variables") continue; // can't replace _runtime
  			_blockContext[k] = context_block_overrides[k]
 		}
 	}
@@ -429,8 +430,8 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, br
 		_resultCallback: resultCallback,
 		_breakCallback: breakCallback,
 		_inputExpression: inputCallback,
-		_variables: variables,
-		_parentVariables: variables,
+		//_parentVariables: variables,
+		_variables:variables,
 		_hint: hint,
 		_errorCallback: errorCallback
 	};
