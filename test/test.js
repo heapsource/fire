@@ -976,5 +976,55 @@ vows.describe('priest error handling').addBatch({
 				assert.equal(expressionResult.result, "First Error catch, yay!") // check expressions/testExpThatRaisesError.js
 			}
 		}
+	},
+	'When a nested expression raises an error and a @try expression is followed by two @resetError @catch expressions': {
+		topic: function() {
+			return  {
+					"@try":{
+						"@testExpThatRaisesError":null
+					}, 
+					"@resetError": null,
+					"@catch": "Never returned"
+				}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var errorCount = 0
+				var tResult = undefined
+				var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					tResult = result
+					count++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount:errorCount
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
+					errorCount++
+					cb(null, {
+						result:tResult,
+						count:count,
+						errorCount: errorCount,
+						errorInfo: errorInfo
+					})
+				},[testExpThatRaisesErrorFilePath])
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the result should be undefined" : function(expressionResult) {
+				assert.equal(expressionResult.result, undefined)
+			}
+		}
 	}
 }).export(module);

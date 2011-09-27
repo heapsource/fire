@@ -395,6 +395,10 @@ Returns the input as a result if any errors was catch by @try. Otherwise it retu
 
 Returns the error in the current expression block.
 
+### @resetError
+
+Clears the last error in the expression block.
+
 ## Compiler & Runtime Errors Table
     Error Code			Message
 	JS1001				Key KEY_NAME was found in a expression block. Regular JSON keys and expression keys can not be mixed at the same level of the document.
