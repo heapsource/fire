@@ -1,14 +1,14 @@
 module.exports = {
 	name: "loop",
 	implementation: function() {
-		console.warn("loop")
+		//console.warn("loop")
 		var rc = this._blockContext._resultCallback
 		var self = this
 		var result = []
 
 		var callInput = null;
 		callInput = function() {
-			console.warn("callInput")
+			//console.warn("callInput")
 			self._runInput({
 				_loopCallback: function(cmd) {
 					if(cmd == "break") {
@@ -20,7 +20,7 @@ module.exports = {
 					}
 				},
 				_resultCallback: function(res) {
-					console.warn("adding result to array")
+					//console.warn("adding result to array")
 					result.push(res)
 					callInput() // call the next iteration
 				}

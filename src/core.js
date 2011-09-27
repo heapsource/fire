@@ -9,9 +9,13 @@ var RuntimeError = require('./RuntimeError')
 var Iterator = require('./Iterator')
 
 module.exports.Error = Error
+var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = false
 
 function throwInternalError(msg) {
-	console.trace()
+	if(TEST_PRINT_TRACE_ON_INTERNAL_ERROR)
+	{
+		console.trace()
+	}
 	throw "JSONCode internal error, " + msg
 }
 
@@ -481,6 +485,7 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 }
 
 module.exports.exportTestOnlyFunctions = function() {
+	TEST_PRINT_TRACE_ON_INTERNAL_ERROR = true
 	module.exports._testOnly_getExpressionNameFromSpecialKey = getExpressionNameFromSpecialKey
 	module.exports._testOnly_runJSONObject = _testOnly_runJSONObjectFromJSON
 	module.exports._testOnly_compileExpressionFuncFromJSON = compileExpressionFuncFromJSON
