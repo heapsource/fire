@@ -276,7 +276,7 @@ The result is:
 Returns the input expression as a result. Typically is the last expression in a block.
 
 ### @get
-Returns the variable name in the hint. If no hint is given it returns undefined.
+Returns the variable path in the hint. If no hint is given it returns the input.
 
 ### @set
 Sets the input as the value of the variable name provided in the hint. If no hint is given it process the input without setting it to any variable. Always returns the input.
@@ -360,6 +360,33 @@ Returns the error in the current expression block.
 
 Clears the last error in the expression block.
 
+### Paths
+
+Paths are used in expressions like "@get" to retrieve any nested value inside a variable including the variable itself.
+
+Paths can only have two type of access: property names or indexes. You use property names to access members of some object including the root variable.
+
+The following path retrieves a variable called "name":
+
+     name
+
+The following path retrieves the value of the *property* name inside the 'person' variable:
+
+     person.name
+
+The following path retrieves the *index* 2 of the 'names' variable, which turns to be an array:
+
+     names[2]
+
+The following path retrieves the name of first person in the list:
+
+     persons[0]
+
+The following path retrieves the tags of the first post:
+
+     blog.posts[0].tags
+
+
 ## Compiler & Runtime Errors Table
     Error Code			Message
 	JS1001				Key KEY_NAME was found in a expression block. Regular JSON keys and expression keys can not be mixed at the same level of the document.
@@ -375,4 +402,7 @@ Clears the last error in the expression block.
 ## Credits
 **Author**: Johan Hernandez. *johan@firebase.co*
 
-**Date:** Sept 23, 2011
+## Revisions
+
+* Sep 23, 2011: First Submission
+* Sep 28, 2011: Paths
