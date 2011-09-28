@@ -9,6 +9,8 @@ var RuntimeError = require('./RuntimeError')
 var Iterator = require('./Iterator')
 var Variable = require('./Variable')
 
+var PathCache = require('./Paths').PathCache
+
 module.exports.Error = Error
 var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = false
 
@@ -308,6 +310,11 @@ var Runtime = function() {
 	this.loadedExpressionsMeta = {}; // Contains a member per full definition of the expression, like {title:<String>, implementation:<Function>}
 	var dirName = path.join(__dirname, "built-in")
 	this.registerWellKnownExpressionDir(dirName)
+	this._paths = new PathCache()
+}
+
+Runtime.prototype.getPaths = function() {
+	return this._paths
 }
 
 Runtime.prototype.registerWellKnownExpressionDir = function(absoluteDirPath) {
@@ -481,7 +488,7 @@ function _setVar(name, value) {
 }
 
 function _getVar(name) {
-	return _getVarCore(this._blockContext._variables, name)
+	return _getVarCore(this._blockContext._runtime, this._blockContext._variables, name)
 }
 
 function _setParentVar(name, value) {
@@ -489,13 +496,19 @@ function _setParentVar(name, value) {
 }
 
 function _getParentVar(name) {
-	return _getVarCore(this._blockContext._parentContext._variables, name)
+	//console.warn("_getParentVar this:", this)
+	return _getVarCore(this._blockContext._runtime, this._blockContext._parentContext._variables, name)
 }
 
-function _getVarCore(bag, name) {
-	//console.warn("Bag get:",bag)
+function _getVarCore(runtime, bag, path) {
+/*	if(!(runtime instanceof Runtime)){
+		console.trace()
+		throw "_getVarCore requires an instance of Runtime, given:" + runtime 
+	}*/
+	return runtime.getPaths().run(bag, path)
+	/*//console.warn("Bag get:",bag)
 	if(bag[name] == undefined) return undefined
-	return bag[name].get()
+	return bag[name].get()*/
 }
 function _setVarCore(bag, name, value) {
 	if(bag[name] == undefined) {

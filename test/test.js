@@ -1617,5 +1617,34 @@ vows.describe('priest loop control').addBatch({
 				assert.deepEqual(expressionResult.result, ["Item0", "Item1", "Item3"])
 			}
 		}
-	},
+	}
+}).export(module);
+
+vows.describe('priest @get paths').addBatch({
+	'When I use @get to get the second item in the array': {
+		topic: function() {
+			return  {
+				"@set(numbers)": [
+					"Zero",
+					"One",
+					"Two"
+				],
+				"@get(numbers[1])": undefined
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function() {
+				}, function(result) {
+					cb(null, result)
+				})
+			},
+			"I should get the second item in the array": function(result) {
+				assert.equal(result,"One")
+			}
+		}, 
+	}
 }).export(module);
