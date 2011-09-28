@@ -10,7 +10,9 @@ var Iterator = function(collection) {
 Iterator.prototype.index = function() {
 	return this._index
 }
-
+Iterator.prototype.isFirst = function() {
+	return this._index === 0
+}
 Iterator.prototype.isLast = function() {
 	return this._index === this._lastIndex
 }

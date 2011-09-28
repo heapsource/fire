@@ -2,6 +2,7 @@ var vows = require('vows')
 var assert = require('assert')
 var PathBuilder = require('../src/Paths').PathBuilder
 var AstEntryType = require('../src/Paths').AstEntryType
+var Variable = require('../src/Variable')
 
 vows.describe('priest Paths').addBatch({
 	"When I have a brand new builder": {
@@ -106,7 +107,7 @@ vows.describe('priest Paths Valid AST').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest Paths Errors').addBatch({
+vows.describe('priest Paths Invalid AST').addBatch({
 	"When I am checking errors and I have the path 'var1..'": {
 		topic: function() {
 			return "var1.."
@@ -190,5 +191,110 @@ vows.describe('priest Paths Errors').addBatch({
 				assert.equal(msg,"Error at char index 0: Can not get the index without an object")
 			}
 		}
+	},"When I am checking errors and I have the path 'list[a345]'": {
+		topic: function() {
+			return "list[a345]"
+		},
+		"I should get an exception": function(topic){
+			assert.throws(function() {
+				new PathBuilder().parse(topic)
+			})
+		},
+		"I should get an exception message 'Error at char index 5: Indexes takes numbers only'": function(topic){
+			try{
+				new PathBuilder().parse(topic)
+			}catch(msg) {
+				assert.equal(msg,"Error at char index 5: Indexes takes numbers only")
+			}
+		}
 	},
+}).export(module);
+
+vows.describe('priest Paths Values').addBatch({
+	"When I have a path builder": {
+		topic: function() {
+			return new PathBuilder()
+		},
+		"and I run a path": function(topic){
+			assert.equal(topic.run({
+				"x":new Variable(200)
+			},"x"), 200)
+		},
+		"it should stay compiled to be reused for further executions": function(topic) {
+			assert.isTrue(topic.isCompiled("x"))
+			assert.equal(topic.run({
+				"x":new Variable(200)
+			},"x"), 200)
+		}
+	},
+	"When I run the path 'var1' and the variables are properly registered": {
+		topic: function() {
+			return "var1"
+		},
+		"I should get the variable value": function(topic){
+			assert.deepEqual(new PathBuilder().run({
+				"var1": new Variable('value of variable 1')
+			},topic), 'value of variable 1');
+		}
+	},
+	"When I run the path 'point.x' and the variables are properly registered": {
+		topic: function() {
+			return "point.x"
+		},
+		"I should get the variable value": function(topic){
+			assert.deepEqual(new PathBuilder().run({
+				"point": new Variable({
+					"x": 200
+				})
+			},topic), 200);
+		}
+	},
+	"When I run the path 'point.x.y' and the variables are properly registered": {
+		topic: function() {
+			return "point.x.y"
+		},
+		"I should get undefined since x is a number and there is no member y": function(topic){
+			assert.isUndefined(new PathBuilder().run({
+				"point": new Variable({
+					"x": 200
+				})
+			},topic));
+		}
+	}
+	,
+	"When I run the path 'point[4]' and the variables are properly registered": {
+		topic: function() {
+			return "point[4]"
+		},
+		"I should get the fourth item in the point array": function(topic){
+			assert.equal(new PathBuilder().run({
+				"point": new Variable([
+					"One",
+					"Two",
+					"Three",
+					"Four",
+					"Five"
+				])
+			},topic),"Five");
+		}
+	},
+	"When I run the path 'point[3][1]' and the variables are properly registered": {
+		topic: function() {
+			return "point[3][1]"
+		},
+		"I should get the second item at the fourth position of the point array": function(topic){
+			assert.equal(new PathBuilder().run({
+				"point": new Variable([
+					"One",
+					"Two",
+					"Three",
+					[
+						"One",
+						"Second at Third Array"
+					],
+					"Five"
+				])
+			},topic),"Second at Third Array");
+		}
+	}
 }).export(module);

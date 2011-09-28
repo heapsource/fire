@@ -1,5 +1,5 @@
-var Variable = function(c) {
-	
+var Variable = function(val) {
+	this._val = val
 }
 
 Variable.prototype.get = function() {
