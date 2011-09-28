@@ -1,13 +1,13 @@
 var vows = require('vows')
 var assert = require('assert')
-var PathBuilder = require('../src/Paths').PathBuilder
+var PathCache = require('../src/Paths').PathCache
 var AstEntryType = require('../src/Paths').AstEntryType
 var Variable = require('../src/Variable')
 
 vows.describe('priest Paths').addBatch({
-	"When I have a brand new builder": {
+	"When I have a brand new cache": {
 		topic: function() {
-			return new PathBuilder()
+			return new PathCache()
 		},
 		"and I ask for a non-compiled path status it should return false": function(topic){
 			assert.isFalse(topic.isCompiled("var1"))
@@ -18,7 +18,7 @@ vows.describe('priest Paths').addBatch({
 vows.describe('priest Paths Valid AST').addBatch({
 	"When I have the path 'var1'": {
 		topic: function() {
-			return new PathBuilder()
+			return new PathCache()
 		},
 		"the AST should be a single Object variable": function(topic){
 			assert.deepEqual(topic.parse("var1"), [
@@ -31,7 +31,7 @@ vows.describe('priest Paths Valid AST').addBatch({
 	},
 	"When I have the path 'var1.var2'": {
 		topic: function() {
-			return new PathBuilder()
+			return new PathCache()
 		},
 		"the AST should be two Object variables": function(topic){
 			assert.deepEqual(topic.parse("var1.var2"), [
@@ -48,7 +48,7 @@ vows.describe('priest Paths Valid AST').addBatch({
 	},
 	"When I have the path 'var1[0]'": {
 		topic: function() {
-			return new PathBuilder()
+			return new PathCache()
 		},
 		"the AST should be one property and one index": function(topic){
 			assert.deepEqual(topic.parse("var1[0]"), [
@@ -65,7 +65,7 @@ vows.describe('priest Paths Valid AST').addBatch({
 	},
 	"When I have the path 'var1[0].var2'": {
 		topic: function() {
-			return new PathBuilder()
+			return new PathCache()
 		},
 		"the AST should be one property, index and property entries": function(topic){
 			assert.deepEqual(topic.parse("var1[0].var2"), [
@@ -86,7 +86,7 @@ vows.describe('priest Paths Valid AST').addBatch({
 	},
 	"When I have the path 'var1[4][5]'": {
 		topic: function() {
-			return new PathBuilder()
+			return new PathCache()
 		},
 		"the AST should be property, index and index entries": function(topic){
 			assert.deepEqual(topic.parse("var1[4][5]"), [
@@ -114,12 +114,12 @@ vows.describe('priest Paths Invalid AST').addBatch({
 		},
 		"I should get an exception": function(topic){
 			assert.throws(function() {
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			})
 		},
 		"I should get an exception message 'Error at char index 5: Can not get the property without an object'": function(topic){
 			try{
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			}catch(msg) {
 				assert.equal(msg,"Error at char index 5: Can not get the property without an object")
 			}
@@ -130,12 +130,12 @@ vows.describe('priest Paths Invalid AST').addBatch({
 		},
 		"I should get an exception": function(topic){
 			assert.throws(function() {
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			})
 		},
 		"I should get an exception message 'Unexpected end path, expecting property name'": function(topic){
 			try{
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			}catch(msg) {
 				assert.equal(msg,"Unexpected end path, expecting property name")
 			}
@@ -147,12 +147,12 @@ vows.describe('priest Paths Invalid AST').addBatch({
 		},
 		"I should get an exception": function(topic){
 			assert.throws(function() {
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			})
 		},
 		"I should get an exception message 'Unexpected end path, expecting index number'": function(topic){
 			try{
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			}catch(msg) {
 				assert.equal(msg,"Unexpected end path, expecting index number")
 			}
@@ -164,12 +164,12 @@ vows.describe('priest Paths Invalid AST').addBatch({
 		},
 		"I should get an exception": function(topic){
 			assert.throws(function() {
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			})
 		},
 		"I should get an exception message 'Error at char index 4: Unexpected end of index number'": function(topic){
 			try{
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			}catch(msg) {
 				assert.equal(msg,"Error at char index 4: Unexpected end of index number")
 			}
@@ -181,12 +181,12 @@ vows.describe('priest Paths Invalid AST').addBatch({
 		},
 		"I should get an exception": function(topic){
 			assert.throws(function() {
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			})
 		},
 		"I should get an exception message 'Error at char index 0: Can not get the index without an object'": function(topic){
 			try{
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			}catch(msg) {
 				assert.equal(msg,"Error at char index 0: Can not get the index without an object")
 			}
@@ -197,12 +197,12 @@ vows.describe('priest Paths Invalid AST').addBatch({
 		},
 		"I should get an exception": function(topic){
 			assert.throws(function() {
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			})
 		},
 		"I should get an exception message 'Error at char index 5: Indexes takes numbers only'": function(topic){
 			try{
-				new PathBuilder().parse(topic)
+				new PathCache().parse(topic)
 			}catch(msg) {
 				assert.equal(msg,"Error at char index 5: Indexes takes numbers only")
 			}
@@ -211,9 +211,9 @@ vows.describe('priest Paths Invalid AST').addBatch({
 }).export(module);
 
 vows.describe('priest Paths Values').addBatch({
-	"When I have a path builder": {
+	"When I have a path cache": {
 		topic: function() {
-			return new PathBuilder()
+			return new PathCache()
 		},
 		"and I run a path": function(topic){
 			assert.equal(topic.run({
@@ -232,7 +232,7 @@ vows.describe('priest Paths Values').addBatch({
 			return "var1"
 		},
 		"I should get the variable value": function(topic){
-			assert.deepEqual(new PathBuilder().run({
+			assert.deepEqual(new PathCache().run({
 				"var1": new Variable('value of variable 1')
 			},topic), 'value of variable 1');
 		}
@@ -242,7 +242,7 @@ vows.describe('priest Paths Values').addBatch({
 			return "point.x"
 		},
 		"I should get the variable value": function(topic){
-			assert.deepEqual(new PathBuilder().run({
+			assert.deepEqual(new PathCache().run({
 				"point": new Variable({
 					"x": 200
 				})
@@ -254,7 +254,7 @@ vows.describe('priest Paths Values').addBatch({
 			return "point.x.y"
 		},
 		"I should get undefined since x is a number and there is no member y": function(topic){
-			assert.isUndefined(new PathBuilder().run({
+			assert.isUndefined(new PathCache().run({
 				"point": new Variable({
 					"x": 200
 				})
@@ -267,7 +267,7 @@ vows.describe('priest Paths Values').addBatch({
 			return "point[4]"
 		},
 		"I should get the fourth item in the point array": function(topic){
-			assert.equal(new PathBuilder().run({
+			assert.equal(new PathCache().run({
 				"point": new Variable([
 					"One",
 					"Two",
@@ -283,7 +283,7 @@ vows.describe('priest Paths Values').addBatch({
 			return "point[3][1]"
 		},
 		"I should get the second item at the fourth position of the point array": function(topic){
-			assert.equal(new PathBuilder().run({
+			assert.equal(new PathCache().run({
 				"point": new Variable([
 					"One",
 					"Two",

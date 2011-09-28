@@ -9,7 +9,7 @@ var AstEntryType = {
 	"Index": 2
 }
 
-var PathBuilder = function() {
+var PathCache = function() {
 	this._compiledPaths = {}
 }
 
@@ -32,7 +32,7 @@ function isDigit(c){
 	return VALID_NUMBERS.indexOf(c) !== -1
 }
 
-PathBuilder.prototype.parse = function(pathStr) {
+PathCache.prototype.parse = function(pathStr) {
 	var list = []
 	var currentEntry = new Entry(AstEntryType.Property)
 	var phase = undefined
@@ -99,7 +99,7 @@ PathBuilder.prototype.parse = function(pathStr) {
 	return list
 }
 
-PathBuilder.prototype.compile = function(pathStr) {
+PathCache.prototype.compile = function(pathStr) {
 	var pathFileName = pathStr + ".path.js"
 	var ast = this.parse(pathStr)
 	var buffer = new StringBuffer()
@@ -138,13 +138,13 @@ PathBuilder.prototype.compile = function(pathStr) {
 	return this._compiledPaths[pathStr] = compilationResults._compiledFunction
 }
 
-PathBuilder.prototype.isCompiled = function(pathStr) {
+PathCache.prototype.isCompiled = function(pathStr) {
 	return this._compiledPaths[pathStr] !== undefined
 }
-PathBuilder.prototype._runCore = function(variables, path) {
+PathCache.prototype._runCore = function(variables, path) {
 	return path(variables)
 }
-PathBuilder.prototype.run = function(variables, pathStr) {
+PathCache.prototype.run = function(variables, pathStr) {
 	var path = this._compiledPaths[pathStr]
 	if(path === undefined) {
 		path = this.compile(pathStr)
@@ -152,5 +152,5 @@ PathBuilder.prototype.run = function(variables, pathStr) {
 	return this._runCore(variables, path)
 }
 
-module.exports.PathBuilder = PathBuilder
+module.exports.PathCache = PathCache
 module.exports.AstEntryType = AstEntryType
