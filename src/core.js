@@ -7,6 +7,7 @@ var fs = require('fs')
 var path = require('path')
 var RuntimeError = require('./RuntimeError')
 var Iterator = require('./Iterator')
+var Variable = require('./Variable')
 
 module.exports.Error = Error
 var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = false
@@ -70,7 +71,7 @@ function getExpressionNameFromSpecialKey(propName) {
 
 function isPureJSONValue(jsonObj) {
 	if(jsonObj == null) {
-		return false;
+		return true;
 	}
 	else if(typeof(jsonObj) === 'number') {
 		return true;
@@ -205,8 +206,8 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 	var resultVarName = selfVarname + "._blockContext._result"
 	buffer.writeLine("var " + selfVarname +  " = this;")
 	buffer.writeLine("var " + names.name("callbackVar") + " = this._blockContext._resultCallback;")
-	buffer.writeLine("var " + names.name("localBlockContext") + " = this._blockContext;")
-	buffer.writeLine("var " + names.name("localContext") + " = this;")
+	//buffer.writeLine("var " + names.name("localBlockContext") + " = this._blockContext;")
+	//buffer.writeLine("var " + names.name("localContext") + " = this;")
 	
 	if(isPureJSONValue(jsonObj)) {
 		buffer.writeLine(resultVarName + " = " + JSON.stringify(jsonObj) + ";")
@@ -365,39 +366,55 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 			_loopCallback: <Function>,
 			_inputExpression: <Function>, // needs to be called with _runExp
 			_variables: <Object>,
-			_parentVariables: <Object>,
+			//_parentVariables: <Object>,
 			_hint: <Object> (optional),
 			_errorCallback: <Function>,
 			_parentResult: <Object>, // Caller Expression Block last Result
 			_result: <Object>
+			_parentContext: <Object>
 		}
 	*/
-	var localVariables = {}; 
-	if(block_context_base._variables != undefined && block_context_base._variables != null) {
-		for(var k in block_context_base._variables) {
-			localVariables[k] = block_context_base._variables[k]
-		}
-	}
+	
 	
 	var _blockContext = {};
-	_blockContext._variables = localVariables;
-	for(var k in block_context_base) {
+	Object.keys(block_context_base).forEach(function(k) {
 		_blockContext[k] = block_context_base[k]
+	})
+	
+	var localVariables = null;
+	var useSameScopeVariables = context_block_overrides == null || context_block_overrides._sameScope !== true
+	if(useSameScopeVariables) {
+		//
+		// If it's not running on the same scope, then copy all the variables.
+		//
+		localVariables = {}//Object.create(block_context_base._variables) //block_context_base._variables; 
+		//console.warn("Copying Variables")
+		if(block_context_base._variables != undefined && block_context_base._variables != null) {
+			Object.keys(block_context_base._variables).forEach(function(k) {
+				//console.warn("Copying var ", k, " with value ", block_context_base._variables[k])
+				localVariables[k] = block_context_base._variables[k]
+			})
+		}
+	} else {
+		// Use the same Scope Varaibles
+		localVariables = block_context_base._variables
 	}
-	_blockContext._runtime = this; 
+	
 	_blockContext._hint = undefined; //formality
-	_blockContext._result = undefined; //formality
-	_blockContext._parentResult = block_context_base._result
-	
-	_blockContext._parentVariables = block_context_base._variables
-	_blockContext._parentContext = block_context_base
-	
 	if(context_block_overrides != null) {
 		for(var k in context_block_overrides) {
 			if(k == "_runtime" ||  k == "_parentVariables" || k == "_variables" || k == "_result" || k == "_parentContext" || k == "_errorInfo") continue; // can't replace these
  			_blockContext[k] = context_block_overrides[k]
 		}
 	}
+	
+	
+	_blockContext._variables = localVariables;
+	_blockContext._runtime = this; 
+	_blockContext._result = undefined; //formality
+	_blockContext._parentResult = block_context_base._result
+	_blockContext._parentContext = block_context_base
+	
 	
 	var context = {
 		_blockContext: _blockContext,
@@ -407,7 +424,11 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 		_setError: _setError,
 		_resetError: _resetError,
 		_loopControl: _loopControl,
-		_skip: _skip
+		_skip: _skip,
+		_setVar: _setVar,
+		_getVar: _getVar,
+		_setParentVar: _setParentVar,
+		_getParentVar: _getParentVar
 	};
 	//context._runExp = _runExp.bind(context)
 	var blockFunc = expFunc.bind(context) // copy the function and bind it to the context
@@ -433,6 +454,9 @@ function _raiseError(err) {
 }
 
 function _runInput(context_block_overrides) {
+	if(context_block_overrides !== undefined && context_block_overrides !== null) {
+		context_block_overrides._sameScope = true // don't copy the variables when running input expressions
+	}
 	this._runExp(this._blockContext._inputExpression, context_block_overrides);
 }
 
@@ -450,6 +474,37 @@ function _loopControl(payload) {
 
 function _skip() {
 	this._blockContext._resultCallback(this._blockContext._parentResult)
+}
+
+function _setVar(name, value) {
+	_setVarCore(this._blockContext._variables, name, value)
+}
+
+function _getVar(name) {
+	return _getVarCore(this._blockContext._variables, name)
+}
+
+function _setParentVar(name, value) {
+	_setVarCore(this._blockContext._parentContext._variables, name, value)
+}
+
+function _getParentVar(name) {
+	return _getVarCore(this._blockContext._parentContext._variables, name)
+}
+
+function _getVarCore(bag, name) {
+	//console.warn("Bag get:",bag)
+	if(bag[name] == undefined) return undefined
+	return bag[name].get()
+}
+function _setVarCore(bag, name, value) {
+	if(bag[name] == undefined) {
+		var v = new Variable()
+		v.set(value)
+		bag[name] = v
+	} else {
+		bag[name].set(value)
+	}
 }
 
 module.exports.Runtime = Runtime
@@ -471,13 +526,16 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 			runtime.registerWellKnownExpressionFile(fileName)
 		})
 	}
-	
+	var variablesObjects = {}
+	for(var k in variables) {
+		_setVarCore(variablesObjects, k, variables[k])
+	}
 	var contextBase = {
 		_resultCallback: resultCallback,
 		_loopCallback: loopCallback,
 		_inputExpression: inputCallback,
 		//_parentVariables: variables,
-		_variables:variables,
+		_variables:variablesObjects,
 		_hint: hint,
 		_errorCallback: errorCallback
 	};

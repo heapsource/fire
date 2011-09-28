@@ -8,7 +8,8 @@ module.exports = {
 
 		var callInput = null;
 		callInput = function() {
-			//console.warn("callInput")
+			
+			//console.warn("callInput", self._blockContext._variables)
 			self._runInput({
 				_loopCallback: function(cmd) {
 					if(cmd == "break") {

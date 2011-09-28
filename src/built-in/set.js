@@ -2,6 +2,7 @@ module.exports = {
 	name:"set",
 	implementation:function() {
 		//console.warn("calling SET")
+		var self = this
 		var rc = this._blockContext._resultCallback
 		var pv = this._blockContext._parentVariables
 		//var v = this._blockContext._variables
@@ -11,16 +12,15 @@ module.exports = {
 		var hint = this._blockContext._hint
 		var validHint = hint != undefined && hint != undefined && hint != null 
 
-		if(this._blockContext._inputExpression) {
-			this._runExp(this._blockContext._inputExpression, {
+			this._runInput({
 				_resultCallback: function(res) {
 					if(validHint) {
 						//v[hint] = res
-						pv[hint] = res
+						self._setParentVar(hint, res)
 					}
 					rc(res)
 				}
 			});
 		}
-	}
+	
 }

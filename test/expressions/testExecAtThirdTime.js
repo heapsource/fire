@@ -2,16 +2,18 @@ module.exports = {
 	name:"testExecAtThirdTime",
 	implementation:function() {
 		var self = this
-		//console.warn("testExecAtThirdTime")
-		if(this._blockContext._parentVariables.testExecAtThirdTimeCount == undefined) {
-			this._blockContext._parentVariables.testExecAtThirdTimeCount  = 0
-			this._skip()
+		//console.warn("testExecAtThirdTime", self._getVar("testExecAtThirdTimeCount"))
+		if(self._getParentVar("testExecAtThirdTimeCount")  == undefined) {
+			
 			//console.warn("initializing testExecAtThirdTimeCount")
+			self._setParentVar("testExecAtThirdTimeCount", 0) 
+			//console.warn("testExecAtThirdTimeCount:", self._getParentVar("testExecAtThirdTimeCount"))
+			this._skip()
 			//return
 		} else {
-			if(self._blockContext._parentVariables.testExecAtThirdTimeCount < 2) {
-				//console.warn("incrementing testExecAtThirdTimeCount", self._blockContext._parentVariables.testExecAtThirdTimeCount )
-				self._blockContext._parentVariables.testExecAtThirdTimeCount++
+			if(self._getParentVar("testExecAtThirdTimeCount")  < 2) {
+				//console.warn("incrementing testExecAtThirdTimeCount", self._getParentVar("testExecAtThirdTimeCount"))
+				self._setParentVar("testExecAtThirdTimeCount", self._getParentVar("testExecAtThirdTimeCount") +1)
 				this._skip()
 				//return
 			} else {

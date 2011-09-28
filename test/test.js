@@ -366,7 +366,7 @@ vows.describe('priest').addBatch({
 			topic:function(topic) {
 				var cb = this.callback
 				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{passedVariable:"This is my Variable"}, function(sendInput) {
+				jsonCode._testOnly_runJSONObject(topic,{"passedVariable":"This is my Variable"}, function(sendInput) {
 					sendInput("Lots of Crap")
 				}, function(){
 					// break
@@ -374,7 +374,7 @@ vows.describe('priest').addBatch({
 					count++
 					cb(null, {
 						result:result,
-						count:count
+						count:count 
 					})
 				},getTempTestOutputFileName('json2code.js'),"")
 			},
@@ -382,7 +382,7 @@ vows.describe('priest').addBatch({
 				assert.isNotNull(expressionResult.result)
 			},
 			"the result should be an object with the variable value on it, the last result in the expression block" : function(expressionResult) {
-				assert.deepEqual(expressionResult.result, {
+				assert.deepEqual(expressionResult.result, { 
 				"name":"This is my Variable",
 			});
 			},
@@ -542,10 +542,10 @@ vows.describe('priest variables scopes').addBatch({
 				},getTempTestOutputFileName('json2code.js'),"")
 			},
 			"the result should be undefined" : function(expressionResult) {
-				assert.equal(expressionResult.result, undefined)
+				assert.equal(expressionResult, undefined)
 			},
 			"the result should be undefined, the value of an undefined variable" : function(expressionResult) {
-				assert.deepEqual(expressionResult.result, undefined);
+				assert.deepEqual(expressionResult, undefined);
 			}
 		}
 	},'When I have a @set expression in a outer scope of a previous statement ': {
@@ -575,6 +575,72 @@ vows.describe('priest variables scopes').addBatch({
 			},
 			"the result should be the value of the most inner expression" : function(expressionResult) {
 				assert.equal(expressionResult, "Value")
+			},
+		}
+	},
+	'When I have a @set expression in a outer scope and a fourth level @set modifies the value ': {
+		topic: function() {
+			return {
+				"@set(something)": "Value",
+				"@return": {
+					"@return": {
+						"@return": {
+							"@return": {
+								"@return": {
+									"@return": {
+										"@set(something)": "Changed at deep levels",
+										"@return": null
+									}
+								}
+							}
+						}
+					}
+				},
+				"@get(something)": null
+			};    
+		},
+		"and I run it the outer context should see the value ": {
+			topic:function(topic) {
+				var cb = this.callback
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					//console.warn("break")
+					// break
+				}, function(result) {
+					cb(null, result)
+				},getTempTestOutputFileName('json2code.js'),"")
+			},
+			"the result should be the value of the most inner expression" : function(expressionResult) {
+				assert.equal(expressionResult, "Changed at deep levels")
+			},
+		}
+	},
+	
+	'When I have a @set expression in a inner scope and I use @get on the same variable on an outer scope': {
+		topic: function() {
+			return {
+				"@return": {
+					"@set(something)": "Value",
+					"@return": "Something else"
+				},
+				"@get(something)": null
+			};    
+		},
+		"and I run it the outer context should not see the value ": {
+			topic:function(topic) {
+				var cb = this.callback
+				jsonCode._testOnly_runJSONObject(topic,{"x":4000}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					//console.warn("break")
+					// break
+				}, function(result) {
+					cb(null, result)
+				},getTempTestOutputFileName('json2code.js'),"")
+			},
+			"the result should be undefined" : function(expressionResult) {
+				assert.isUndefined(expressionResult)
 			},
 		}
 	},
