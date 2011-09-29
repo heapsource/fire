@@ -1,8 +1,8 @@
 #priest.js Compiler 1.0
-Specification for JSONCode compiler.
+Specification for Priest compiler.
 ***
 
-priest.js is basically a set of special expressions embedded as 'keys' with the intention to manipulate and transform the document.
+priest.js is basically a set of special expressions embedded as 'keys' with the intention to manipulate and transform a JSON documents in memory, which turns to be a simple manipulation of javascript objects.
 
 ## Example 1:
 
@@ -408,7 +408,39 @@ Loading manifest:
     
 	var runtime = new Runtime()
 	runtime.loadFromManifestFile("priest.manifest.json")
-     
+
+### Environments & Configurations
+
+Environment are a set of configurations or requirements for each stage of the product, like "development", "staging", "production" and priest follows the standard node.js environment variable NODE_ENV to act accordingly. Each runtime has a environment name to know which configurations must be loaded.
+
+Example:
+
+	var runtime = new Runtime()
+	console.log(runtime.environmentName) // defaults to "development" if NODE_ENV is not present.
+    
+
+Manifest can contain configurations for each environment as follows:
+
+	{
+		"modules": [
+			"expressionModule1",
+			"expressionModule2"
+		],
+		"environments": {
+			"production": {
+				"expressionModule1": {
+					"config1": "config value for expressionModule1",
+					"config2": 200
+				},
+				"expressionModule2": {
+					"config1": "value2",
+					"config2": 200
+				}
+			}
+		}
+	}
+
+
 
 ## Compiler & Runtime Errors Table
     Error Code			Message

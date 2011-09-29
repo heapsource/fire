@@ -13,6 +13,7 @@ var setVarCore = require('./Expressions').setVarCore
 var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = require('./Expressions').TEST_PRINT_TRACE_ON_INTERNAL_ERROR
 var throwInternalError = require('./Expressions').throwInternalError
 
+var DEFAULT_ENVIRONMENT = "development"
 var PathCache = require('./Paths').PathCache
 
 module.exports.Error = Error
@@ -306,6 +307,7 @@ function Runtime() {
 	var dirName = path.join(__dirname, "built-in")
 	this.registerWellKnownExpressionDir(dirName)
 	this._paths = new PathCache()
+	this.environmentName = process.env.NODE_ENV === undefined ? DEFAULT_ENVIRONMENT : process.env.NODE_ENV 
 }
 
 Runtime.prototype.getPaths = function() {
@@ -345,6 +347,11 @@ Runtime.prototype.loadModule = function(moduleName) {
 		}, this)
 }
 
+Runtime.prototype.getModuleConfiguration = function(moduleName) {
+	if(this.configurations === undefined) return undefined;
+	return this.configurations[moduleName]
+}
+
 Runtime.prototype.loadFromManifestFile = function(manifestFile) {
 	var jsonStr = fs.readFileSync(manifestFile, 'utf8')
 	
@@ -359,8 +366,11 @@ Runtime.prototype.loadFromManifestFile = function(manifestFile) {
 				},this)
 			}
 		}
+		var configurations = manifest.environments;
+		if(configurations !== undefined && configurations !== null) {
+			this.configurations = configurations[this.environmentName]
+		}
 	}
-	
 	return true
 }
 
@@ -513,7 +523,7 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	runtime.runExpressionFunc(baseFunc, contextBase, null)
 }
 
-
+module.exports.DEFAULT_ENVIRONMENT = DEFAULT_ENVIRONMENT
 
 module.exports.exportTestOnlyFunctions = function() {
 	TEST_PRINT_TRACE_ON_INTERNAL_ERROR = true
@@ -521,5 +531,6 @@ module.exports.exportTestOnlyFunctions = function() {
 	module.exports._testOnly_runJSONObject = _testOnly_runJSONObjectFromJSON
 	module.exports._testOnly_compileExpressionFuncFromJSON = compileExpressionFuncFromJSON
 	module.exports._testOnly_getHint = getHint
+	
 }
 

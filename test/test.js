@@ -1664,10 +1664,10 @@ vows.describe('priest manifests').addBatch({
 				return runtime
 			},
 			"the expression expressionModule1 should be loaded": function(runtime) {
-				runtime.isExpressionLoaded("expressionModule1")
+				assert.isTrue(runtime.isExpressionLoaded("expressionModule1"))
 			},
 			"the expression expressionModule2 should be loaded": function(runtime) {
-				runtime.isExpressionLoaded("expressionModule2")
+				assert.isTrue(runtime.isExpressionLoaded("expressionModule2"))
 			},
 			"and once the modules are loaded": {
 				"we test the first": {
@@ -1702,6 +1702,85 @@ vows.describe('priest manifests').addBatch({
 					},
 					"it should work properly": function(err, res) {
 					 	assert.equal(res, "Hello World expressionModule2")
+					}
+				}
+			}
+		}
+	}
+}).export(module);
+
+vows.describe('priest environments').addBatch({
+	'Having a Runtime running in production': {
+		topic: function() {
+			process.env.NODE_ENV="production"
+			return new Runtime()
+		},
+		"when I query what is the environment of the runtime ": {
+			topic:function(runtime) {
+				return runtime.environmentName
+			},
+			"it should be production": function(env) {
+				assert.equal(env,"production")
+			}
+		}
+	},
+	'Having a Runtime running in development': {
+		topic: function() {
+			process.env.NODE_ENV="development"
+			return new Runtime()
+		},
+		"when I query what is the environment of the runtime ": {
+			topic:function(runtime) {
+				return runtime.environmentName
+			},
+			"it should be production": function(env) {
+				assert.equal(env,"development")
+			}
+		}
+	},
+	'Having a Runtime running with no explicit enviroment': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when I query what is the environment of the runtime ": {
+			topic:function(runtime) {
+				return runtime.environmentName
+			},
+			"it should be development(the default environment)": function(env) {
+				assert.equal(env,jsonCode.DEFAULT_ENVIRONMENT)
+			}
+		}
+	}
+}).export(module);
+
+vows.describe('priest configurations').addBatch({
+	'Working in a custom environment': {
+		topic: function() {
+			require.paths.unshift(path.join(__dirname,'manifests/testConfig/node_modules')); // because we are testing in a different directory
+			process.env.NODE_ENV="customEnv1"
+			return new Runtime()
+		},
+		"when I set up a runtime": {
+			topic:function(runtime) {
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfig/priest.manifest.json"))
+				return runtime
+			},
+			"and once the modules are loaded": {
+				"and we run it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("module1", contextBase ,null)
+					},
+					"it should work with the configurations": function(err, res) {
+					 	assert.equal(res, "Hello World with configurations, server configuration host is 127.0.0.1 is and the environment is customEnv1")
 					}
 				}
 			}

@@ -1,0 +1,12 @@
+{
+	"modules": [
+		"module1"
+	],
+	"environments": {
+		"customEnv1": {
+			"module1": {
+				"server": "127.0.0.1"
+			}
+		}
+	}
+}
