@@ -386,6 +386,29 @@ The following path retrieves the tags of the first post:
 
      blog.posts[0].tags
 
+## Manifest
+
+Manifest specifies information for the runtime work properly, like what modules to load.
+
+### Manifest Modules
+
+Specifies a list of modules inside "node_modules" to gather expressions.
+
+    
+	{
+		"modules": [
+			"expressionModule1",
+			"expressionModule2"
+		]
+	}
+    
+
+Loading manifest:
+
+    
+	var runtime = new Runtime()
+	runtime.loadFromManifestFile("priest.manifest.json")
+     
 
 ## Compiler & Runtime Errors Table
     Error Code			Message

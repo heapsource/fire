@@ -300,7 +300,7 @@ var compileExpressionFuncFromJSON = function(jsonBlock, virtualFileName, outputF
 	return _expressionFunc; // defined inside the script.
 }
 
-var Runtime = function() {
+function Runtime() {
 	this.loadedExpressions = {}; // Contains a member per expression implementation <Function>
 	this.loadedExpressionsMeta = {}; // Contains a member per full definition of the expression, like {title:<String>, implementation:<Function>}
 	var dirName = path.join(__dirname, "built-in")
@@ -328,6 +328,40 @@ Runtime.prototype.registerWellKnownExpressionFile = function(absoluteFilePath) {
 Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDefinition) {
 	this.loadedExpressions[expressionDefinition.name] = expressionDefinition.implementation 
 	this.loadedExpressionsMeta[expressionDefinition.name] = expressionDefinition
+}
+
+Runtime.prototype.isExpressionLoaded = function(name) {
+	return this.loadedExpressionsMeta[name] !== undefined
+}
+
+Runtime.prototype.loadModule = function(moduleName) {
+	var priestModule = require(moduleName)
+	var priestExpressions = priestModule.priestExpressions
+	if(priestExpressions === undefined || priestExpressions === null) {
+		throw "priest module " + moduleName + " does not export any priest expression"
+	}
+	priestExpressions.forEach(function(expressionDefintion) {
+		this.registerWellKnownExpressionDefinition(expressionDefintion)
+		}, this)
+}
+
+Runtime.prototype.loadFromManifestFile = function(manifestFile) {
+	var jsonStr = fs.readFileSync(manifestFile, 'utf8')
+	
+	var manifest = JSON.parse(jsonStr)
+	
+	if(manifest !== undefined && manifest !== null) {
+		var manifestModules = manifest.modules
+		if(manifestModules !== undefined && manifestModules !== null) {
+			if(manifestModules instanceof Array) {
+				manifestModules.forEach(function(moduleName) {
+					this.loadModule(moduleName)
+				},this)
+			}
+		}
+	}
+	
+	return true
 }
 
 Runtime.prototype.runExpressionByName = function(expressionName, base_context, context_overrides) {
@@ -458,7 +492,7 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	for(var k in variables) {
 		setVarCore(variablesObjects, k, variables[k])
 	}
-	var contextBase = new Expression()
+	var contextBase = {}
 	contextBase._resultCallback = resultCallback
 	contextBase._loopCallback = loopCallback
 	contextBase._inputExpression = inputCallback
@@ -478,6 +512,8 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	*/
 	runtime.runExpressionFunc(baseFunc, contextBase, null)
 }
+
+
 
 module.exports.exportTestOnlyFunctions = function() {
 	TEST_PRINT_TRACE_ON_INTERNAL_ERROR = true

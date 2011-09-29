@@ -11,6 +11,6 @@
  "bugs" : { "web" : "https://github.com/firebaseco/priest/issues" },
 "keywords": ["API", "REST", "RESTful", "JSON", "Mongo", "MongoDB", "mongoose"],
   "repository": "git://github.com/firebaseco/priest",
-  "dependencies":{ "express": ">= 2.4.3" },
+  "devDependencies":{ "vows": ">= 0.5.11" },
   "engines":{"node": ">= 0.1.98"}
 }

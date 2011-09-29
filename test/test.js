@@ -1,6 +1,7 @@
 var vows = require('vows')
 var assert = require('assert')
 var jsonCode = require('../src/core.js')
+var Runtime = jsonCode.Runtime
 jsonCode.exportTestOnlyFunctions();
 
 var fs = require('fs'),
@@ -1646,5 +1647,64 @@ vows.describe('priest @get paths').addBatch({
 				assert.equal(result,"One")
 			}
 		}, 
+	}
+}).export(module);
+
+vows.describe('priest manifests').addBatch({
+	'Having a Runtime with no configuration': {
+		topic: function() {
+			require.paths.unshift(path.join(__dirname,'manifests/testModules/node_modules')); // because we are testing in a different directory
+			
+			return new Runtime()
+		},
+		"when I set up a runtime with a manifest with two modules ": {
+			topic:function(runtime) {
+				
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testModules/priest.manifest.json"))
+				return runtime
+			},
+			"the expression expressionModule1 should be loaded": function(runtime) {
+				runtime.isExpressionLoaded("expressionModule1")
+			},
+			"the expression expressionModule2 should be loaded": function(runtime) {
+				runtime.isExpressionLoaded("expressionModule2")
+			},
+			"and once the modules are loaded": {
+				"we test the first": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("expressionModule1", contextBase ,null)
+					},
+					"it should work properly": function(err, res) {
+					 	assert.equal(res, "Hello World expressionModule1")
+					}
+				},
+				"we test the second": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("expressionModule2", contextBase ,null)
+					},
+					"it should work properly": function(err, res) {
+					 	assert.equal(res, "Hello World expressionModule2")
+					}
+				}
+			}
+		}
 	}
 }).export(module);
