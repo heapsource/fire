@@ -295,7 +295,8 @@ var compileExpressionFuncFromJSON = function(jsonBlock, virtualFileName, outputF
 	} else {
 		generatedSourceCode = generateFunctionFromJSONExpression(jsonBlock, virtualFileName, hint);
 	}
-	//console.warn("ABOUT TO LOAD THE FOLLOWING JS INTO THE VM:", generatedSourceCode)
+	//console.warn("ABOUT TO LOAD THE FOLLOWING JS INTO THE VM:")
+	//console.warn(generatedSourceCode)
 
 	vm.runInThisContext(generatedSourceCode,virtualFileName, true)
 	return _expressionFunc; // defined inside the script.
@@ -328,8 +329,27 @@ Runtime.prototype.registerWellKnownExpressionFile = function(absoluteFilePath) {
 }
 
 Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDefinition) {
-	this.loadedExpressions[expressionDefinition.name] = expressionDefinition.implementation 
-	this.loadedExpressionsMeta[expressionDefinition.name] = expressionDefinition
+	if(expressionDefinition === undefined || expressionDefinition === null) {
+		throwInternalError("expression definition is required")
+	}
+	var name = expressionDefinition.name
+	if(name === undefined || name === null) {
+		throwInternalError("expression definition doesn't have any name")
+	}
+	var implementation = expressionDefinition.implementation
+	if(implementation=== undefined) {
+		if(expressionDefinition.json === undefined || expressionDefinition.json === null) {
+			throwInternalError("expression definition requires an implementation or a json block")
+		}
+		var implementationFunc = compileExpressionFuncFromJSON(expressionDefinition.json, name + ".implementation.js")
+		
+		var expressionClass = function() {};
+		expressionClass.prototype = new Expression()
+		expressionClass.prototype.execute = implementationFunc
+		implementation = expressionClass;
+	}
+	this.loadedExpressions[name] = implementation
+	this.loadedExpressionsMeta[name] = expressionDefinition
 }
 
 Runtime.prototype.isExpressionLoaded = function(name) {

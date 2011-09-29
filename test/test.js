@@ -1787,3 +1787,39 @@ vows.describe('priest configurations').addBatch({
 		}
 	}
 }).export(module);
+
+vows.describe('priest JSON definition registration').addBatch({
+	'Having a JSON document with the definition of a priest expression': {
+		topic: function() {
+			return new Runtime()
+		},
+		"then when we register ": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"customJsonExpression",
+					json: {
+						"@return": 500
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("customJsonExpression", contextBase ,null)
+					},
+					"it should return the value specified in the priest JSON document given in the definition": function(err, res) {
+					 	assert.equal(res, 500)
+					}
+			}
+		}
+	}
+}).export(module);
