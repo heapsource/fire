@@ -440,6 +440,37 @@ Manifest can contain configurations for each environment as follows:
 		}
 	}
 
+## Custom Modules
+
+priest modules are regular Node.js modules inside node_modules which main script exports a list of expression definitions.
+
+### Example Custom Module
+
+*main.js*
+    
+	var Expression = require("priest").Expression
+	function exampleExpression() {
+		
+	}
+	exampleExpression.prototype = new Expression()
+	exampleExpression.prototype.execute = function() {
+		this._blockContext._resultCallback("Hello World");
+	}
+
+	module.exports.priestExpressions = [{
+		name: "exampleExpression",
+		implementation: exampleExpression
+	}]
+    
+*package.json*
+	
+	{
+		"name" : "priest-exampleExpression",
+  		"main" : "./main.js" 
+    }
+
+These two files has to be inside the node_modules directory and can be referenced from the manifest file. When a Runtime is loaded from a manifest using loadFromManifestFile all the modules are automatically loaded.
+
 
 
 ## Compiler & Runtime Errors Table
