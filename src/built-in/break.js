@@ -1,6 +1,14 @@
+var Expression = require("../Expressions").Expression
+
+function Break() {
+	
+}
+Break.prototype = new Expression();
+Break.prototype.execute = function() {
+	this._loopControl('break')
+}
+
 module.exports = {
 	name:"break",
-	implementation:function() {
-		this._loopControl('break')
-	}
+	implementation:Break
 }

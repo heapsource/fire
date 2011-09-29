@@ -8,19 +8,14 @@ var path = require('path')
 var RuntimeError = require('./RuntimeError')
 var Iterator = require('./Iterator')
 var Variable = require('./Variable')
+var Expression = require('./Expressions').Expression
+var _setVarCore = require('./Expressions')._setVarCore
+var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = require('./Expressions').TEST_PRINT_TRACE_ON_INTERNAL_ERROR
+var throwInternalError = require('./Expressions').throwInternalError
 
 var PathCache = require('./Paths').PathCache
 
 module.exports.Error = Error
-var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = false
-
-function throwInternalError(msg) {
-	if(TEST_PRINT_TRACE_ON_INTERNAL_ERROR)
-	{
-		console.trace()
-	}
-	throw "JSONCode internal error, " + msg
-}
 
 var SPECIAL_KEY_SYMBOL = "@"
 var HINT_START_SYMBOL = "("
@@ -337,18 +332,31 @@ Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDef
 
 Runtime.prototype.runExpressionByName = function(expressionName, base_context, context_overrides) {
 	//console.warn("Calling expression with name ", expressionName)
-	var expFunc = this.loadedExpressions[expressionName]
-	if(expFunc == undefined) {
+	var expObject = this.loadedExpressions[expressionName]
+	if(expObject == undefined) {
 		throw new Error('JS1002', "Expression '" + expressionName +  "' is not registered or was not loaded.");
 	}
-	this.runExpressionByFunc(expFunc, base_context, context_overrides)
+	var expressionObject = new expObject()
+	this.runExpressionInstance(expressionObject, base_context, context_overrides)
 }
 
-Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, context_block_overrides) {
-	//console.warn("block_context_base",block_context_base)
-	//console.warn("context_block_overrides",context_block_overrides)
+Runtime.prototype.runExpressionFunc = function(expFunc, block_context_base, context_block_overrides) {
 	if(expFunc === undefined || expFunc == null || typeof(expFunc) != 'function') {
 		throwInternalError("expFunc is required and must be a function")
+	}
+	var expressionObject = new Expression();
+	expressionObject.execute = expFunc.bind(expressionObject)
+	this.runExpressionInstance(expressionObject, block_context_base, context_block_overrides)
+};
+
+Runtime.prototype.runExpressionInstance = function(expressionInstance, block_context_base, context_block_overrides) {
+	//console.warn("block_context_base",block_context_base)
+	//console.warn("context_block_overrides",context_block_overrides)
+	/*if(expFunc === undefined || expFunc == null || typeof(expFunc) != 'function') {
+		throwInternalError("expFunc is required and must be a function")
+	}*/
+	if(expressionInstance === undefined || expressionInstance == null || !(expressionInstance instanceof Expression)) {
+		throwInternalError("expressionInstance is required to be an instance or derived from Expression")
 	}
 	if(block_context_base === undefined || typeof(block_context_base) != 'object' || block_context_base == null) {
 		throwInternalError("block_context_base is required and must be an non-null object")
@@ -365,7 +373,7 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	if(block_context_base._variables === undefined || block_context_base._variables === null  || typeof(block_context_base._variables) != 'object') {
 		throwInternalError("block_context_base._variables must be an object")
 	}
-	//console.warn("runExpressionByFunc validation passed")
+	//console.warn("runExpressionFunc validation passed")
 	/* 
 		// block_context_base members structure
 		{
@@ -422,103 +430,10 @@ Runtime.prototype.runExpressionByFunc = function(expFunc, block_context_base, co
 	_blockContext._parentResult = block_context_base._result
 	_blockContext._parentContext = block_context_base
 	
-	
-	var context = {
-		_blockContext: _blockContext,
-		_runExp: _runExp,
-		_raiseError: _raiseError,
-		_runInput: _runInput,
-		_setError: _setError,
-		_resetError: _resetError,
-		_loopControl: _loopControl,
-		_skip: _skip,
-		_setVar: _setVar,
-		_getVar: _getVar,
-		_setParentVar: _setParentVar,
-		_getParentVar: _getParentVar
-	};
-	//context._runExp = _runExp.bind(context)
-	var blockFunc = expFunc.bind(context) // copy the function and bind it to the context
-	//console.warn("runExpressionByFunc is calling block with context", context)
-	blockFunc(); // run it
+	expressionInstance._blockContext = _blockContext
+	expressionInstance.execute() // run it
 };
 
-function _runExp(exp, context_block_overrides) {
-	//console.warn("Calling expression ", exp)
-	if(typeof(exp) == 'function') {
-		this._blockContext._runtime.runExpressionByFunc(exp, this._blockContext, context_block_overrides )
-	} else if(typeof(exp) == 'string') {
-		this._blockContext._runtime.runExpressionByName(exp, this._blockContext, context_block_overrides )
-	} else {
-		throwInternalError("exp must be a expression name or a function")
-	}
-}
-
-function _raiseError(err) {
-	//console.warn("_raiseError:", err)
-	var errorInfo = new RuntimeError(this._blockContext, err)
-	this._blockContext._errorCallback(errorInfo)
-}
-
-function _runInput(context_block_overrides) {
-	if(context_block_overrides !== undefined && context_block_overrides !== null) {
-		context_block_overrides._sameScope = true // don't copy the variables when running input expressions
-	}
-	this._runExp(this._blockContext._inputExpression, context_block_overrides);
-}
-
-function _setError(errorInfo) {
-	this._blockContext._parentContext._errorInfo = errorInfo
-}
-
-function _resetError() {
-	this._blockContext._parentContext._errorInfo = undefined
-}
-
-function _loopControl(payload) {
-	this._blockContext._loopCallback(payload)
-}
-
-function _skip() {
-	this._blockContext._resultCallback(this._blockContext._parentResult)
-}
-
-function _setVar(name, value) {
-	_setVarCore(this._blockContext._variables, name, value)
-}
-
-function _getVar(name) {
-	return _getVarCore(this._blockContext._runtime, this._blockContext._variables, name)
-}
-
-function _setParentVar(name, value) {
-	_setVarCore(this._blockContext._parentContext._variables, name, value)
-}
-
-function _getParentVar(name) {
-	//console.warn("_getParentVar this:", this)
-	return _getVarCore(this._blockContext._runtime, this._blockContext._parentContext._variables, name)
-}
-
-function _getVarCore(runtime, bag, path) {
-/*	if(!(runtime instanceof Runtime)){
-		console.trace()
-		throw "_getVarCore requires an instance of Runtime, given:" + runtime 
-	}*/
-	return runtime.getPaths().run(bag, path)
-	/*//console.warn("Bag get:",bag)
-	if(bag[name] == undefined) return undefined
-	return bag[name].get()*/
-}
-function _setVarCore(bag, name, value) {
-	if(bag[name] == undefined) {
-		var v = new Variable()
-		v.set(value)
-		bag[name] = v
-	} else {
-		bag[name].set(value)
-	}
-}
 
 module.exports.Runtime = Runtime
 
@@ -543,6 +458,14 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	for(var k in variables) {
 		_setVarCore(variablesObjects, k, variables[k])
 	}
+	var contextBase = new Expression()
+	contextBase._resultCallback = resultCallback
+	contextBase._loopCallback = loopCallback
+	contextBase._inputExpression = inputCallback
+	contextBase._variables = variablesObjects
+	contextBase._hint = hint
+	contextBase._errorCallback = errorCallback
+	/*
 	var contextBase = {
 		_resultCallback: resultCallback,
 		_loopCallback: loopCallback,
@@ -552,7 +475,8 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 		_hint: hint,
 		_errorCallback: errorCallback
 	};
-	runtime.runExpressionByFunc(baseFunc, contextBase, null)
+	*/
+	runtime.runExpressionFunc(baseFunc, contextBase, null)
 }
 
 module.exports.exportTestOnlyFunctions = function() {

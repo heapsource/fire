@@ -1,6 +1,13 @@
+var Expression = require("../../src/Expressions").Expression
+function testDoLoopControl() {
+	
+}
+testDoLoopControl.prototype = new Expression()
+testDoLoopControl.prototype.execute = function() {
+	this._loopControl()
+}
+
 module.exports = {
-	name:"testDoLoopControl",
-	implementation:function() {
-		this._loopControl()
-	}
+	name: "testDoLoopControl",
+	implementation: testDoLoopControl
 }
