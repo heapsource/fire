@@ -5,19 +5,19 @@ function testExecAtFirstTime() {
 testExecAtFirstTime.prototype = new Expression()
 testExecAtFirstTime.prototype.execute = function() {
 	var self = this
-	if(this._getParentVar("testExecAtSecondTimeCount") == undefined) {
-		this._setParentVar("testExecAtSecondTimeCount", 0)
-		self._skip()
-	} else if(this._getParentVar("testExecAtSecondTimeCount") == 1) {
-		this._setParentVar("testExecAtSecondTimeCount", this._getParentVar("testExecAtSecondTimeCount") +1)
-		this._runInput({
+	if(this.getParentVar("testExecAtSecondTimeCount") == undefined) {
+		this.setParentVar("testExecAtSecondTimeCount", 0)
+		self.skip()
+	} else if(this.getParentVar("testExecAtSecondTimeCount") == 1) {
+		this.setParentVar("testExecAtSecondTimeCount", this.getParentVar("testExecAtSecondTimeCount") +1)
+		this.runInput({
 			_resultCallback: function(res) {
-				self._skip()
+				self.skip()
 			}
 		})
 	}else {
-		this._setParentVar("testExecAtSecondTimeCount", this._getParentVar("testExecAtSecondTimeCount") +1)
-		self._skip()
+		this.setParentVar("testExecAtSecondTimeCount", this.getParentVar("testExecAtSecondTimeCount") +1)
+		self.skip()
 	}
 }
 

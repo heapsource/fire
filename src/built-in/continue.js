@@ -4,7 +4,7 @@ function Continue() {
 }
 Continue.prototype = new Expression()
 Continue.prototype.execute = function() {
-	this._loopControl('continue')
+	this.loopControl('continue')
 }
 
 module.exports = {

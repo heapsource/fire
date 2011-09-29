@@ -5,9 +5,9 @@ function Try() {
 Try.prototype = new Expression()
 Try.prototype.execute = function() {
 	var self = this
-	this._runInput({
+	this.runInput({
 		_errorCallback: function(error) {
-			self._setError(error)
+			self.setError(error)
 			self._blockContext._resultCallback(self._blockContext._parentResult)
 		},
 		_resultCallback: function(res) {

@@ -9,7 +9,7 @@ var RuntimeError = require('./RuntimeError')
 var Iterator = require('./Iterator')
 var Variable = require('./Variable')
 var Expression = require('./Expressions').Expression
-var _setVarCore = require('./Expressions')._setVarCore
+var setVarCore = require('./Expressions').setVarCore
 var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = require('./Expressions').TEST_PRINT_TRACE_ON_INTERNAL_ERROR
 var throwInternalError = require('./Expressions').throwInternalError
 
@@ -138,7 +138,7 @@ function genExpressionHashChain(iterator,jsonObj, buffer, blockNames, names,resu
 	//console.warn("propName =============================== , ", propName)
 	var childInputJsonObj = jsonObj[propName];
 
-	buffer.writeLine(blockNames.name("self") + "._runExp(")
+	buffer.writeLine(blockNames.name("self") + ".runExp(")
 	buffer.indent()
 	var childExprName = getExpressionNameFromSpecialKey(propName)
 	buffer.writeLine('"' + childExprName + '"')
@@ -255,7 +255,7 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 }
 
 function generateExpressionBlockFunctionWrapper(jsonObj, buffer, blockNames, names, writeResultCallback, hint) {
-	buffer.writeLine(blockNames.name("self") + "._runExp(")
+	buffer.writeLine(blockNames.name("self") + ".runExp(")
 	buffer.indent()
 	generateExpressionReadyFunction(jsonObj, buffer, names.createInner())
 	buffer.writeLine(",{")
@@ -274,7 +274,7 @@ function generateFunctionFromJSONExpression(jsonBlock, virtualFileName, hint) {
 
 	buffer.writeLine("var _expressionFunc = function() {")
 	buffer.indent()
-	buffer.writeLine("this._runExp(")
+	buffer.writeLine("this.runExp(")
 	buffer.indent()
 	generateExpressionReadyFunction(jsonBlock, buffer, names.createInner())
 	buffer.writeLine(",null");
@@ -379,7 +379,7 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 		{
 			_resultCallback: <Function>,
 			_loopCallback: <Function>,
-			_inputExpression: <Function>, // needs to be called with _runExp
+			_inputExpression: <Function>, // needs to be called with runExp
 			_variables: <Object>,
 			//_parentVariables: <Object>,
 			_hint: <Object> (optional),
@@ -456,7 +456,7 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	}
 	var variablesObjects = {}
 	for(var k in variables) {
-		_setVarCore(variablesObjects, k, variables[k])
+		setVarCore(variablesObjects, k, variables[k])
 	}
 	var contextBase = new Expression()
 	contextBase._resultCallback = resultCallback

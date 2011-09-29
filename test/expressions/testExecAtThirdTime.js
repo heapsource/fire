@@ -5,25 +5,25 @@ function testExecAtThirdTime() {
 testExecAtThirdTime.prototype = new Expression()
 testExecAtThirdTime.prototype.execute = function() {
 	var self = this
-	//console.warn("testExecAtThirdTime", self._getVar("testExecAtThirdTimeCount"))
-	if(self._getParentVar("testExecAtThirdTimeCount")  == undefined) {
+	//console.warn("testExecAtThirdTime", self.getVar("testExecAtThirdTimeCount"))
+	if(self.getParentVar("testExecAtThirdTimeCount")  == undefined) {
 
 		//console.warn("initializing testExecAtThirdTimeCount")
-		self._setParentVar("testExecAtThirdTimeCount", 0) 
-		//console.warn("testExecAtThirdTimeCount:", self._getParentVar("testExecAtThirdTimeCount"))
-		this._skip()
+		self.setParentVar("testExecAtThirdTimeCount", 0) 
+		//console.warn("testExecAtThirdTimeCount:", self.getParentVar("testExecAtThirdTimeCount"))
+		this.skip()
 		//return
 	} else {
-		if(self._getParentVar("testExecAtThirdTimeCount")  < 2) {
-			//console.warn("incrementing testExecAtThirdTimeCount", self._getParentVar("testExecAtThirdTimeCount"))
-			self._setParentVar("testExecAtThirdTimeCount", self._getParentVar("testExecAtThirdTimeCount") +1)
-			this._skip()
+		if(self.getParentVar("testExecAtThirdTimeCount")  < 2) {
+			//console.warn("incrementing testExecAtThirdTimeCount", self.getParentVar("testExecAtThirdTimeCount"))
+			self.setParentVar("testExecAtThirdTimeCount", self.getParentVar("testExecAtThirdTimeCount") +1)
+			this.skip()
 			//return
 		} else {
 			//console.warn("executing testExecAtThirdTimeCount")
-			this._runInput({
+			this.runInput({
 				_resultCallback: function(res) {
-					self._skip()
+					self.skip()
 				}
 			})
 		}

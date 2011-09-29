@@ -4,7 +4,7 @@ function testExpThatRaisesError() {
 }
 testExpThatRaisesError.prototype = new Expression()
 testExpThatRaisesError.prototype.execute = function() {
-	this._raiseError("Help!!!... Chuck Norris is in da house!")
+	this.raiseError("Help!!!... Chuck Norris is in da house!")
 }
 
 module.exports = {

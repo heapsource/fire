@@ -13,10 +13,10 @@ Get.prototype.execute = function() {
 	var hint = this._blockContext._hint
 	if(hint != undefined && hint != undefined && hint != null)
 	{
-		val = self._getParentVar(this._blockContext._hint)
+		val = self.getParentVar(this._blockContext._hint)
 		rc(val)
 	} else {
-		this._skip()
+		this.skip()
 	}
 }
 

@@ -14,10 +14,10 @@ Set.prototype.execute = function(){
 	var hint = this._blockContext._hint
 	var validHint = hint != undefined && hint != undefined && hint != null 
 
-	this._runInput({
+	this.runInput({
 		_resultCallback: function(res) {
 			if(validHint) {
-				self._setParentVar(hint, res)
+				self.setParentVar(hint, res)
 			}
 			rc(res)
 		}

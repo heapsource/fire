@@ -5,7 +5,7 @@ function Return() {
 Return.prototype = new Expression()
 Return.prototype.execute = function() {
 	var rc = this._blockContext._resultCallback
-	this._runInput({
+	this.runInput({
 		_resultCallback: function(res) {
 			rc(res)
 		}

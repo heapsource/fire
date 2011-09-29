@@ -10,7 +10,7 @@ Loop.prototype.execute = function() {
 
 	var callInput = null;
 	callInput = function() {
-		self._runInput({
+		self.runInput({
 			_loopCallback: function(cmd) {
 				if(cmd == "break") {
 					rc(result) // return the array

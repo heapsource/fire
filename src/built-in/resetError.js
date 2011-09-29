@@ -6,8 +6,8 @@ function ResetError() {
 ResetError.prototype = new Expression()
 ResetError.prototype.execute = function() {
 	var self = this
-	self._resetError()
-	self._skip();
+	self.resetError()
+	self.skip();
 }
 
 module.exports = {

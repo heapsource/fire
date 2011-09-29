@@ -1619,7 +1619,7 @@ vows.describe('priest loop control').addBatch({
 		}
 	}
 }).export(module);
-
+ 
 vows.describe('priest @get paths').addBatch({
 	'When I use @get to get the second item in the array': {
 		topic: function() {

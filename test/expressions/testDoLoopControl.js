@@ -4,7 +4,7 @@ function testDoLoopControl() {
 }
 testDoLoopControl.prototype = new Expression()
 testDoLoopControl.prototype.execute = function() {
-	this._loopControl()
+	this.loopControl()
 }
 
 module.exports = {

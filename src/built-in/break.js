@@ -5,7 +5,7 @@ function Break() {
 }
 Break.prototype = new Expression();
 Break.prototype.execute = function() {
-	this._loopControl('break')
+	this.loopControl('break')
 }
 
 module.exports = {
