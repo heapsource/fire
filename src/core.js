@@ -17,6 +17,7 @@ var DEFAULT_ENVIRONMENT = "development"
 var PathCache = require('./Paths').PathCache
 
 module.exports.Error = Error
+module.exports.Expression = Expression
 
 var SPECIAL_KEY_SYMBOL = "@"
 var HINT_START_SYMBOL = "("
