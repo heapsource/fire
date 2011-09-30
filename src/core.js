@@ -374,6 +374,9 @@ Runtime.prototype.loadModule = function(moduleName) {
 	if(priestExpressions === undefined || priestExpressions === null) {
 		throw "priest module " + moduleName + " does not export any priest expression"
 	}
+	if(priestModule.priestModuleInit !== undefined) {
+		priestModule.priestModuleInit(this)
+	}
 	priestExpressions.forEach(function(expressionDefintion) {
 		this.registerWellKnownExpressionDefinition(expressionDefintion)
 		}, this)
@@ -390,6 +393,13 @@ Runtime.prototype.loadFromManifestFile = function(manifestFile) {
 	var manifest = JSON.parse(jsonStr)
 	
 	if(manifest !== undefined && manifest !== null) {
+		
+		// Configurations must be loaded first so the priestModuleInit callback of all modules can work properly.
+		var configurations = manifest.environments;
+		if(configurations !== undefined && configurations !== null) {
+			this.configurations = configurations[this.environmentName]
+		}
+		
 		var manifestModules = manifest.modules
 		if(manifestModules !== undefined && manifestModules !== null) {
 			if(manifestModules instanceof Array) {
@@ -397,10 +407,6 @@ Runtime.prototype.loadFromManifestFile = function(manifestFile) {
 					this.loadModule(moduleName)
 				},this)
 			}
-		}
-		var configurations = manifest.environments;
-		if(configurations !== undefined && configurations !== null) {
-			this.configurations = configurations[this.environmentName]
 		}
 	}
 	return true

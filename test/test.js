@@ -1706,6 +1706,25 @@ vows.describe('priest manifests').addBatch({
 				}
 			}
 		}
+	},
+	'when I set up a runtime with a manifest and missing configuration for a module': {
+		"the load from manifest should fail": function() {
+			require.paths.unshift(path.join(__dirname,'manifests/testConfigMissing/node_modules')); // because we are testing in a different directory
+			var runtime = new Runtime()
+			assert.throws(function() {
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/priest.manifest.json"))
+				})
+		},
+		"the load from manifest should fail with message": function() {
+			require.paths.unshift(path.join(__dirname,'manifests/testConfigMissing/node_modules')); // because we are testing in a different directory
+			var runtime = new Runtime()
+			
+			try {
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/priest.manifest.json"))
+			}catch(moduleErrorMsg) {
+				assert.equal(moduleErrorMsg,"database connection info is missing")
+			}
+		}
 	}
 }).export(module);
 

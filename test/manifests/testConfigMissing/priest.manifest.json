@@ -1,0 +1,9 @@
+{
+	"modules": [
+		"module1"
+	],
+	"environments": {
+		"customEnv1": {
+		}
+	}
+}
