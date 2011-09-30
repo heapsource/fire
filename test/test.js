@@ -2860,3 +2860,414 @@ vows.describe('priest @notEquals').addBatch({
 		}
 	},
 }).export(module);
+
+vows.describe('priest @increment').addBatch({
+	'Having a @increment expression using a undefined variable': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIncrement",
+					json: {
+						"@increment(x)": 1
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIncrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @increment expression using a undefined variable': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIncrement",
+					json: {
+						"@increment(x)": 1
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIncrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @increment expression using a null variable': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIncrement",
+					json: {
+						"@set(x)": null,
+						"@increment(x)": 1
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIncrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @increment expression using a undefined input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIncrement",
+					json: {
+						"@set(x)": 426.1,
+						"@increment(x)": undefined
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIncrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @increment expression using a null input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIncrement",
+					json: {
+						"@set(x)": 426.1,
+						"@increment(x)": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIncrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @increment expression using number variable and input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIncrement",
+					json: {
+						"@set(x)": 425,
+						"@increment(x)": 25
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIncrement", contextBase ,null)
+					},
+					"it should should return the sum": function(err, res) {
+					 	assert.equal(res,450)
+					}
+			}
+		}
+	}
+}).export(module);
+
+
+vows.describe('priest @decrement').addBatch({
+	'Having a @decrement expression using a undefined variable': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testDecrement",
+					json: {
+						"@decrement(x)": 1
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testDecrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @decrement expression using a undefined variable': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testDecrement",
+					json: {
+						"@increment(x)": 1
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testDecrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @decrement expression using a null variable': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testDecrement",
+					json: {
+						"@set(x)": null,
+						"@increment(x)": 1
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testDecrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @decrement expression using a undefined input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testDecrement",
+					json: {
+						"@set(x)": 426.1,
+						"@increment(x)": undefined
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testDecrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @decrement expression using a null input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testDecrement",
+					json: {
+						"@set(x)": 426.1,
+						"@increment(x)": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testDecrement", contextBase ,null)
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @decrement expression using number variable and input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testDecrement",
+					json: {
+						"@set(x)": 425,
+						"@decrement(x)": 25
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testDecrement", contextBase ,null)
+					},
+					"it should should return the substraction": function(err, res) {
+					 	assert.equal(res,400)
+					}
+			}
+		}
+	}
+}).export(module);

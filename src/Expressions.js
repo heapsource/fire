@@ -71,6 +71,10 @@ Expression.prototype.getHintValue = function() {
 	return this.hasHint() ? this._blockContext._hint : undefined
 }
 
+Expression.prototype.getHintVariableValue = function() {
+	return this.hasHint() ? this.getParentVar(this._blockContext._hint) : undefined
+}
+
 Expression.prototype.setResult = function(res) {
 	this._blockContext._resultCallback(res)
 }

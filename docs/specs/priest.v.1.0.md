@@ -550,11 +550,11 @@ Negates the operand(following the Javascript evaluation rules for booleans) and 
 
 ### @increment
 
-Increments the operant by the value given in the input. If the operant is not a number it will return NaN. The operand can be a variable name in the hint or the previous result.
+Increments the operant by the value given in the input. If the operant or the input are not numbers it will return NaN. The operand can be a variable name in the hint or the previous result.
 
 ### @decrement
 
-Decrement the operant by the value given in the input. If the operant is not a number it will return NaN. The operand can be a variable name in the hint or the previous result.
+Decrement the operant by the value given in the input. If the operant or the input are not numbers it will return NaN. The operand can be a variable name in the hint or the previous result.
 
 ### @sum
 

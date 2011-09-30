@@ -7,7 +7,7 @@ Unless.prototype = new Expression()
 Unless.prototype.execute = function() {
 	var self = this
 	
-	var met = this.hasHint() ? this.getHintValue() : this.getParentResult();
+	var met = this.hasHint() ? this.getHintVariableValue() : this.getParentResult();
 	
 	if(!met) {
 		// run the input...
