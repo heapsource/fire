@@ -471,6 +471,19 @@ priest modules are regular Node.js modules inside node_modules which main script
 
 These two files has to be inside the node_modules directory and can be referenced from the manifest file. When a Runtime is loaded from a manifest using loadFromManifestFile all the modules are automatically loaded.
 
+
+### Comparable Values and Operands
+
+Due the flexibility of the Javascript object-system, priest behaves in certain ways when a conditional expression needs to compare the values of a given input(mostly known as operand). Internally priest will try to convert anything to an array of comparable values before execute any comparison and it follows some simple rules:
+
+* the comparable values of *any array* it's the array itself
+* the comparable values of *null* is an empty array
+* the comparable values of *undefined* is an empty array
+* the comparable values of *an empty object* is an empty array
+* the comparable values of *any object* are all the values of the first-level properties
+* the comparable values of *any boolean* is an empty array
+* the comparable values of *any string* are all the chars in the String
+
 ## Conditional Expressions
 
 ### @if
@@ -483,11 +496,37 @@ Executes and returns the input if the operand is evaluated as false(following th
 
 ### @equals
 
-Compares the items of an array or the values of the first-level keys of an object in the input and returns true if all of them are equal, otherwise returns false. Ignores any input.
+Returns true if all the comparable values are equal, otherwise returns false. A hint with 'strict' can force the expression to compare types too, by default this is turned off. If operand doesn't have at least two comparable values it will return undefined. Ignores any input.
+
+
+#### Non-Strict Sample:
+
+    {
+		"@equals": ['1',1] // Returns true
+    }
+
+#### Strict Sample:
+
+    {
+		"@equals(strict)": ['1',1] // Returns false
+    }
 
 ### @notEquals
 
-Compares the items of an array or the values of the first-level keys of an object in the input and returns true if all of them are not equal, otherwise returns false. Ignores any input.
+Returns true if all the comparable values are not equal, otherwise returns false. A hint with 'strict' can force the expression to compare types too, by default this is turned off. If operand doesn't have at least two comparable values it will return undefined. Ignores any input.
+
+
+#### Non-Strict Sample:
+
+    {
+		"@notEquals": ['1',1] // Returns false
+    }
+
+#### Strict Sample:
+
+    {
+		"@notEquals(strict)": ['1',1] // Returns true
+    }
 
 ### @or
 
@@ -578,4 +617,4 @@ Returns the input as a lowercase string.
 * Sep 23, 2011: First Submission
 * Sep 28, 2011: Paths
 * Sep 29, 2011: Manifest Modules, Environments, Configurations, Custom Modules, Conditionals, @if, @unless, @equals, @notEquals, @negate, @increment, @decrement, @sum, @subtract, @divide, @modulus, @undefined, @NaN, @concat
-* Sep 30, 2011: Update @set behavior. It returns the block result all the time, it no longer returns the input value.
+* Sep 30, 2011: Update @set behavior. It returns the block result all the time, it no longer returns the input value. Strictness comparison for @equals and @notEquals.
