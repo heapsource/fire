@@ -55,6 +55,22 @@ Expression.prototype.getParentVar = function(name) {
 	return this._blockContext._runtime.getPaths().run(this._blockContext._parentContext._variables, name)
 }
 
+Expression.prototype.getParentResult = function() {
+	return this._blockContext._parentContext._result
+}
+
+Expression.prototype.setParentResult = function(val) {
+	this._blockContext._parentContext._result = val
+}
+
+Expression.prototype.hasHint = function(val) {
+	return this._blockContext._hint !== undefined && this._blockContext._hint !== null && this._blockContext._hint !== ''
+}
+
+Expression.prototype.getHintValue = function() {
+	return this.hasHint() ? this.getVar(this._blockContext._hint) : undefined
+}
+
 function setVarCore(bag, name, value) {
 	if(bag[name] == undefined) {
 		var v = new Variable()

@@ -77,6 +77,9 @@ function isPureJSONValue(jsonObj) {
 	else if(typeof(jsonObj) === 'string') {
 		return true;
 	}
+	else if(typeof(jsonObj) === 'boolean') {
+		return true;
+	}
 	else if(typeof(jsonObj) === 'object') {
 		if(jsonObj instanceof Array) {
 			// Check all the items.
@@ -100,7 +103,7 @@ function isPureJSONValue(jsonObj) {
 			return true;
 		}
 	}
-	throwInternalError("can't recognize the following value: " + jsonObj);
+	throwInternalError("can't recognize the following value: " + jsonObj + ", typeof " + typeof(jsonObj) );
 }
 
 function objectIsExpression(jsonObj) {

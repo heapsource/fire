@@ -651,7 +651,7 @@ vows.describe('priest _result tests').addBatch({
 	'When the first expression in a block returns a value and the last expression returns the parent value': {
 		topic: function() {
 			return  {
-				"@set":"Super Result on the same level",
+				"@return":"Super Result on the same level",
 				"@testReturnParentResult": null
 			}
 		},
@@ -1873,4 +1873,247 @@ vows.describe('priest @each built-in expression').addBatch({
 			}
 		}
 	}
+}).export(module);
+
+
+vows.describe('priest @if built-in expression').addBatch({
+	'Having a JSON document with an @if expression and there is no result in the block': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@if": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIf", contextBase ,null)
+					},
+					"it should return undefined": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @if expression which previous statement is true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@return": true,
+						"@if": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIf", contextBase ,null)
+					},
+					"should return the input": function(err, res) {
+					 	assert.equal(res,"Got them!")
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @if expression with a path that doesn not exist': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@if(doesntExist)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIf", contextBase ,null)
+					},
+					"should return undefined": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @if expression with a path that returns false': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : false,
+						"@if(contactFound)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIf", contextBase ,null)
+					},
+					"should return false": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @if expression with a path that returns true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : true,
+						"@if(contactFound)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testIf", contextBase ,null)
+					},
+					"should return false": function(err, res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	}
+}).export(module);
+
+
+
+vows.describe('priest booleans').addBatch({
+	'Having a JSON document with a boolean value false': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testFalse",
+					json: {
+						"@return": false
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testFalse", contextBase ,null)
+					},
+					"it should return false": function(err, res) {
+					 	assert.strictEqual(res, false)
+					}
+			}
+		}
+	},
+	'Having a JSON document with a boolean value true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testTrue",
+					json: {
+						"@return": true
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testTrue", contextBase ,null)
+					},
+					"it should return true": function(err, res) {
+					 	assert.strictEqual(res, true)
+					}
+			}
+		}
+	},
 }).export(module);
