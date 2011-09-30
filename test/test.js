@@ -2115,5 +2115,213 @@ vows.describe('priest booleans').addBatch({
 					}
 			}
 		}
+	}
+}).export(module);
+
+
+
+
+vows.describe('priest @unless built-in expression').addBatch({
+	'Having a JSON document with an @unless expression and there is no result in the block': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@unless": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testUnless", contextBase ,null)
+					},
+					"it should return the input": function(err, res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
 	},
+	'Having a JSON document with an @unless expression which previous statement is true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@return": true,
+						"@unless": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testUnless", contextBase ,null)
+					},
+					"should return true literal value": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @unless expression which previous statement a string': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@return": "Some String",
+						"@unless": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testUnless", contextBase ,null)
+					},
+					"should return true literal value": function(err, res) {
+					 	assert.equal(res, "Some String")
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @unless expression with a path that doesn not exist': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@unless(doesntExist)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testUnless", contextBase ,null)
+					},
+					"should return undefined": function(err, res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @unless expression with a path that returns false': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@set(contactFound)" : false,
+						"@unless(contactFound)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testUnless", contextBase ,null)
+					},
+					"should return false": function(err, res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @unless expression with a path that returns true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@set(contactFound)" : true,
+						"@unless(contactFound)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testUnless", contextBase ,null)
+					},
+					"should return false": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	}
 }).export(module);
