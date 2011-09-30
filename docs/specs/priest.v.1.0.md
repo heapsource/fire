@@ -471,6 +471,16 @@ priest modules are regular Node.js modules inside node_modules which main script
 
 These two files has to be inside the node_modules directory and can be referenced from the manifest file. When a Runtime is loaded from a manifest using loadFromManifestFile all the modules are automatically loaded.
 
+### Initialization
+
+Some modules may require some configuration or initialize something in the environment or the runtime, for that pouposes there is a callback called priestModuleInit that we can export in the module.
+
+    
+	module.exports.priestModuleInit = function(runtime) {
+		//Here you can do do some initialization stuff...
+		//... like checking some configuration.
+	}
+    
 
 ### Comparable Values and Operands
 
