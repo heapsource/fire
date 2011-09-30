@@ -68,7 +68,11 @@ Expression.prototype.hasHint = function(val) {
 }
 
 Expression.prototype.getHintValue = function() {
-	return this.hasHint() ? this.getVar(this._blockContext._hint) : undefined
+	return this.hasHint() ? this._blockContext._hint : undefined
+}
+
+Expression.prototype.setResult = function(res) {
+	this._blockContext._resultCallback(res)
 }
 
 function setVarCore(bag, name, value) {

@@ -1,16 +1,19 @@
 var path = require('path')
 var fs = require('fs')
 var assert = require('assert')
-var PriestError = require('./PriestError.js')
+//var PriestError = require('./Error.js')
 
+/*
 function endsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
 module.exports.endsWith = endsWith
+*/
 
 /*
 	Returns the files with a specific extension. Return the file name and not the path.
 */
+/*
 module.exports.getFilesWithExtension = function(absoluteDirPath, extension) {
 	var fileNames = fs.readdirSync(absoluteDirPath)
 	var list = []
@@ -33,6 +36,9 @@ module.exports.loadJSONFile = function(fileUnderServicesDir) {
 	return jsonDefinition;
 }
 
-module.exports.isNullOrEmpty = function(value) {
+function isNullOrEmpty(value) {
 	return value === undefined || value == null || value === ""
 }
+
+module.exports.isNullOrEmpty = isNullOrEmpty
+*/

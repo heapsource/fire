@@ -2118,9 +2118,6 @@ vows.describe('priest booleans').addBatch({
 	}
 }).export(module);
 
-
-
-
 vows.describe('priest @unless built-in expression').addBatch({
 	'Having a JSON document with an @unless expression and there is no result in the block': {
 		topic: function() {
@@ -2324,4 +2321,542 @@ vows.describe('priest @unless built-in expression').addBatch({
 			}
 		}
 	}
+}).export(module);
+
+
+vows.describe('priest @equals').addBatch({
+	'Having a @equals expressions without at least two comparable values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": []
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEquals", contextBase ,null)
+					},
+					"it should should return undefined": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two identical values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": ['Same', 'Same']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEquals", contextBase ,null)
+					},
+					"it should should true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two different values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": ['Same', 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEquals", contextBase ,null)
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": [5, '5']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEquals", contextBase ,null)
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with three similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": [5, '5', 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEquals", contextBase ,null)
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with more than three similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": [5, '5', 5, 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEquals", contextBase ,null)
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two similar values but not with the same type in strict mode': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals(strict)": [5, '5']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEquals", contextBase ,null)
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two similar values and type in strict mode': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals(strict)": [5, 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEquals", contextBase ,null)
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+}).export(module);
+
+
+
+
+vows.describe('priest @notEquals').addBatch({
+	'Having a @notEquals expressions without at least two comparable values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testNotEquals",
+					json: {
+						"@notEquals": []
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+					},
+					"it should should return undefined": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two identical values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testNotEquals",
+					json: {
+						"@notEquals": ['Same', 'Same']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+					},
+					"it should should false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two different values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testNotEquals",
+					json: {
+						"@notEquals": ['Same', 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testNotEquals",
+					json: {
+						"@notEquals": [5, '5']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with three similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testNotEquals",
+					json: {
+						"@notEquals": [5, '5', 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with more than three similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testNotEquals",
+					json: {
+						"@notEquals": [5, '5', 5, 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two similar values but not with the same type in strict mode': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testNotEquals",
+					json: {
+						"@notEquals(strict)": [5, '5']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two similar values and type in strict mode': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testNotEquals",
+					json: {
+						"@notEquals(strict)": [5, 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
 }).export(module);
