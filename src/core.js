@@ -326,6 +326,14 @@ Runtime.prototype.registerWellKnownExpressionDir = function(absoluteDirPath) {
 Runtime.prototype.registerWellKnownExpressionFile = function(absoluteFilePath) {
 	var definition = require(absoluteFilePath)
 	this.registerWellKnownExpressionDefinition(definition)
+	return definition
+}
+
+Runtime.prototype.registerWellKnownJSONExpressionFile = function(absoluteFilePath) {
+	var jsonSourceCode = fs.readFileSync(absoluteFilePath, 'utf8')
+	var definition = JSON.parse(jsonSourceCode)
+	this.registerWellKnownExpressionDefinition(definition)
+	return definition
 }
 
 Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDefinition) {

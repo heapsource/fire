@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+
+var CommandLine = require('../src/CommandLine.js')
+
+var cmd = new CommandLine()
+cmd.run()

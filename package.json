@@ -1,16 +1,27 @@
 {
-  "name": "priest",
-  "description": "Message-Oriented REST API Framework for node.js, express.js and MongoDB ",
-  "version": "1.0.0",
-  "author": "Johan Hernandez <johan@firebase.co>",
-  "main": "./src/main.js",
- "repository" :
-  { "type" : "git"
-  , "url" : "http://github.com/firebaseco/priest.git"
-  },
- "bugs" : { "web" : "https://github.com/firebaseco/priest/issues" },
-"keywords": ["API", "REST", "RESTful", "JSON", "Mongo", "MongoDB", "mongoose"],
-  "repository": "git://github.com/firebaseco/priest",
-  "devDependencies":{ "vows": ">= 0.5.11" },
-  "engines":{"node": ">= 0.1.98"}
+    "name": "priest",
+    "description": "Message-Oriented REST API Framework for node.js, express.js and MongoDB ",
+    "version": "1.0.0",
+    "author": "Johan Hernandez <johan@firebase.co>",
+    "main": "./src/core.js",
+    "bin": {
+        "priest": "./bin/priest"
+    },
+    "repository":
+    {
+        "type": "git"
+        ,
+        "url": "http://github.com/firebaseco/priest.git"
+    },
+    "bugs": {
+        "web": "https://github.com/firebaseco/priest/issues"
+    },
+    "keywords": ["API", "REST", "RESTful", "JSON", "Mongo", "MongoDB", "mongoose"],
+    "repository": "git://github.com/firebaseco/priest",
+    "devDependencies": {
+        "vows": ">= 0.5.11"
+    },
+    "engines": {
+        "node": ">= 0.1.98"
+    }
 }

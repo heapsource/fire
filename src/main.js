@@ -1,1 +1,0 @@
-module.exports.priest = require('./core.js')
