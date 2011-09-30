@@ -44,7 +44,7 @@ Expression.prototype.setVar = function(name, value) {
 }
 
 Expression.prototype.getVar = function(name) {
-	return getVarCore(this._blockContext._runtime, this._blockContext._variables, name)
+	return this._blockContext._runtime.getPaths().run(this._blockContext._variables, name)
 }
 
 Expression.prototype.setParentVar = function(name, value) {
