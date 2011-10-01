@@ -387,6 +387,13 @@ Runtime.prototype.getModuleConfiguration = function(moduleName) {
 	return this.configurations[moduleName]
 }
 
+Runtime.prototype.setModuleConfiguration = function(moduleName, value) {
+	if(this.configurations === undefined) {
+		this.configurations  = {}
+	}
+	this.configurations[moduleName] = value
+}
+
 Runtime.prototype.loadFromManifestFile = function(manifestFile) {
 	var jsonStr = fs.readFileSync(manifestFile, 'utf8')
 	
