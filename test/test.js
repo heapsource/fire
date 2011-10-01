@@ -1876,7 +1876,55 @@ vows.describe('priest @each built-in expression').addBatch({
 						contextBase._errorCallback =  function() {};
 						runtime.runExpressionByName("testEach", contextBase ,null)
 					},
-					"it should return the value specified in the priest JSON document given in the definition": function(err, res) {
+					"it should iterate the variable given in the hint and return an array with converted documents from the input": function(err, res) {
+					 	assert.deepEqual(res, [{
+							"id": "a552"
+						},{
+							"id": "a553"
+						},
+						{
+							"id": "a554"
+						},
+						{
+							"id": "a555"
+						}])
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @each expression and no hint': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEach",
+					json: {
+						"@return": ['a552','a553','a554','a555'],
+						"@each": {
+							"id":{
+								"@get(CurrentItem)": null
+							}
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEach", contextBase ,null)
+					},
+					"it should iterate the last value in the block and return an array with converted documents from the input": function(err, res) {
 					 	assert.deepEqual(res, [{
 							"id": "a552"
 						},{

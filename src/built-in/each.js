@@ -10,14 +10,20 @@ Each.prototype.execute = function() {
 	var result = []
 
 	var callInput = null;
-	var varVal = this.getVar(this._blockContext._hint)
+	var varVal = null
+	if(this.hasHint()) {
+		varVal = this.getVar(this._blockContext._hint)
+	} else {
+		varVal = this.getParentResult()
+	}
+	var itemVarName = this.hasHint() ? this.getHintValue() + 'CurrentItem' : 'CurrentItem'
 	var iterator = new Iterator(varVal)
 	callInput = function() {
 		if(!iterator.next()) {
 			rc(result)
 			return
 		}
-		self.setVar(self._blockContext._hint + 'CurrentItem', iterator.current())
+		self.setVar(itemVarName, iterator.current())
 		self.runInput({
 			_loopCallback: function(cmd) {
 				if(cmd == "break") {
