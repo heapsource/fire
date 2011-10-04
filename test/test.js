@@ -3338,3 +3338,136 @@ vows.describe('priest @decrement').addBatch({
 		}
 	}
 }).export(module);
+
+vows.describe('priest async execution').addBatch({
+	'When I have a JSON doc that creates a regular object based on async expression keys': {
+		topic: function() {
+			return {
+				"enlistedPersons": {
+					"@testTickedReturn(1000)": [1,2,3,4]
+				},
+				"disabledPersons": {
+					"@testTickedReturn(200)": [5,6,7,8,9]
+				}
+			};    
+		},
+		
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var testtickedReturnPath = path.join(__dirname, "expressions/tickedReturn.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(err) {
+					throw err
+				},[testtickedReturnPath])
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be an object with the result of all the async expresion keys" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, {
+					"enlistedPersons": [1,2,3,4],
+					"disabledPersons": [5,6,7,8,9]
+				});
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
+	},
+	'When I have a JSON doc that creates a regular array based on async expressions': {
+		topic: function() {
+			return [
+				{
+					"@testTickedReturn(1000)": [1,2,3,4]
+				},
+				50000
+				,
+				{
+					"@testTickedReturn(200)": [5,6,7,8,9]
+				},40000
+			];    
+		},
+		
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var testtickedReturnPath = path.join(__dirname, "expressions/tickedReturn.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(err) {
+					throw err
+				},[testtickedReturnPath])
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be an array with the results in the right order" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, [[1,2,3,4],50000,[5,6,7,8,9],40000]);
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
+	},
+	'When I have a JSON doc that returns values async': {
+		topic: function() {
+			return {
+					"@testTickedReturn(1000)": "First Expression",
+					"@testTickedReturn(200)": "Last Expression"
+			};    
+		},
+		
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var testtickedReturnPath = path.join(__dirname, "expressions/tickedReturn.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(err) {
+					throw err
+				},[testtickedReturnPath])
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be the last value" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, "Last Expression");
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
+	}
+
+}).export(module);
+
+

@@ -137,7 +137,7 @@ function navigateKeys(obj,callback) {
 	}
 }
 
-function genExpressionHashChain(iterator,jsonObj, buffer, blockNames, names,resultVarName) {
+function genExpressionBlockChain(iterator,jsonObj, buffer, blockNames, names,resultVarName) {
 	if (!iterator.next()) return;
 	var propName = iterator.current()
 	//console.warn("propName =============================== , ", propName)
@@ -166,7 +166,7 @@ function genExpressionHashChain(iterator,jsonObj, buffer, blockNames, names,resu
 		buffer.writeLine(blockNames.name("callbackVar") + "("+ resultVarName +");")
 	} else {
 		buffer.indent()
-		genExpressionHashChain(iterator, jsonObj, buffer, blockNames, names.createInner(),resultVarName)
+		genExpressionBlockChain(iterator, jsonObj, buffer, blockNames, names.createInner(),resultVarName)
 		buffer.unindent()
 	}
 
@@ -201,6 +201,71 @@ function genExpressionArrayChain(iterator, buffer,jsonObj, blockNames, names,res
 		},null)
 	}
 
+
+function genExpressionHashChain(iterator, buffer, jsonObj, blockNames, names,resultVarName) {
+	if (!iterator.next()) return;
+	var propName = iterator.current()
+	//console.warn("regular propName =============================== , ", propName)
+	var childInputJsonObj = jsonObj[propName];
+	var isLast = iterator.isLast()
+	generateExpressionBlockFunctionWrapper(childInputJsonObj, buffer, blockNames, names, function(blockBuffer, callbackBlockNames) {
+		blockBuffer.writeLine("function("+ names.name("subLevelResArg") +"){")
+		blockBuffer.indent()
+		blockBuffer.writeLine(resultVarName + "['"+ propName +"'] = " + names.name("subLevelResArg") + ";")
+		if(isLast) {
+			// if this is the last expression of the block, call the result callback.
+			blockBuffer.writeLine(blockNames.name("callbackVar") + "("+ resultVarName +");")
+		} else {
+			blockBuffer.indent()
+			genExpressionHashChain(iterator, blockBuffer,jsonObj, blockNames, names.createInner(), resultVarName)
+			blockBuffer.unindent()
+		}
+		blockBuffer.unindent()
+		blockBuffer.writeLine("}")
+		},getHint(propName))
+		/*
+		generateExpressionBlockFunction(childInputJsonObj, buffer, names, function(childBLockResultArgName) {
+		buffer.writeLine(names.name("callbackVar") + "("+names.name("incResult")+");")
+		})*/
+	/*
+	//console.warn("propName =============================== , ", propName)
+	var childInputJsonObj = jsonObj[propName];
+
+	buffer.writeLine(blockNames.name("self") + ".runExp(")
+	buffer.indent()
+	var childExprName = getExpressionNameFromSpecialKey(propName)
+	buffer.writeLine('"' + childExprName + '"')
+
+	// Begin Input Callback Generation
+	buffer.writeLine(",{_inputExpression:")
+	buffer.indent()
+	generateExpressionReadyFunction(childInputJsonObj, buffer, names.createInner());
+	buffer.unindent()
+	//End of Input Callback Generation
+
+	// Begin Result Callback Generation
+	buffer.writeLine(", _resultCallback: function(" + blockNames.name("incResult") + "){")
+	buffer.indent()
+
+
+	buffer.writeLine(resultVarName + " = " + blockNames.name("incResult") + ";")
+	if(iterator.isLast()) {
+		// if this is the last expression of the array, call the result callback.
+		buffer.writeLine(blockNames.name("callbackVar") + "("+ resultVarName +");")
+	} else {
+		buffer.indent()
+		genExpressionBlockChain(iterator, jsonObj, buffer, blockNames, names.createInner(),resultVarName)
+		buffer.unindent()
+	}
+
+	buffer.unindent()
+	buffer.writeLine("}")
+	//End of Result Callback Generation
+	buffer.writeLine(", _hint: " + getHint4JsFromPropName(propName))
+	buffer.unindent()
+	buffer.writeLine("});")*/
+}
+
 function generateExpressionReadyFunction(jsonObj, buffer, names) {
 	buffer.writeLine("function() {")
 	buffer.indent()
@@ -226,31 +291,14 @@ function generateExpressionReadyFunction(jsonObj, buffer, names) {
 				checkIfIsIsNotMixingKeys(jsonObj)
 				// Render all the block expressions as a chain, one expression after the result of the other
 				var iterator = new Iterator(Object.keys(jsonObj))
-				genExpressionHashChain(iterator,jsonObj, buffer, names, names.createInner(),resultVarName)
+				genExpressionBlockChain(iterator,jsonObj, buffer, names, names.createInner(),resultVarName)
 				
 			} else {
 				// Second level blocks
+				
 				buffer.writeLine(resultVarName + " = {};")
-				navigateKeys(jsonObj, function(iteration) {
-					var propName = iteration.key
-					//console.warn("regular propName =============================== , ", propName)
-					var childInputJsonObj = jsonObj[propName];
-					generateExpressionBlockFunctionWrapper(childInputJsonObj, buffer, names, names, function(blockBuffer, blockNames) {
-						blockBuffer.writeLine("function("+ blockNames.name("subLevelResArg") +"){")
-						blockBuffer.indent()
-						blockBuffer.writeLine(resultVarName + "['"+ propName +"'] = " + blockNames.name("subLevelResArg") + ";")
-						if(iteration.isLast) {
-							// if this is the last expression of the block, call the result callback.
-							blockBuffer.writeLine(names.name("callbackVar") + "("+ resultVarName +");")
-						}
-						blockBuffer.unindent()
-						blockBuffer.writeLine("}")
-					},getHint(propName))
-					/*
-					generateExpressionBlockFunction(childInputJsonObj, buffer, names, function(childBLockResultArgName) {
-						buffer.writeLine(names.name("callbackVar") + "("+names.name("incResult")+");")
-					})*/
-				});
+				var iterator = new Iterator(Object.keys(jsonObj))
+				genExpressionHashChain(iterator,buffer,jsonObj, names, names.createInner(), resultVarName)
 			}
 		}
 	}
