@@ -3470,4 +3470,85 @@ vows.describe('priest async execution').addBatch({
 
 }).export(module);
 
+vows.describe('priest @input').addBatch({
+	'Having a JSON code that returns the input using a @input at first level': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testInput",
+					json: {
+						"@return": {
+							"@input": null
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {
+						this.setResult("super input Result")
+					};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.runExpressionByName("testInput", contextBase ,null)
+				},
+				"it should return the input callback": function(err, res) {
+					assert.equal(res,"super input Result")
+				}
+			}
+		}
+	},
+	'Having a JSON code that returns the input using a @input at third level': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testInput",
+					json: {
+						"@return": {
+							"@return": {
+								"@return": {
+									"@input": null
+								}
+							}
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {
+						this.setResult("super input Result")
+					};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.runExpressionByName("testInput", contextBase ,null)
+				},
+				"it should return the input callback": function(err, res) {
+					assert.equal(res,"super input Result")
+				}
+			}
+		}
+	},
+}).export(module);;
+
 

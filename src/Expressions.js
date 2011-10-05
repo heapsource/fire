@@ -17,10 +17,17 @@ Expression.prototype.raiseError = function(err) {
 }
 
 Expression.prototype.runInput = function(context_block_overrides) {
+	this.runInputFunction(this._blockContext._inputExpression, context_block_overrides)
+}
+
+/*
+* Run any expression input as a input expression. Used by @input
+*/
+Expression.prototype.runInputFunction = function(inputFunc, context_block_overrides) {
 	if(context_block_overrides !== undefined && context_block_overrides !== null) {
 		context_block_overrides._sameScope = true // don't copy the variables when running input expressions
 	}
-	this.runExp(this._blockContext._inputExpression, context_block_overrides);
+	this.runExp(inputFunc, context_block_overrides);
 }
 
 Expression.prototype.setError = function(errorInfo) {

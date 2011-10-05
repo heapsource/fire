@@ -324,9 +324,9 @@ function generateExpressionBlockFunctionWrapper(jsonObj, buffer, blockNames, nam
 function generateFunctionFromJSONExpression(jsonBlock, virtualFileName, hint) {
 	var buffer = new StringBuffer()
 	var names = new NameGenerator()
-
 	buffer.writeLine("var _expressionFunc = function() {")
 	buffer.indent()
+	buffer.writeLine("this._blockContext._rootExpression = true;")
 	buffer.writeLine("this.runExp(")
 	buffer.indent()
 	generateExpressionReadyFunction(jsonBlock, buffer, names.createInner())
@@ -566,6 +566,8 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 	_blockContext._result = undefined; //formality
 	_blockContext._parentResult = block_context_base._result
 	_blockContext._parentContext = block_context_base
+	_blockContext._rootExpression = undefined // _rootScope can not be inherited.
+	
 	
 	expressionInstance._blockContext = _blockContext
 	expressionInstance.execute() // run it
