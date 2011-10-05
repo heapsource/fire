@@ -300,13 +300,46 @@ Process the input as long as the expression given in the hint is true or until i
 ### @each
 Takes a hint as a variable name or uses the last result of the expression-block and Process the input per item found in the given array or object. Returns an array with the results of every input processing (even if the input is undefined or null).
 
-#### @break
+### @break
 
 Immediately stops the execution of the current or any other iteration. Any result in the current iteration will *NOT* be added to the loop.
 
 ### @continue
 
 Immediately stops the execution of the current iteration. Any result in the current iteration will be added to the loop.
+
+### @input
+
+When used inside some priest code, it executes the input of the root expression. Specially intended for custom expressions coded in priest lang.
+
+Example:
+
+    // My.Custom.Expression.json
+	{
+		"name": "My.Custom.Expression",
+		"json": {
+			"@return": {
+				"@input": null
+			}
+		}
+	}
+    
+    // consumer.json
+	{
+		"name": "consumer",
+		"json": {
+			"@return": {
+				"@My.Custom.Expression": "This is the input of the custom expression and result of the whole program"
+			}
+		}
+	}
+
+Running it with command line tool:
+
+	
+	$ priest consumer.json
+	"This is the input of the custom expression and result of the whole program"
+    
 
 ## Variables Names
 
