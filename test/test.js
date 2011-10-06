@@ -3549,6 +3549,20 @@ vows.describe('priest @input').addBatch({
 			}
 		}
 	},
-}).export(module);;
+}).export(module);
 
+vows.describe('priest getWellKnownExpressions').addBatch({
+	"When I initialize a runtime":{
+		topic: function() {
+			return new Runtime()
+		},
+		"getWellKnownExpressions should return all the modules loaded": function(runtime){
+			assert.typeOf(runtime.getWellKnownExpressions(), 'object')
+			assert.include(runtime.getWellKnownExpressions().names(),'continue')
+			assert.include(runtime.getWellKnownExpressions().names(),'return')
+			assert.include(runtime.getWellKnownExpressions().names(),'get')
+			assert.include(runtime.getWellKnownExpressions().names(),'set')
+		}
+	}
+}).export(module);
 

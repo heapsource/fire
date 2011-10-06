@@ -354,13 +354,31 @@ var compileExpressionFuncFromJSON = function(jsonBlock, virtualFileName, outputF
 	return _expressionFunc; // defined inside the script.
 }
 
+function PriestExpressionsCollection() {
+	
+}
+
+/*
+ * Returns the name of all modules loaded.
+ */
+PriestExpressionsCollection.prototype.names = function() {
+	return Object.keys(this)
+}
+
 function Runtime() {
 	this.loadedExpressions = {}; // Contains a member per expression implementation <Function>
-	this.loadedExpressionsMeta = {}; // Contains a member per full definition of the expression, like {title:<String>, implementation:<Function>}
+	this.loadedExpressionsMeta = new PriestExpressionsCollection(); // Contains a member per full definition of the expression, like {name:<String>, implementation:<Function>}
 	var dirName = path.join(__dirname, "built-in")
 	this.registerWellKnownExpressionDir(dirName)
 	this._paths = new PathCache()
 	this.environmentName = process.env.NODE_ENV === undefined ? DEFAULT_ENVIRONMENT : process.env.NODE_ENV 
+}
+
+/*
+ * Returns the expression definitions objects for all expressions registered and loaded.
+ */
+Runtime.prototype.getWellKnownExpressions = function() {
+	return this.loadedExpressionsMeta;
 }
 
 Runtime.prototype.getPaths = function() {
