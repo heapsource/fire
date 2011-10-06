@@ -1,0 +1,6 @@
+{
+	"name" : "MyMain",
+	"json" : {
+		"@testFourModule.doSomething": null
+	}
+}

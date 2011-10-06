@@ -14,19 +14,34 @@ CommandLine.prototype.run = function() {
 		this.printHelp()
 		process.exit(0);
 	} else {
-		var runtime = new priest.Runtime()
-		var def = runtime.registerWellKnownJSONExpressionFile(path.resolve(pureArgs[0]))
+		var mainScriptPath = path.resolve(pureArgs[0])
+		var mainScriptDirName = path.dirname(mainScriptPath)
 		
-		var self = this
-		var contextBase = {};
-		contextBase._resultCallback = function(res) {
-			console.log(JSON.stringify(res))
+		process.chdir(mainScriptDirName) // Change the Current Directory
+		require.paths.unshift(path.join(mainScriptDirName,'node_modules'))
+		
+		var runtime = new priest.Runtime()
+		runtime.moduleRequire = function(moduleName) {
+			return require(moduleName)
 		}
-		contextBase._loopCallback = function() {};
-		contextBase._inputExpression  = function() {};
-		contextBase._variables = {};   
-		contextBase._errorCallback =  function() {};
-		runtime.runExpressionByName(def.name, contextBase ,null)
+		var manifestPath = priest.DEFAULT_MANIFEST_FILE_NAME
+		path.exists(manifestPath, function(manifestFound) {
+			if(manifestFound) {
+				runtime.loadFromManifestFile(manifestPath)
+			}
+			var def = runtime.registerWellKnownJSONExpressionFile(mainScriptPath)
+		
+			var self = this
+			var contextBase = {};
+			contextBase._resultCallback = function(res) {
+				console.log(JSON.stringify(res))
+			}
+			contextBase._loopCallback = function() {};
+			contextBase._inputExpression  = function() {};
+			contextBase._variables = {};   
+			contextBase._errorCallback =  function() {};
+			runtime.runExpressionByName(def.name, contextBase ,null)
+		})
 	}
 }
 

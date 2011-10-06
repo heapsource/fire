@@ -40,5 +40,23 @@ vows.describe('priest command line utility').addBatch({
 			assert.isNotNull(output.stdout)
 			assert.include(output.stdout, "Hello World from the Simplest JSON Expression")
 		}
+	},
+	"When I run the command line in a directory with a single folder with a JSON file and a Manifest and the module returns a value from the configuration section": {
+		topic: function() {
+			var self = this
+			//exec('cd test/commandLineDirs/withManifest2 && ../../../bin/./priest myMain.json', function (error, stdout, stderr) {
+			exec('bin/./priest test/commandLineDirs/withManifest2/myMain.json', function (error, stdout, stderr) {
+				self.callback(error, {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				})
+			});
+		},
+		"I should see the configuration value in the console": function(output){
+			assert.equal(output.stderr,'')
+			assert.isNotNull(output.stdout)
+			assert.include(output.stdout, "The Chuck Norris Four")
+		}
 	}
 }).export(module);

@@ -372,6 +372,9 @@ function Runtime() {
 	this.registerWellKnownExpressionDir(dirName)
 	this._paths = new PathCache()
 	this.environmentName = process.env.NODE_ENV === undefined ? DEFAULT_ENVIRONMENT : process.env.NODE_ENV 
+	this.moduleRequire = function(moduleName) {
+		return require(moduleName)
+	}
 }
 
 /*
@@ -435,7 +438,7 @@ Runtime.prototype.isExpressionLoaded = function(name) {
 }
 
 Runtime.prototype.loadModule = function(moduleName) {
-	var priestModule = require(moduleName)
+	var priestModule = this.moduleRequire(moduleName)
 	var priestExpressions = priestModule.priestExpressions
 	if(priestExpressions === undefined || priestExpressions === null) {
 		throw "priest module " + moduleName + " does not export any priest expression"
@@ -635,8 +638,10 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	*/
 	runtime.runExpressionFunc(baseFunc, contextBase, null)
 }
+var DEFAULT_MANIFEST_FILE_NAME = "priest.manifest.json"
 
 module.exports.DEFAULT_ENVIRONMENT = DEFAULT_ENVIRONMENT
+module.exports.DEFAULT_MANIFEST_FILE_NAME = DEFAULT_MANIFEST_FILE_NAME
 
 module.exports.exportTestOnlyFunctions = function() {
 	TEST_PRINT_TRACE_ON_INTERNAL_ERROR = true

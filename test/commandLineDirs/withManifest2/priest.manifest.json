@@ -1,0 +1,12 @@
+{
+	"modules": [
+		"../test/commandLineDirs/withManifest2/node_modules/testFourModule/main.js"
+	],
+	"environments": {
+		"development": {
+			"testFourModule": {
+				"fourIs": "The Chuck Norris Four"
+			}
+		}
+	}
+}
