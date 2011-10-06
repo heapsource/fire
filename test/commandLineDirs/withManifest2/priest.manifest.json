@@ -1,6 +1,6 @@
 {
 	"modules": [
-		"../test/commandLineDirs/withManifest2/node_modules/testFourModule/main.js"
+		"testFourModule"
 	],
 	"environments": {
 		"development": {
