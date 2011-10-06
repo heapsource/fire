@@ -59,4 +59,39 @@ vows.describe('priest command line utility').addBatch({
 			assert.include(output.stdout, "The Chuck Norris Four")
 		}
 	}
+	,
+	"When I run the command line in a directory with two json scripts and the main script uses the second script as the result": {
+		topic: function() {
+			var self = this
+			exec('bin/./priest test/commandLineDirs/withRootLevelFiles/myMain.priest.json', function (error, stdout, stderr) {
+				self.callback(error, {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				})
+			});
+		},
+		"I should see the second expression value in the console": function(output){
+			assert.equal(output.stderr,'')
+			assert.isNotNull(output.stdout)
+			assert.include(output.stdout, "Value from the Other Expression")
+		}
+	},
+	"When I run the command line in a proyect with a manifest that specifies additional directories and the main script returns a value from an additional directory": {
+		topic: function() {
+			var self = this
+			exec('bin/./priest test/commandLineDirs/withSubScripts/myMain.priest.json', function (error, stdout, stderr) {
+				self.callback(error, {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				})
+			});
+		},
+		"I should see the additional directory expression value in the console": function(output){
+			assert.equal(output.stderr,'')
+			assert.isNotNull(output.stdout)
+			assert.include(output.stdout, "Value from a Sub expression")
+		}
+	}
 }).export(module);

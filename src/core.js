@@ -375,6 +375,8 @@ function Runtime() {
 	this.moduleRequire = function(moduleName) {
 		return require(moduleName)
 	}
+	
+	this.scriptDirectories = ['.']
 }
 
 /*
@@ -387,7 +389,22 @@ Runtime.prototype.getWellKnownExpressions = function() {
 Runtime.prototype.getPaths = function() {
 	return this._paths
 }
+var Utils  = require('./Utils')
 
+/*
+ * Load .priest.json files from a directory.
+ */
+Runtime.prototype.scanScriptsDir = function(absoluteDirPath) {
+	var fileNames = Utils.getFilesWithExtension(absoluteDirPath, DEFAULT_SCRIPT_EXTENSION)
+	fileNames.forEach(function(file) {
+		var absoluteFileName = path.join(absoluteDirPath, file)
+		this.registerWellKnownJSONExpressionFile(absoluteFileName)
+	}, this)
+}
+
+/*
+ * Load .js files from a directory using require. Used by built-in functions. Can be used to load absolute-path .js files.
+ */
 Runtime.prototype.registerWellKnownExpressionDir = function(absoluteDirPath) {
 	var fileNames = fs.readdirSync(absoluteDirPath)
 	fileNames.forEach(function(file) {
@@ -420,7 +437,7 @@ Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDef
 	var implementation = expressionDefinition.implementation
 	if(implementation=== undefined) {
 		if(expressionDefinition.json === undefined || expressionDefinition.json === null) {
-			throwInternalError("expression definition requires an implementation or a json block")
+			throwInternalError("expression definition requires either an implementation or a json block")
 		}
 		var implementationFunc = compileExpressionFuncFromJSON(expressionDefinition.json, name + ".implementation.js")
 		
@@ -464,26 +481,41 @@ Runtime.prototype.setModuleConfiguration = function(moduleName, value) {
 }
 
 Runtime.prototype.loadFromManifestFile = function(manifestFile) {
+	var self = this
 	var jsonStr = fs.readFileSync(manifestFile, 'utf8')
 	
 	var manifest = JSON.parse(jsonStr)
 	
 	if(manifest !== undefined && manifest !== null) {
 		
-		// Configurations must be loaded first so the priestModuleInit callback of all modules can work properly.
+		// STEP 1. Load Configurations from Manifest
+		// (Configurations must be loaded first so the priestModuleInit callback of all modules can work properly)
 		var configurations = manifest.environments;
 		if(configurations !== undefined && configurations !== null) {
-			this.configurations = configurations[this.environmentName]
+			self.configurations = configurations[self.environmentName]
 		}
 		
+		// STEP 2. Extract additional script directories and append them to the main array.
+		if(manifest && manifest.scriptDirectories) {
+			manifest.scriptDirectories.forEach(function(dirName) {
+				self.scriptDirectories.push(dirName)
+			})
+		}
+		
+		// STEP 3. Load Modules
 		var manifestModules = manifest.modules
 		if(manifestModules !== undefined && manifestModules !== null) {
 			if(manifestModules instanceof Array) {
 				manifestModules.forEach(function(moduleName) {
-					this.loadModule(moduleName)
-				},this)
+					self.loadModule(moduleName)
+				})
 			}
 		}
+		
+		// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
+		this.scriptDirectories.forEach(function(dirName) {
+			self.scanScriptsDir(dirName)
+		})
 	}
 	return true
 }
@@ -638,10 +670,12 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	*/
 	runtime.runExpressionFunc(baseFunc, contextBase, null)
 }
+var DEFAULT_SCRIPT_EXTENSION = ".priest.json"
 var DEFAULT_MANIFEST_FILE_NAME = "priest.manifest.json"
 
 module.exports.DEFAULT_ENVIRONMENT = DEFAULT_ENVIRONMENT
 module.exports.DEFAULT_MANIFEST_FILE_NAME = DEFAULT_MANIFEST_FILE_NAME
+module.exports.DEFAULT_SCRIPT_EXTENSION = DEFAULT_SCRIPT_EXTENSION
 
 module.exports.exportTestOnlyFunctions = function() {
 	TEST_PRINT_TRACE_ON_INTERNAL_ERROR = true

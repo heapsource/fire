@@ -29,6 +29,9 @@ CommandLine.prototype.run = function() {
 			if(manifestFound) {
 				runtime.loadFromManifestFile(manifestPath)
 			}
+			
+			runtime.scanScriptsDir(mainScriptDirName)
+			
 			var def = runtime.registerWellKnownJSONExpressionFile(mainScriptPath)
 		
 			var self = this
