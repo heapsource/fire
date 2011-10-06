@@ -684,6 +684,13 @@ module.exports.DEFAULT_ENVIRONMENT = DEFAULT_ENVIRONMENT
 module.exports.DEFAULT_MANIFEST_FILE_NAME = DEFAULT_MANIFEST_FILE_NAME
 module.exports.DEFAULT_SCRIPT_EXTENSION = DEFAULT_SCRIPT_EXTENSION
 
+module.exports.setBlockContextVariable = function(blockContext, name, value) {
+	if(!blockContext._variables) {
+		blockContext._variables = {}
+	} 
+	setVarCore(blockContext._variables, name, value)
+}
+
 module.exports.inferExpressionNameByFileName = function(fileName) {
 	if(!fileName) return null
 	if(fileName.indexOf(DEFAULT_SCRIPT_EXTENSION) == -1) return null
