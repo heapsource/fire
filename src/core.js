@@ -402,6 +402,14 @@ Runtime.prototype.scanScriptsDir = function(absoluteDirPath) {
 	}, this)
 }
 
+
+Runtime.prototype.scanScriptsDirs = function() {
+	var self = this
+	this.scriptDirectories.forEach(function(dirName) {
+		self.scanScriptsDir(dirName)
+	})
+}
+
 /*
  * Load .js files from a directory using require. Used by built-in functions. Can be used to load absolute-path .js files.
  */
@@ -512,10 +520,9 @@ Runtime.prototype.loadFromManifestFile = function(manifestFile) {
 			}
 		}
 		
+		
 		// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
-		this.scriptDirectories.forEach(function(dirName) {
-			self.scanScriptsDir(dirName)
-		})
+		this.scanScriptsDirs()
 	}
 	return true
 }
@@ -676,6 +683,12 @@ var DEFAULT_MANIFEST_FILE_NAME = "priest.manifest.json"
 module.exports.DEFAULT_ENVIRONMENT = DEFAULT_ENVIRONMENT
 module.exports.DEFAULT_MANIFEST_FILE_NAME = DEFAULT_MANIFEST_FILE_NAME
 module.exports.DEFAULT_SCRIPT_EXTENSION = DEFAULT_SCRIPT_EXTENSION
+
+module.exports.inferExpressionNameByFileName = function(fileName) {
+	if(!fileName) return null
+	if(fileName.indexOf(DEFAULT_SCRIPT_EXTENSION) == -1) return null
+	return fileName.substring(0, fileName.indexOf(DEFAULT_SCRIPT_EXTENSION))
+}
 
 module.exports.exportTestOnlyFunctions = function() {
 	TEST_PRINT_TRACE_ON_INTERNAL_ERROR = true

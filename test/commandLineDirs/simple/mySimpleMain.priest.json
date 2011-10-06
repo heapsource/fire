@@ -1,5 +1,5 @@
 {
-	"name" : "MainSimpleExpression",
+	"name" : "mySimpleMain",
 	"json" : {
 		"@return": "Hello World from the Simplest JSON Expression"
 	}

@@ -4,6 +4,7 @@ var PathCache = require('../src/Paths').PathCache
 var AstEntryType = require('../src/Paths').AstEntryType
 var Variable = require('../src/Variable')
 var exec  = require('child_process').exec
+var priest = require('../src/core.js')
 
 vows.describe('priest command line utility').addBatch({
 	"When I run the command line with no args": {
@@ -27,7 +28,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run the command line in a directory with a single folder and single JSON file": {
 		topic: function() {
 			var self = this
-			exec(' (cd test/commandLineDirs/simple && ../../../bin/./priest mySimpleMain.json)', function (error, stdout, stderr) {
+			exec(' (cd test/commandLineDirs/simple && ../../../bin/./priest mySimpleMain.priest.json)', function (error, stdout, stderr) {
 				self.callback(error, {
 					error: error, 
 					stdout: stdout, 
@@ -44,8 +45,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run the command line in a directory with a single folder with a JSON file and a Manifest and the module returns a value from the configuration section": {
 		topic: function() {
 			var self = this
-			//exec('cd test/commandLineDirs/withManifest2 && ../../../bin/./priest myMain.json', function (error, stdout, stderr) {
-			exec('bin/./priest test/commandLineDirs/withManifest2/myMain.json', function (error, stdout, stderr) {
+			exec('bin/./priest test/commandLineDirs/withManifest2/myMain.priest.json', function (error, stdout, stderr) {
 				self.callback(error, {
 					error: error, 
 					stdout: stdout, 
@@ -76,7 +76,8 @@ vows.describe('priest command line utility').addBatch({
 			assert.isNotNull(output.stdout)
 			assert.include(output.stdout, "Value from the Other Expression")
 		}
-	},
+	}
+	,
 	"When I run the command line in a proyect with a manifest that specifies additional directories and the main script returns a value from an additional directory": {
 		topic: function() {
 			var self = this

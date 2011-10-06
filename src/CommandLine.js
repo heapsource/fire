@@ -14,7 +14,16 @@ CommandLine.prototype.run = function() {
 		this.printHelp()
 		process.exit(0);
 	} else {
-		var mainScriptPath = path.resolve(pureArgs[0])
+		var scriptName = pureArgs[0]
+		var mainScriptPath = path.resolve(scriptName)
+		var mainScriptStats = fs.stat(mainScriptPath)
+		
+		var expressionName = priest.inferExpressionNameByFileName(path.basename(mainScriptPath))
+		if(!expressionName) {
+			throw "The file '" + scriptName+ "' was not recognized as a priest script due file name extension incompatibility"
+			return
+		}
+		
 		var mainScriptDirName = path.dirname(mainScriptPath)
 		
 		process.chdir(mainScriptDirName) // Change the Current Directory
@@ -28,12 +37,10 @@ CommandLine.prototype.run = function() {
 		path.exists(manifestPath, function(manifestFound) {
 			if(manifestFound) {
 				runtime.loadFromManifestFile(manifestPath)
+			} else {
+				// Manually load the scripts
+				runtime.scanScriptsDirs()
 			}
-			
-			runtime.scanScriptsDir(mainScriptDirName)
-			
-			var def = runtime.registerWellKnownJSONExpressionFile(mainScriptPath)
-		
 			var self = this
 			var contextBase = {};
 			contextBase._resultCallback = function(res) {
@@ -43,7 +50,7 @@ CommandLine.prototype.run = function() {
 			contextBase._inputExpression  = function() {};
 			contextBase._variables = {};   
 			contextBase._errorCallback =  function() {};
-			runtime.runExpressionByName(def.name, contextBase ,null)
+			runtime.runExpressionByName(expressionName, contextBase ,null)
 		})
 	}
 }

@@ -3566,3 +3566,29 @@ vows.describe('priest getWellKnownExpressions').addBatch({
 	}
 }).export(module);
 
+vows.describe('priest file extension inference').addBatch({
+	"When I infer the expression name from a simple name file with the official script extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("some.priest.json")
+		},
+		"the expression name should be the name of the file without the extension": function(expressionName) {
+			assert.equal(expressionName,"some")
+		}
+	},
+	"When I infer the expression name from a namespaced file name with the official script extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.priest.json")
+		},
+		"the expression name should be the name of the file without the extension": function(expressionName) {
+			assert.equal(expressionName,"myApp.SomeFeature.SomeExpression")
+		}
+	},
+	"When I infer the expression name from a file name without the official script extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.priest.mp3")
+		},
+		"the expression name should be null": function(expressionName) {
+			assert.equal(expressionName,null)
+		}
+	}
+}).export(module)
