@@ -7,7 +7,7 @@ function Expression() {
 
 Expression.prototype.execute = function() {
 	console.trace()
-	throw "Expression requires derived classes or instances to override the 'run' function with a expression-capable function"
+	throw "Expression requires derived classes or instances to override the 'execute' function with a expression-compliant function"
 }
 
 Expression.prototype.raiseError = function(err) {

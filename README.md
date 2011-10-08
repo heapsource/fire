@@ -1,29 +1,36 @@
 # priest.js
 
-Currently in Development, stay tuned!
+priest.js is a programming language embedded in JSON as a set of special 'keys' which aims to make ridiculously easy the creation of Javascript objects from asynchronous sources in node.js.
 
-## Specifications
+The Runtime takes a JSON document and compiles it for asynchronous Javascript execution:
 
-### 1.0
+    JSON Document -> Deserialization -> Compilation to Javascript -> Execution
 
-* [priest.v.1.0.md](https://github.com/firebaseco/priest/blob/master/docs/specs/priest.v.1.0.md)
+## More Info
+
++ [Tutorials](https://github.com/firebaseco/priest/wiki/Tutorials)
+
++ [Wiki](https://github.com/firebaseco/priest/wiki)
+
+## FAQ
+
+### Is it a replacement for Javascript in Node.js?
+
+Definitely no. The goal of priest.js is to reuse "building blocks" so you can write node.js applications without dealing with the infamous *Javascript asynchronous spaghetti code*.
+
+### Why JSON?
+
+Because JSON Documents are a serialized representation of Javascript Objects. This makes it easier for the Runtime to understand and humans to edit.
+
+### Why "priest"?
+
+[here](http://en.wikipedia.org/wiki/Judas_Priest)... I was thinking of calling it "judas.js" but I rather keep Lady Gaga out of my mind(this is the part when you laugh).
 
 
-## Contributing
-
-1. Clone the Repository
-2. Run the Tests
-3. Read the Specifications all the specifications for the current version at docs/specs
-4. Inspect the Source code at src
-5. Send your patch to *johan@firebase.co*
-
-### Collaborating
-
-* Johan (author). Email: *johan@firebase.co*, Skype: *thepumpkin1979*
-
-### Cloning the Repository
+## Cloning the Repository
 
     git clone https://github.com/firebaseco/priest.git
+
 
 ### Preparing your Development Environment and running the Tests
 
@@ -31,27 +38,21 @@ priest depends on [vows](http://vowsjs.org/) and other development tools, you ca
 
      make install-dev-dependencies
 
-Once it's finished then you can run the tests
+Once it's finished then you can run the tests:
 
     make run-tests
 
-Or you can let [vows](http://vowsjs.org/) run the test automatically as you change them:
-
-    run-tests-forever
-
-### Cleaning your development Environment
-
-By running `make install-dev-dependencies` you will create a bunch of crap inside node_modules that we don't really want to commit as part of your patches, so when you are ready to create the patch run the following command first:
+There is also:
 
     make remove-dev-dependencies
 
+### Collaborating
 
-## Author
-Johan Hernandez: johan@firebase.co
+* Johan (author). Email: *johan@firebase.co*, Skype: *thepumpkin1979*
 
-## License
+## MIT License
 
-Copyright (c) 2011 Firebase.co
+Copyright (c) 2011 Firebase.co - http://www.firebase.co
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
