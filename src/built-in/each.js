@@ -45,5 +45,6 @@ Each.prototype.execute = function() {
 
 module.exports = {
 	name: "each",
+	flags: "hint",
 	implementation: Each
 }

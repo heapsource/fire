@@ -454,6 +454,7 @@ Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDef
 		expressionClass.prototype.execute = implementationFunc
 		implementation = expressionClass;
 	}
+	expressionDefinition.implementation = implementation
 	this.loadedExpressions[name] = implementation
 	this.loadedExpressionsMeta[name] = expressionDefinition
 }
@@ -527,12 +528,22 @@ Runtime.prototype.loadFromManifestFile = function(manifestFile) {
 	return true
 }
 
+function blockContextHasHint(blockContext) {
+	return blockContext && blockContext._hint
+}
+
 Runtime.prototype.runExpressionByName = function(expressionName, base_context, context_overrides) {
-	//console.warn("Calling expression with name ", expressionName)
-	var expObject = this.loadedExpressions[expressionName]
-	if(expObject == undefined) {
+	//console.warn("Calling expression with name ", expressionName, " context_overrides ", context_overrides)
+	var expDefinition = this.loadedExpressionsMeta[expressionName]
+	if(expDefinition == undefined) {
 		throw new Error('JS1002', "Expression '" + expressionName +  "' is not registered or was not loaded.");
 	}
+	
+	var supportHints = expDefinition.flags && expDefinition.flags.indexOf("hint") != -1
+	if(!supportHints &&  blockContextHasHint(context_overrides)) {
+		throw new Error('UnsupportedHint', "Expression '" + expressionName + "' does not support hints")
+	}
+	var expObject = expDefinition.implementation
 	var expressionObject = new expObject()
 	this.runExpressionInstance(expressionObject, base_context, context_overrides)
 }

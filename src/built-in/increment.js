@@ -26,5 +26,6 @@ Increment.prototype.execute = function() {
 
 module.exports = {
 	name:"increment",
+	flags: "hint",
 	implementation:Increment
 }

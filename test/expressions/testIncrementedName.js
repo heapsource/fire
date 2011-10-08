@@ -14,5 +14,6 @@ testIncrementedName.prototype.execute = function() {
 }
 module.exports = {
 	name:"testIncrementedName",
+	flags: "hint",
 	implementation:testIncrementedName
 }

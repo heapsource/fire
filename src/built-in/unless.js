@@ -25,5 +25,6 @@ Unless.prototype.execute = function() {
 
 module.exports = {
 	name: "unless",
+	flags: "hint",
 	implementation: Unless
 }

@@ -25,5 +25,6 @@ If.prototype.execute = function() {
 
 module.exports = {
 	name:"if",
+	flags: "hint",
 	implementation:If
 }

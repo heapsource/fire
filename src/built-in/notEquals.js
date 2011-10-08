@@ -27,5 +27,6 @@ NotEquals.prototype.execute = function() {
 
 module.exports = {
 	name:"notEquals",
+	flags: "hint",
 	implementation:NotEquals
 }

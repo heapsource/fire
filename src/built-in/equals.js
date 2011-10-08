@@ -27,5 +27,6 @@ Equals.prototype.execute = function() {
 
 module.exports = {
 	name:"equals",
+	flags: "hint",
 	implementation:Equals
 }

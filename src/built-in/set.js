@@ -23,5 +23,6 @@ Set.prototype.execute = function(){
 
 module.exports = {
 	name:"set",
+	flags: "hint",
 	implementation:Set
 }

@@ -29,5 +29,6 @@ testTickedReturn.prototype.execute = function() {
 
 module.exports = {
 	name:"testTickedReturn",
+	flags: "hint",
 	implementation:testTickedReturn
 }

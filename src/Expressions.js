@@ -70,7 +70,7 @@ Expression.prototype.setParentResult = function(val) {
 	this._blockContext._parentContext._result = val
 }
 
-Expression.prototype.hasHint = function(val) {
+Expression.prototype.hasHint = function() {
 	return this._blockContext._hint !== undefined && this._blockContext._hint !== null && this._blockContext._hint !== ''
 }
 

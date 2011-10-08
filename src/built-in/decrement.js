@@ -26,5 +26,6 @@ Decrement.prototype.execute = function() {
 
 module.exports = {
 	name: "decrement",
+	flags: "hint",
 	implementation: Decrement
 }
