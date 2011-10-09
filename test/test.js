@@ -1044,13 +1044,13 @@ vows.describe('priest error handling').addBatch({
 			}
 		}
 	},
-	'When a nested expression raises an error and a @try expression is followed by two @resetError @catch expressions': {
+	'When a nested expression raises an error and a @try expression is followed by two @clearError @catch expressions': {
 		topic: function() {
 			return  {
 					"@try":{
 						"@testExpThatRaisesError":null
 					}, 
-					"@resetError": null,
+					"@clearError": null,
 					"@catch": "Never returned"
 				}
 		},
@@ -1844,7 +1844,7 @@ vows.describe('priest JSON definition registration').addBatch({
 }).export(module);
 
 vows.describe('priest @each built-in expression').addBatch({
-	'Having a JSON document with an @each expression': {
+	'Having a JSON document with an @each expression with hint': {
 		topic: function() {
 			return new Runtime()
 		},
@@ -1854,9 +1854,10 @@ vows.describe('priest @each built-in expression').addBatch({
 					name:"testEach",
 					json: {
 						"@set(ids)": ['a552','a553','a554','a555'],
-						"@each(ids)": {
+						"@get(ids)": null,
+						"@each(somePrefix)": {
 							"id":{
-								"@get(idsCurrentItem)": null
+								"@get(somePrefixCurrentItem)": null
 							}
 						}
 					}
@@ -1876,7 +1877,7 @@ vows.describe('priest @each built-in expression').addBatch({
 						contextBase._errorCallback =  function() {};
 						runtime.runExpressionByName("testEach", contextBase ,null)
 					},
-					"it should iterate the variable given in the hint and return an array with converted documents from the input": function(err, res) {
+					"it should iterate the last value and return an array with converted documents from the input using the prefixed variable": function(err, res) {
 					 	assert.deepEqual(res, [{
 							"id": "a552"
 						},{
@@ -1936,6 +1937,44 @@ vows.describe('priest @each built-in expression').addBatch({
 						{
 							"id": "a555"
 						}])
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @each expression and the value is not an array': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEach",
+					json: {
+						"@return": 2,
+						"@each": {
+							"id":{
+								"@get(CurrentItem)": null
+							}
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("testEach", contextBase ,null)
+					},
+					"it should return an empty array": function(err, res) {
+					 	assert.deepEqual(res, [])
 					}
 			}
 		}
@@ -3473,6 +3512,44 @@ vows.describe('priest file extension inference').addBatch({
 		},
 		"the expression name should be null": function(expressionName) {
 			assert.equal(expressionName,null)
+		}
+	}
+}).export(module)
+
+vows.describe('priest @undefined').addBatch({
+	'Having a JSON code that returns @undefined at the end of the expression-block': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUndefined",
+					json: {
+						"@return": 1,
+						"@undefined": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.runExpressionByName("testUndefined", contextBase ,null)
+				},
+				"the result should be undefined": function(err, res) {
+					assert.isUndefined(res)
+					assert.equal(res, undefined)
+				}
+			}
 		}
 	}
 }).export(module)

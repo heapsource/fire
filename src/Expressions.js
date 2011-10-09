@@ -34,7 +34,7 @@ Expression.prototype.setError = function(errorInfo) {
 	this._blockContext._parentContext._errorInfo = errorInfo
 }
 
-Expression.prototype.resetError = function() {
+Expression.prototype.clearError = function() {
 	this._blockContext._parentContext._errorInfo = undefined
 }
 

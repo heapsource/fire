@@ -11,10 +11,10 @@ Each.prototype.execute = function() {
 
 	var callInput = null;
 	var varVal = null
-	if(this.hasHint()) {
-		varVal = this.getVar(this._blockContext._hint)
-	} else {
-		varVal = this.getParentResult()
+	varVal = this.getParentResult()
+	if(!(varVal instanceof Array)) {
+		this.setResult([])
+		return
 	}
 	var itemVarName = this.hasHint() ? this.getHintValue() + 'CurrentItem' : 'CurrentItem'
 	var iterator = new Iterator(varVal)

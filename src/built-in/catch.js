@@ -7,7 +7,7 @@ Catch.prototype = new Expression()
 Catch.prototype.execute = function() {
 	var self = this
 	var errInfo = this._blockContext._parentContext._errorInfo
-	self.resetError()
+	self.clearError()
 	if(errInfo != undefined) {
 		// there is an error, run the input...
 		this._blockContext._variables.errorInfo = errInfo // let the input know about the error
