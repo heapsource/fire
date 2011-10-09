@@ -1,0 +1,18 @@
+{
+	"name": "Examples.ArrayIndexPaths",
+	"json": {
+		"@set(contactsBook)": {
+			"count": 12,
+			"contacts": [
+				{
+					"email": "chuch@example.com",
+					"name": "Chuck Norris"
+				}, {
+					"email": "clark.kent64@example.com",
+					"name": "Superman"
+				}
+			]
+		},
+		"@get(contactsBook.contacts[1])": null
+	}
+}

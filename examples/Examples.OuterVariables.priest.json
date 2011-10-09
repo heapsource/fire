@@ -1,0 +1,13 @@
+{
+	"name": "Examples.OuterVariables",
+	"json": {
+		"@set(person)": null,
+		"@return": {
+			"@set(person)": {
+				"firstName": "Chuch",
+				"lastName": "Norris"
+			},
+		"@get(person)": null
+		}
+	}
+}

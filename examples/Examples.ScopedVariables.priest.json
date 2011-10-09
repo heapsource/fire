@@ -1,0 +1,15 @@
+{
+	"name": "Examples.ScopedVariables",
+	"json": {
+		"@set(fName)": "Chuck",
+		"@set(lName)": "Norris",
+		"@return": {
+			"firstName": { 
+				"@get(fName)": null 
+				},
+			"lastName": {
+				"@get(lName)": null
+			}
+		}
+	}
+}

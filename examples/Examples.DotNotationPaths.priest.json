@@ -1,0 +1,10 @@
+{
+	"name": "Examples.DotNotationPaths",
+	"json": {
+		"@set(superhero)": {
+			"name": "Chuck Norris",
+			"age": 460
+		},
+		"@get(superhero.name)": null
+	}
+}

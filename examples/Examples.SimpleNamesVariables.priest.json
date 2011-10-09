@@ -1,0 +1,7 @@
+{
+	"name": "Examples.SimpleNamesVariables",
+	"json": {
+		"@set(name)": "Chuck Norris",
+		"@get(name)": null
+	}
+}
