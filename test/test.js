@@ -2929,7 +2929,7 @@ vows.describe('priest @notEquals').addBatch({
 }).export(module);
 
 vows.describe('priest @increment').addBatch({
-	'Having a @increment expression using a undefined variable': {
+	'Having a @increment expression without a hint': {
 		topic: function() {
 			return new Runtime()
 		},
@@ -2938,7 +2938,7 @@ vows.describe('priest @increment').addBatch({
 				runtime.registerWellKnownExpressionDefinition({
 					name:"testIncrement",
 					json: {
-						"@increment(x)": 1
+						"@increment": 1
 					}
 				})
 				return runtime
@@ -2948,21 +2948,28 @@ vows.describe('priest @increment').addBatch({
 						var self = this
 						var contextBase = {};
 						contextBase._resultCallback = function(res) {
-							self.callback(null, res)
+							self.callback(null, {
+								res:res
+							})
 						}
 						contextBase._loopCallback = function() {};
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
-						contextBase._errorCallback =  function() {};
+						contextBase._errorCallback =  function(err) {
+							self.callback(null, {
+								err:err
+							})
+						};
 						runtime.runExpressionByName("testIncrement", contextBase ,null)
 					},
-					"it should should return NaN": function(err, res) {
-					 	assert.isNaN(res)
+					"it should return an error": function(err, res) {
+					 	assert.isUndefined(res.res)
+						assert.equal(res.err.error,"Expression 'increment' requires a hint")
 					}
 			}
 		}
 	},
-	'Having a @increment expression using a undefined variable': {
+	'Having a @increment expression using an undefined variable': {
 		topic: function() {
 			return new Runtime()
 		},
@@ -2971,7 +2978,8 @@ vows.describe('priest @increment').addBatch({
 				runtime.registerWellKnownExpressionDefinition({
 					name:"testIncrement",
 					json: {
-						"@increment(x)": 1
+						"@increment(x)": 1,
+						"@get(x)": null
 					}
 				})
 				return runtime
@@ -2989,41 +2997,7 @@ vows.describe('priest @increment').addBatch({
 						contextBase._errorCallback =  function() {};
 						runtime.runExpressionByName("testIncrement", contextBase ,null)
 					},
-					"it should should return NaN": function(err, res) {
-					 	assert.isNaN(res)
-					}
-			}
-		}
-	},
-	'Having a @increment expression using a null variable': {
-		topic: function() {
-			return new Runtime()
-		},
-		"when we register it": {
-			topic:function(runtime) {
-				runtime.registerWellKnownExpressionDefinition({
-					name:"testIncrement",
-					json: {
-						"@set(x)": null,
-						"@increment(x)": 1
-					}
-				})
-				return runtime
-			},
-			"and execute it": {
-					topic: function(runtime) {
-						var self = this
-						var contextBase = {};
-						contextBase._resultCallback = function(res) {
-							self.callback(null, res)
-						}
-						contextBase._loopCallback = function() {};
-						contextBase._inputExpression  = function() {};
-						contextBase._variables = {};            
-						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIncrement", contextBase ,null)
-					},
-					"it should should return NaN": function(err, res) {
+					"it should bypass and set NaN in the variable": function(err, res) {
 					 	assert.isNaN(res)
 					}
 			}
@@ -3039,41 +3013,8 @@ vows.describe('priest @increment').addBatch({
 					name:"testIncrement",
 					json: {
 						"@set(x)": 426.1,
-						"@increment(x)": undefined
-					}
-				})
-				return runtime
-			},
-			"and execute it": {
-					topic: function(runtime) {
-						var self = this
-						var contextBase = {};
-						contextBase._resultCallback = function(res) {
-							self.callback(null, res)
-						}
-						contextBase._loopCallback = function() {};
-						contextBase._inputExpression  = function() {};
-						contextBase._variables = {};            
-						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIncrement", contextBase ,null)
-					},
-					"it should should return NaN": function(err, res) {
-					 	assert.isNaN(res)
-					}
-			}
-		}
-	},
-	'Having a @increment expression using a null input': {
-		topic: function() {
-			return new Runtime()
-		},
-		"when we register it": {
-			topic:function(runtime) {
-				runtime.registerWellKnownExpressionDefinition({
-					name:"testIncrement",
-					json: {
-						"@set(x)": 426.1,
-						"@increment(x)": null
+						"@increment(x)": undefined,
+						"@get(x)": null
 					}
 				})
 				return runtime
@@ -3107,7 +3048,8 @@ vows.describe('priest @increment').addBatch({
 					name:"testIncrement",
 					json: {
 						"@set(x)": 425,
-						"@increment(x)": 25
+						"@increment(x)": 25,
+						"@get(x)": null
 					}
 				})
 				return runtime
@@ -3135,7 +3077,7 @@ vows.describe('priest @increment').addBatch({
 
 
 vows.describe('priest @decrement').addBatch({
-	'Having a @decrement expression using a undefined variable': {
+	'Having a @decrement expression without a hint': {
 		topic: function() {
 			return new Runtime()
 		},
@@ -3144,7 +3086,7 @@ vows.describe('priest @decrement').addBatch({
 				runtime.registerWellKnownExpressionDefinition({
 					name:"testDecrement",
 					json: {
-						"@decrement(x)": 1
+						"@decrement": 1
 					}
 				})
 				return runtime
@@ -3154,21 +3096,28 @@ vows.describe('priest @decrement').addBatch({
 						var self = this
 						var contextBase = {};
 						contextBase._resultCallback = function(res) {
-							self.callback(null, res)
+							self.callback(null, {
+								res:res
+							})
 						}
 						contextBase._loopCallback = function() {};
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
-						contextBase._errorCallback =  function() {};
+						contextBase._errorCallback =  function(err) {
+							self.callback(null, {
+								err:err
+							})
+						};
 						runtime.runExpressionByName("testDecrement", contextBase ,null)
 					},
-					"it should should return NaN": function(err, res) {
-					 	assert.isNaN(res)
+					"it should return an error": function(err, res) {
+					 	assert.isUndefined(res.res)
+						assert.equal(res.err.error,"Expression 'decrement' requires a hint")
 					}
 			}
 		}
 	},
-	'Having a @decrement expression using a undefined variable': {
+	'Having a @decrement expression using an undefined variable': {
 		topic: function() {
 			return new Runtime()
 		},
@@ -3177,7 +3126,8 @@ vows.describe('priest @decrement').addBatch({
 				runtime.registerWellKnownExpressionDefinition({
 					name:"testDecrement",
 					json: {
-						"@increment(x)": 1
+						"@decrement(x)": 1,
+						"@get(x)": null
 					}
 				})
 				return runtime
@@ -3195,41 +3145,7 @@ vows.describe('priest @decrement').addBatch({
 						contextBase._errorCallback =  function() {};
 						runtime.runExpressionByName("testDecrement", contextBase ,null)
 					},
-					"it should should return NaN": function(err, res) {
-					 	assert.isNaN(res)
-					}
-			}
-		}
-	},
-	'Having a @decrement expression using a null variable': {
-		topic: function() {
-			return new Runtime()
-		},
-		"when we register it": {
-			topic:function(runtime) {
-				runtime.registerWellKnownExpressionDefinition({
-					name:"testDecrement",
-					json: {
-						"@set(x)": null,
-						"@increment(x)": 1
-					}
-				})
-				return runtime
-			},
-			"and execute it": {
-					topic: function(runtime) {
-						var self = this
-						var contextBase = {};
-						contextBase._resultCallback = function(res) {
-							self.callback(null, res)
-						}
-						contextBase._loopCallback = function() {};
-						contextBase._inputExpression  = function() {};
-						contextBase._variables = {};            
-						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testDecrement", contextBase ,null)
-					},
-					"it should should return NaN": function(err, res) {
+					"it should bypass and set NaN in the variable": function(err, res) {
 					 	assert.isNaN(res)
 					}
 			}
@@ -3245,41 +3161,8 @@ vows.describe('priest @decrement').addBatch({
 					name:"testDecrement",
 					json: {
 						"@set(x)": 426.1,
-						"@increment(x)": undefined
-					}
-				})
-				return runtime
-			},
-			"and execute it": {
-					topic: function(runtime) {
-						var self = this
-						var contextBase = {};
-						contextBase._resultCallback = function(res) {
-							self.callback(null, res)
-						}
-						contextBase._loopCallback = function() {};
-						contextBase._inputExpression  = function() {};
-						contextBase._variables = {};            
-						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testDecrement", contextBase ,null)
-					},
-					"it should should return NaN": function(err, res) {
-					 	assert.isNaN(res)
-					}
-			}
-		}
-	},
-	'Having a @decrement expression using a null input': {
-		topic: function() {
-			return new Runtime()
-		},
-		"when we register it": {
-			topic:function(runtime) {
-				runtime.registerWellKnownExpressionDefinition({
-					name:"testDecrement",
-					json: {
-						"@set(x)": 426.1,
-						"@increment(x)": null
+						"@decrement(x)": undefined,
+						"@get(x)": null
 					}
 				})
 				return runtime
@@ -3313,7 +3196,8 @@ vows.describe('priest @decrement').addBatch({
 					name:"testDecrement",
 					json: {
 						"@set(x)": 425,
-						"@decrement(x)": 25
+						"@decrement(x)": 25,
+						"@get(x)": null
 					}
 				})
 				return runtime
@@ -3331,7 +3215,7 @@ vows.describe('priest @decrement').addBatch({
 						contextBase._errorCallback =  function() {};
 						runtime.runExpressionByName("testDecrement", contextBase ,null)
 					},
-					"it should should return the substraction": function(err, res) {
+					"it should should return the subtraction": function(err, res) {
 					 	assert.equal(res,400)
 					}
 			}

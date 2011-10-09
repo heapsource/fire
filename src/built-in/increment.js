@@ -6,18 +6,24 @@ function Increment() {
 Increment.prototype = new Expression()
 Increment.prototype.execute = function() {
 	var self = this
-	var value = this.hasHint() ? this.getHintVariableValue() : this.getParentResult();
+	if(!this.requireHint()) return;
+	
+	var value = this.getHintVariableValue()
+	
 	if(isNaN(value) || value === undefined || value === null) {
-		this.setResult(NaN)
+		this.setParentVar(this.getHintValue(), NaN)
+		this.skip()
 	} else {
 		// run the input...
 		this.runInput({
 			_resultCallback: function(res) {
 				if(isNaN(res) || res === undefined || res === null) {
-					self.setResult(NaN)
+					self.setParentVar(self.getHintValue(), NaN)
+					self.skip()
 				} else {
 					var res = value + res
-					self.setResult(res)
+					self.setParentVar(self.getHintValue(), res)
+					self.skip()
 				}
 			}
 		});

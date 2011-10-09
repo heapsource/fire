@@ -86,6 +86,18 @@ Expression.prototype.setResult = function(res) {
 	this._blockContext._resultCallback(res)
 }
 
+Expression.prototype.getExpressionName = function() {
+	return !this.expressionName ? "<Anonymous>" : this.expressionName
+}
+
+Expression.prototype.requireHint = function() {
+	if(!this.hasHint()) {
+		this.raiseError("Expression '" + this.getExpressionName()  + "' requires a hint")
+		return false
+	}
+	return true
+}
+
 function setVarCore(bag, name, value) {
 	if(bag[name] == undefined) {
 		var v = new Variable()

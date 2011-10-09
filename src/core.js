@@ -455,6 +455,7 @@ Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDef
 		implementation = expressionClass;
 	}
 	expressionDefinition.implementation = implementation
+	expressionDefinition.implementation.prototype.expressionName = expressionDefinition.name
 	this.loadedExpressions[name] = implementation
 	this.loadedExpressionsMeta[name] = expressionDefinition
 }
