@@ -3,7 +3,7 @@
     "description": "Message-Oriented REST API Framework for node.js, express.js and MongoDB ",
     "version": "1.0.0",
     "author": "Johan Hernandez <johan@firebase.co>",
-    "main": "./src/core.js",
+    "main": "index",
     "bin": {
         "priest": "./bin/priest"
     },
