@@ -57,7 +57,7 @@ CommandLine.prototype.run = function() {
 
 CommandLine.prototype.printHelp = function() {
 	console.log("Priest Runtime version " + this.versionNumber)
-	console.log("usage: priest main.json")
+	console.log("usage: priest TheProject.Main.priest.json")
 	console.log("")
 	console.log("Copyright (C) 2011 Firebase and Contributors. http://priest.firebase.co")
 }
