@@ -1,0 +1,15 @@
+{
+	"name": "Examples.ErrorCatching",
+	"json": {
+		"@try": {
+			"@raiseError": "This is an error, we are so screwed!"
+		},
+		"@catch": {
+			"whatHappended": {
+				"@get(CurrentError.error)": null
+			},
+			"howAreWeDoing": "We had some trouble but we are ok now!"
+		}
+	}
+}
+

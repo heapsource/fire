@@ -1,0 +1,12 @@
+{
+	"name": "Examples.ClearingErrors",
+	"json": {
+		"@return": "Boring... no errors happening around here",
+		"@try": {
+			"@raiseError": "This is an error, we are so screwed!"
+		},
+		"@clearError": null,
+		"@catch": "Whoa... This is an error!"
+	}
+}
+

@@ -1,0 +1,10 @@
+{
+	"name": "Examples.ReturningErrors",
+	"json": {
+		"@try": {
+			"@raiseError": "This is an error, we are so screwed!"
+		},
+		"@returnError": null
+	}
+}
+
