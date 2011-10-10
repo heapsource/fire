@@ -17,12 +17,17 @@ Each.prototype.execute = function() {
 		return
 	}
 	var itemVarName = this.hasHint() ? this.getHintValue() + 'CurrentItem' : 'CurrentItem'
+	var CurrentIndexVarName = this.hasHint() ? this.getHintValue() + 'CurrentIndex' : 'CurrentIndex'
 	var iterator = new Iterator(varVal)
+	var count = -1
 	callInput = function() {
 		if(!iterator.next()) {
 			rc(result)
 			return
 		}
+		count++
+		self.setVar(CurrentIndexVarName,count)
+		
 		self.setVar(itemVarName, iterator.current())
 		self.runInput({
 			_loopCallback: function(cmd) {

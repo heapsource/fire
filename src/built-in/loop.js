@@ -7,9 +7,13 @@ Loop.prototype.execute = function() {
 	var rc = this._blockContext._resultCallback
 	var self = this
 	var result = []
-
+	var count = -1
 	var callInput = null;
+	var CurrentIndexVarName = this.hasHint() ? this.getHintValue() + 'CurrentIndex' : 'CurrentIndex'
+	
 	callInput = function() {
+		count++
+		self.setVar(CurrentIndexVarName,count)
 		self.runInput({
 			_loopCallback: function(cmd) {
 				if(cmd == "break") {
@@ -32,5 +36,6 @@ Loop.prototype.execute = function() {
 
 module.exports = {
 	name: "loop",
+	flags: "hints",
 	implementation: Loop
 }

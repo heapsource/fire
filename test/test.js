@@ -1618,6 +1618,181 @@ vows.describe('priest loop control').addBatch({
 				assert.deepEqual(expressionResult.result, ["Item0", "Item1", "Item3"])
 			}
 		}
+	},
+	'Having a JSON code with a @loop expression that breaks at index 10': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testCurrentIndexLoop",
+					json: {
+						"@loop": {
+							"@equals": [{
+									"@get(CurrentIndex)": null
+								},
+								10
+							],
+							"@if": {
+								"@break": null
+							},
+							"@get(CurrentIndex)": null
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.runExpressionByName("testCurrentIndexLoop", contextBase ,null)
+				},
+				"the result should be an array with the index from 0 to 9": function(err, res) {
+					assert.deepEqual(res, [0,1,2,3,4,5,6,7,8,9])
+				}
+			}
+		}
+	}
+	,'Having a JSON code with a prefixed @loop expression that breaks at index 10': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testCurrentIndexLoop",
+					json: {
+						"@loop(counted)": {
+							"@equals": [{
+									"@get(countedCurrentIndex)": null
+								},
+								10
+							],
+							"@if": {
+								"@break": null
+							},
+							"@get(countedCurrentIndex)": null
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.runExpressionByName("testCurrentIndexLoop", contextBase ,null)
+				},
+				"the result should be an array with the index from 0 to 9": function(err, res) {
+					assert.deepEqual(res, [0,1,2,3,4,5,6,7,8,9])
+				}
+			}
+		}
+	}
+	,
+	'Having a JSON code with a @each expression that breaks at index 5': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testCurrentIndexLoop",
+					json: {
+						"@return": ['One', 'Two','Three', 'Four','Five','Six','Seven','Eight','Nine','Ten'],
+						"@each": {
+							"@equals": [{
+									"@get(CurrentIndex)": null
+								},
+								5
+							],
+							"@if": {
+								"@break": null
+							},
+							"@get(CurrentIndex)": null
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.runExpressionByName("testCurrentIndexLoop", contextBase ,null)
+				},
+				"the result should be an array with the index from 0 to 4": function(err, res) {
+					assert.deepEqual(res, [0,1,2,3,4])
+				}
+			}
+		}
+	},
+	'Having a JSON code with a prefixed @each expression that breaks at index 5': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testCurrentIndexLoop",
+					json: {
+						"@return": ['One', 'Two','Three', 'Four','Five','Six','Seven','Eight','Nine','Ten'],
+						"@each(numbers)": {
+							"@equals": [{
+									"@get(numbersCurrentIndex)": null
+								},
+								5
+							],
+							"@if": {
+								"@break": null
+							},
+							"@get(numbersCurrentIndex)": null
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.runExpressionByName("testCurrentIndexLoop", contextBase ,null)
+				},
+				"the result should be an array with the index from 0 to 4": function(err, res) {
+					assert.deepEqual(res, [0,1,2,3,4])
+				}
+			}
+		}
 	}
 }).export(module);
  
