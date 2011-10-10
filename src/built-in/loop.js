@@ -17,16 +17,22 @@ Loop.prototype.execute = function() {
 		self.runInput({
 			_loopCallback: function(cmd) {
 				if(cmd == "break") {
-					rc(result) // return the array
+					process.nextTick(function() {
+						rc(result) // return the array
+					})
 				} else if(cmd == "continue") {
-					callInput() // call the next iteration
+					process.nextTick(function() {
+						callInput() // call the next iteration
+					})
 				} else {
 					throw "Invalid loop command " + cmd
 				}
 			},
 			_resultCallback: function(res) {
 				result.push(res)
-				callInput() // call the next iteration
+				process.nextTick(function() {
+					callInput() // call the next iteration
+				})
 			}
 		});
 	}
