@@ -3728,3 +3728,42 @@ vows.describe('priest @undefined').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe('priest @raiseError').addBatch({
+	'Having a JSON code that raises an error using @raiseError': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testRaiseError",
+					json: {
+						"@raiseError": "This is the error"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testRaiseError", contextBase ,null)
+				},
+				"it should return an error": function(err, res) {
+					assert.isNull(res)
+					assert.equal(err.error, "This is the error")
+				}
+			}
+		}
+	}
+}).export(module)
