@@ -1,0 +1,6 @@
+{
+	"name": "Examples.EqualsStrict",
+	"json": {
+		"@equals(strict)": [10,"10"]
+	}
+}

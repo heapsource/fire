@@ -1,0 +1,7 @@
+{
+	"name": "Examples.UnlessLastResult",
+	"json": {
+		"@set(chuckIsHere)": false,
+		"@unless(chuckIsHere)": "Chuck Norris is not here, we are Safe!"
+	}
+}

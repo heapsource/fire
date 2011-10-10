@@ -1,0 +1,7 @@
+{
+	"name": "Examples.IfLastResult",
+	"json": {
+		"@return": true,
+		"@if": "Totally true"
+	}
+}

@@ -1,0 +1,7 @@
+{
+	"name": "Examples.IfBypass",
+	"json": {
+		"@return": "This is the First and Last Result of the Program",
+		"@if(thisVariableDoesntEvenExists)": "This input is never used"
+	}
+}

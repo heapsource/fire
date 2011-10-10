@@ -1,0 +1,6 @@
+{
+	"name": "Examples.NotEquals",
+	"json": {
+		"@notEquals": [10,13]
+	}
+}

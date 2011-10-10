@@ -1,0 +1,6 @@
+{
+	"name": "Examples.Equals",
+	"json": {
+		"@equals": [10,"10"]
+	}
+}

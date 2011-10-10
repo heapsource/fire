@@ -1,0 +1,12 @@
+{
+	"name": "Examples.TheFruitsJoy",
+	"json": {
+		"@set(fruits)": ["Orange", "Orange"],
+		"@equals": {
+			"@get(fruits)": null
+		},
+		"@if": "Yay, We have different fruits!",
+		"@unless": "Boring, Same fruits..."
+	}
+}
+

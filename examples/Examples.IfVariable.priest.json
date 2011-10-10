@@ -1,0 +1,7 @@
+{
+	"name": "Examples.IfVariable",
+	"json": {
+		"@set(chuckIsHere)": true,
+		"@if(chuckIsHere)": "Chuck is here, we are in trouble!"
+	}
+}
