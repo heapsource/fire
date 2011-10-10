@@ -1,0 +1,26 @@
+{
+	"name": "Examples.NoZeroNumbers",
+	"json": {
+		"@loop(mainLoop)": {
+			"@equals": [
+				{
+					"@get(mainLoopCurrentIndex)": null
+				},
+				30
+			],
+			"@if": {
+				"@break":null
+			},
+			" @equals": [
+				{
+					"@get(mainLoopCurrentIndex)": null
+				},
+				0
+			],
+			" @if": {
+				"@continue": null
+			},
+			"@get(mainLoopCurrentIndex)": null
+		}
+	}
+}

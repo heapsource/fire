@@ -1,0 +1,17 @@
+{
+	"name": "Examples.30Numbers",
+	"json": {
+		"@loop": {
+			"@equals": [
+				{
+					"@get(CurrentIndex)": null
+				},
+				30
+			],
+			"@if": {
+				"@break":null
+			},
+			"@get(CurrentIndex)": null
+		}
+	}
+}

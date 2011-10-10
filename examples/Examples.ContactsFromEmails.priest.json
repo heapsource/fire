@@ -1,0 +1,11 @@
+{
+	"name": "Examples.ContactsFromEmails",
+	"json": {
+		"@return": ["chuck@example.com", "superman@example.com", "steveJobs@example.com"],
+		"@each(superheroes)": {
+			"email": {
+				"@get(superheroesCurrentItem)": null
+			}
+		}
+	}
+}
