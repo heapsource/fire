@@ -1094,6 +1094,88 @@ vows.describe('priest error handling').addBatch({
 				assert.equal(expressionResult.result, undefined)
 			}
 		}
+	},
+	'Having a JSON code that catches errors using @catch providing a variable called CurrentError': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testCatchCurrentError",
+					json: {
+						"@try": {
+							"@raiseError": "Houston, we have a problem!"
+						},
+						"@catch": {
+							"@get(CurrentError.error)": null
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testCatchCurrentError", contextBase ,null)
+				},
+				"it should return the error as the result of the expression": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res, "Houston, we have a problem!")
+				}
+			}
+		}
+	},
+	"Having a JSON code that catches errors using a @catch called 'nasa' providing a variable called nasaCurrentError": {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testCatchCurrentError",
+					json: {
+						"@try": {
+							"@raiseError": "Houston, we have a problem!"
+						},
+						"@catch(nasa)": {
+							"@get(nasaCurrentError.error)": null
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testCatchCurrentError", contextBase ,null)
+				},
+				"it should return the error as the result of the expression": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res, "Houston, we have a problem!")
+				}
+			}
+		}
 	}
 }).export(module);
 
