@@ -1,4 +1,7 @@
-var RuntimeError = function(blockContext, error) {
+/*
+ Object used when some expression uses raiseError(error)
+*/
+function RuntimeError(blockContext, error) {
 	this.blockContext = blockContext;
 	this.error = error;
 };

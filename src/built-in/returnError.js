@@ -4,7 +4,11 @@ function ReturnError() {
 }
 ReturnError.prototype = new Expression()
 ReturnError.prototype.execute = function() {
-	this._blockContext._resultCallback(this._blockContext._parentContext._errorInfo)
+	if(this._blockContext._parentContext._errorInfo) {
+		this.setResult(this._blockContext._parentContext._errorInfo.error)
+	} else {
+		this.setResult(undefined)
+	}
 }
 
 

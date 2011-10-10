@@ -893,7 +893,7 @@ vows.describe('priest error handling').addBatch({
 				assert.equal(expressionResult.errorCount, 0)
 			},
 			"the result should be the error" : function(expressionResult) {
-				assert.equal(expressionResult.result.error, "Help!!!... Chuck Norris is in da house!") // check expressions/testExpThatRaisesError.js
+				assert.equal(expressionResult.result, "Help!!!... Chuck Norris is in da house!") // check expressions/testExpThatRaisesError.js
 			}
 		}
 	},
