@@ -1,4 +1,4 @@
-var priest = require('./core')
+
 var fs = require('fs')
 var path = require('path')
 
@@ -15,7 +15,15 @@ CommandLine.prototype.run = function() {
 		process.exit(0);
 	} else {
 		var scriptName = pureArgs[0]
+		
+		
 		var mainScriptPath = path.resolve(scriptName)
+		
+		var mainScriptDirName = path.dirname(mainScriptPath)
+		
+		var priest = require(path.join(mainScriptDirName,'node_modules/priest'))
+		
+		
 		var mainScriptStats = fs.stat(mainScriptPath)
 		
 		var expressionName = priest.inferExpressionNameByFileName(path.basename(mainScriptPath))
@@ -24,7 +32,7 @@ CommandLine.prototype.run = function() {
 			return
 		}
 		
-		var mainScriptDirName = path.dirname(mainScriptPath)
+		
 		
 		process.chdir(mainScriptDirName) // Change the Current Directory
 		require.paths.unshift(path.join(mainScriptDirName,'node_modules'))

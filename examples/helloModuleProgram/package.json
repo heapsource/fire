@@ -1,0 +1,7 @@
+{
+	"name": "helloModuleProgram",
+	"version": "1.0.0",
+	"dependencies": {
+		"priest": ">= 1.0.0"
+	}
+}

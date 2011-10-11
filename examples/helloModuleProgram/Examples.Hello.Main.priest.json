@@ -1,0 +1,8 @@
+{
+	"name": "Examples.Hello.Main",
+	"json": {
+		"@Examples.HelloWorld": {
+			"hello": "world"
+		}
+	}
+}
