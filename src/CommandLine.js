@@ -1,6 +1,7 @@
 
 var fs = require('fs')
 var path = require('path')
+var sys = require('sys')
 
 function CommandLine() {
 	var packageJSON = JSON.parse(fs.readFileSync(path.join(__dirname,"../package.json"), 'utf8'))
@@ -52,7 +53,7 @@ CommandLine.prototype.run = function() {
 			var self = this
 			var contextBase = {};
 			contextBase._resultCallback = function(res) {
-				console.log(JSON.stringify(res))
+				sys.print(JSON.stringify(res))
 			}
 			contextBase._loopCallback = function() {};
 			contextBase._inputExpression  = function() {};
