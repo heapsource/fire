@@ -3849,3 +3849,87 @@ vows.describe('priest @raiseError').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe('priest loadedModules').addBatch({
+	'Having a Runtime which loads two modules': {
+		topic: function() {
+			require.paths.unshift(path.join(__dirname,'loadedModules/node_modules')); // because we are testing in a different directory
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.loadFromManifestFile(path.join(__dirname,"loadedModules/priest.manifest.json"))
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testLoadedModules",
+					json: {
+						"@loadedExpression1": null,
+						"@loadedExpression2": null
+					}
+				})
+				return runtime
+			},
+			"when I use getLoadedModules it should return the list of modules": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, {
+							res:res,
+							runtime:runtime
+						})
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testLoadedModules", contextBase ,null)
+				},
+				"it should return an error": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res.res, "Loaded Expression Two Result")
+					assert.deepEqual(res.runtime.getModules().names(),["loadedModule1","loadedModule2"])
+					assert.equal(res.runtime.getModules()["loadedModule1"].superName, "Super Module One")
+					assert.equal(res.runtime.getModules()["loadedModule2"].superName, "Super Module Two")
+				}
+			}
+		}
+	}
+}).export(module)
+
+vows.describe('priest Runtime on("load") event').addBatch({
+	'When a Runtime loads from Manifest file': {
+			topic:function() {
+				var runtime = new Runtime()
+				var self = this
+				runtime.events.on("load", function(r) {
+					self.callback(null,{
+						runtime:runtime,
+						r:r
+					})
+				})
+				runtime.loadFromManifestFile(path.join(__dirname,"onLoadTest/priest.manifest.json"))
+			},
+			"it should invoke the 'load' event": function(res) {
+				assert.equal(res.runtime, res.r, "expecting the event to send the runtime instance as the first argument") 
+			}
+	},
+	'When a Runtime loads from bootstrap': {
+			topic:function() {
+				var runtime = new Runtime()
+				var self = this
+				runtime.events.on("load", function(r) {
+					self.callback(null,{
+						runtime:runtime,
+						r:r
+					})
+				})
+				runtime.load()
+			},
+			"it should invoke the 'load' event": function(res) {
+				assert.equal(res.runtime, res.r, "expecting the event to send the runtime instance as the first argument") 
+			}
+	}
+}).export(module)
+

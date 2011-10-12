@@ -47,7 +47,7 @@ CommandLine.prototype.run = function() {
 				runtime.loadFromManifestFile(manifestPath)
 			} else {
 				// Manually load the scripts
-				runtime.scanScriptsDirs()
+				runtime.load()
 			}
 			var self = this
 			var contextBase = {};

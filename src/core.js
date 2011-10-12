@@ -12,7 +12,7 @@ var Expression = require('./Expressions').Expression
 var setVarCore = require('./Expressions').setVarCore
 var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = require('./Expressions').TEST_PRINT_TRACE_ON_INTERNAL_ERROR
 var throwInternalError = require('./Expressions').throwInternalError
-
+var EventEmitter = require('events').EventEmitter
 var DEFAULT_ENVIRONMENT = "development"
 var PathCache = require('./Paths').PathCache
 
@@ -354,20 +354,22 @@ var compileExpressionFuncFromJSON = function(jsonBlock, virtualFileName, outputF
 	return _expressionFunc; // defined inside the script.
 }
 
-function PriestExpressionsCollection() {
+function PriestCollection() {
 	
 }
 
 /*
  * Returns the name of all modules loaded.
  */
-PriestExpressionsCollection.prototype.names = function() {
+PriestCollection.prototype.names = function() {
 	return Object.keys(this)
 }
 
 function Runtime() {
 	this.loadedExpressions = {}; // Contains a member per expression implementation <Function>
-	this.loadedExpressionsMeta = new PriestExpressionsCollection(); // Contains a member per full definition of the expression, like {name:<String>, implementation:<Function>}
+	this.loadedExpressionsMeta = new PriestCollection(); // Contains a member per full definition of the expression, like {name:<String>, implementation:<Function>}
+	this.loadedModules = new PriestCollection();
+	
 	var dirName = path.join(__dirname, "built-in")
 	this.registerWellKnownExpressionDir(dirName)
 	this._paths = new PathCache()
@@ -375,7 +377,7 @@ function Runtime() {
 	this.moduleRequire = function(moduleName) {
 		return require(moduleName)
 	}
-	
+	this.events = new EventEmitter()
 	this.scriptDirectories = ['.']
 }
 
@@ -384,6 +386,13 @@ function Runtime() {
  */
 Runtime.prototype.getWellKnownExpressions = function() {
 	return this.loadedExpressionsMeta;
+}
+
+/*
+ * Returns all the priest.js modules loaded on the runtime.
+ */
+Runtime.prototype.getModules = function() {
+	return this.loadedModules;
 }
 
 Runtime.prototype.getPaths = function() {
@@ -476,6 +485,7 @@ Runtime.prototype.loadModule = function(moduleName) {
 	priestExpressions.forEach(function(expressionDefintion) {
 		this.registerWellKnownExpressionDefinition(expressionDefintion)
 		}, this)
+	this.loadedModules[moduleName] = priestModule
 }
 
 Runtime.prototype.getModuleConfiguration = function(moduleName) {
@@ -523,10 +533,20 @@ Runtime.prototype.loadFromManifestFile = function(manifestFile) {
 		}
 		
 		
-		// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
-		this.scanScriptsDirs()
+		this.load()
 	}
 	return true
+}
+
+/*
+Prepares the Runtime to Run
+*/
+Runtime.prototype.load = function() {
+	// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
+	this.scanScriptsDirs()
+	
+	this.events.emit('load', this)
+	this.events.removeAllListeners('load')
 }
 
 function blockContextHasHint(blockContext) {
