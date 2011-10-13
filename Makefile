@@ -1,4 +1,4 @@
-all: prepare-tests
+all: run-tests
 
 install-dev-dependencies:
 	npm install vows
@@ -6,10 +6,10 @@ install-dev-dependencies:
 remove-dev-dependencies:
 	npm uninstall vows
 
-run-tests: test/*.js
+run-tests:
 	node_modules/.bin/vows test/*.js
 
-run-tests-spec: test/*.js
+run-tests-spec:
 	node_modules/.bin/vows test/*.js --spec
 
 install-npm:

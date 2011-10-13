@@ -50,6 +50,14 @@ Expression.prototype.setVar = function(name, value) {
 	setVarCore(this._blockContext._variables, name, value)
 }
 
+Expression.prototype.setScopeVar = function(name, value) {
+	setVarCore(this._blockContext._variables, name, value, true)
+}
+
+Expression.prototype.setParentScopeVar = function(name, value) {
+	setVarCore(this._blockContext._parentContext._variables, name, value, true)
+}
+
 Expression.prototype.getVar = function(name) {
 	return this._blockContext._runtime.getPaths().run(this._blockContext._variables, name)
 }
@@ -98,8 +106,8 @@ Expression.prototype.requireHint = function() {
 	return true
 }
 
-function setVarCore(bag, name, value) {
-	if(bag[name] == undefined) {
+function setVarCore(bag, name, value, forceCreate) {
+	if(forceCreate || bag[name] == undefined) {
 		var v = new Variable()
 		v.set(value)
 		bag[name] = v

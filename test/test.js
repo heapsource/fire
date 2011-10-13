@@ -2,6 +2,7 @@ var vows = require('vows')
 var assert = require('assert')
 var jsonCode = require('../src/core.js')
 var Runtime = jsonCode.Runtime
+var Expression = jsonCode.Expression
 jsonCode.exportTestOnlyFunctions();
 
 var fs = require('fs'),
@@ -3933,3 +3934,126 @@ vows.describe('priest Runtime on("load") event').addBatch({
 	}
 }).export(module)
 
+
+
+vows.describe('priest createVar').addBatch({
+	'Having a Expression that uses setScopeVar instead setVar': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			function testCreateVarImplementation() {
+
+			}
+			testCreateVarImplementation.prototype = new Expression()
+			testCreateVarImplementation.prototype.execute = function()
+			{
+				var self = this
+				//console.warn("Creating var")
+				self.setScopeVar("someContext", "String of the Created Variable Context")
+				//console.warn("var created and running input")
+				this.runInput({
+					_resultCallback: function(res) {
+						//console.warn('got the result')
+						self.setResult(res)
+					}
+				});
+			}
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"createVarTest",
+				implementation: testCreateVarImplementation
+			})
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testCreateVar",
+				json: {
+					"@set(someContext)": "original context variable value",
+					"@return": {
+						"createdVarVal": {
+							"@createVarTest": {
+								"@get(someContext)": null
+							}
+						},
+						"originalVarVal": {
+							"@get(someContext)": null
+						}
+					}
+				}
+			})
+			return runtime
+		},
+			"when we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testCreateVar", contextBase ,null)
+				},
+				"should not override the outer variable": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res.originalVarVal,"original context variable value")
+				},
+				"should let the input of the caller expression see the value of the scope variable": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res.createdVarVal,"String of the Created Variable Context")
+				}
+			
+		}
+	},
+	'Having a Expression that uses @scopeSet instead @set': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testScopeSetVar",
+				json: {
+					"@set(someContext)": "original context variable value",
+					"@return": {
+						"createdVarVal": {
+							"@scopeSet(someContext)": "String of the Created Variable Context",
+							"@get(someContext)": null
+						},
+						"originalVarVal": {
+							"@get(someContext)": null
+						}
+					}
+				}
+			})
+			return runtime
+		},
+			"when we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testScopeSetVar", contextBase ,null)
+				},
+				"should not override the outer variable": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res.originalVarVal,"original context variable value")
+				},
+				"should let the input of the caller expression see the value of the scope variable": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res.createdVarVal,"String of the Created Variable Context")
+				}
+			
+		}
+	}
+}).export(module)
