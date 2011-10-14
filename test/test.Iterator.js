@@ -134,5 +134,10 @@ vows.describe('priest Iterator').addBatch({
 				})
 			}
 		}
-	}
+	}	,
+		"When I load the priest.js module the Iterator type must be exported":  function(){
+			var priestExports = require('../index')
+			assert.isFunction(priestExports.Iterator)
+			assert.equal(Iterator, priestExports.Iterator)
+		}
 	}).export(module);

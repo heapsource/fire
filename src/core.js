@@ -15,9 +15,10 @@ var throwInternalError = require('./Expressions').throwInternalError
 var EventEmitter = require('events').EventEmitter
 var DEFAULT_ENVIRONMENT = "development"
 var PathCache = require('./Paths').PathCache
-
+var Iterator = require('./Iterator')
 module.exports.Error = Error
 module.exports.Expression = Expression
+module.exports.Iterator = Iterator
 
 var SPECIAL_KEY_SYMBOL = "@"
 var HINT_START_SYMBOL = "("
