@@ -1880,15 +1880,13 @@ vows.describe('priest loop control').addBatch({
 }).export(module);
  
 vows.describe('priest @get paths').addBatch({
-	'When I use @get to get the second item in the array': {
+	'When I use @get to get a nested member in a variable': {
 		topic: function() {
 			return  {
-				"@set(numbers)": [
-					"Zero",
-					"One",
-					"Two"
-				],
-				"@get(numbers[1])": undefined
+				"@set(stuff)": {
+					number:"One"
+				},
+				"@get(stuff.number)": undefined
 			}
 		},
 		"and I run it": {
@@ -1901,7 +1899,7 @@ vows.describe('priest @get paths').addBatch({
 					cb(null, result)
 				})
 			},
-			"I should get the second item in the array": function(result) {
+			"I should get the nested member variable": function(result) {
 				assert.equal(result,"One")
 			}
 		}, 

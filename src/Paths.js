@@ -6,7 +6,6 @@ var Iterator = require('./Iterator')
 var AstEntryType = {
 	"Unknown": 0,
 	"Property": 1,
-	"Index": 2
 }
 
 function PathCache() {
@@ -25,8 +24,6 @@ Entry.prototype.isEmpty = function() {
 
 var EXPECTING_ANYTHING = 0
 var EXPECTING_PROPERTY_NAME = 1
-var EXPECTING_INDEX_NAME = 2
-var EXPECTING_PROPERTY_NAME = 3
 var VALID_NUMBERS = "0123456789"
 
 function isDigit(c){
@@ -49,29 +46,6 @@ PathCache.prototype.parse = function(pathStr) {
 			}
 			currentEntry = new Entry(AstEntryType.Property)// new property entry
 			phase = EXPECTING_PROPERTY_NAME
-		} else if(c === '[') {
-			//console.warn("Begin of Index found at char	" + i)
-			if(currentEntry.isEmpty() && currentEntry.type !== AstEntryType.Unknown) {
-				throw "Error at char index " + i + ": Can not get the index without an object"
-			}
-			if(currentEntry.type != AstEntryType.Unknown) {
-				list.push(currentEntry)
-			}
-			currentEntry = new Entry(AstEntryType.Index) // new index Entry
-			phase = EXPECTING_INDEX_NAME
-		} else if(c === ']') {
-			//console.warn("End of Index found at char	" + i)
-			if(currentEntry.isEmpty()) {
-				throw "Error at char index " + i + ": Index key can not be blank"
-			}
-			if(currentEntry.type !== AstEntryType.Index) {
-				throw "Error at char index " + i + ": Unexpected end of index number"
-			}
-			if(currentEntry.type != AstEntryType.Unknown) {
-				list.push(currentEntry)
-			}
-			currentEntry = new Entry(AstEntryType.Unknown)
-			phase = EXPECTING_ANYTHING
 		} else if(c === ' ') {
 			throw "Error at char index " + i + ": White spaces are not supported in names"
 		}
@@ -80,9 +54,6 @@ PathCache.prototype.parse = function(pathStr) {
 			if(currentEntry.type == AstEntryType.Unknown) {
 				currentEntry.type = AstEntryType.Property
 			}
-			if(currentEntry.type == AstEntryType.Index && !isDigit(c)) {
-				throw "Error at char index " + i + ": Indexes takes numbers only"
-			}
 			currentEntry.key += c
 			phase = EXPECTING_ANYTHING
 		}
@@ -90,9 +61,6 @@ PathCache.prototype.parse = function(pathStr) {
 	//console.warn("end of parse")
 	if(phase === EXPECTING_PROPERTY_NAME) {
 		throw "Unexpected end path, expecting property name"
-	}
-	else if(phase === EXPECTING_INDEX_NAME) {
-		throw "Unexpected end path, expecting index number"
 	}
 	if(!currentEntry.isEmpty()) {
 		list.push(currentEntry)
@@ -121,10 +89,6 @@ PathCache.prototype.compile = function(pathStr) {
 			buffer.writeLine("if(res === undefined || res === null) return res;")
 		} else if(entry.type == AstEntryType.Property) {
 			buffer.writeLine("res = res['" + entry.key +"'];")
-			buffer.writeLine("if(res === undefined || res === null) return res;")
-		}
-		else if(entry.type == AstEntryType.Index) {
-			buffer.writeLine("res = res[" + entry.key +"];")
 			buffer.writeLine("if(res === undefined || res === null) return res;")
 		}
 	}
