@@ -9,8 +9,9 @@ var AstEntryType = {
 	"Index": 2
 }
 
-var PathCache = function() {
+function PathCache() {
 	this._compiledPaths = {}
+	this._compiledWritePaths = {}
 }
 
 var Entry = function(type) {
@@ -141,8 +142,14 @@ PathCache.prototype.compile = function(pathStr) {
 PathCache.prototype.isCompiled = function(pathStr) {
 	return this._compiledPaths[pathStr] !== undefined
 }
+PathCache.prototype.writeIsCompiled = function(pathStr) {
+	return this._compiledWritePaths[pathStr] !== undefined
+}
 PathCache.prototype._runCore = function(variables, path) {
 	return path(variables)
+}
+PathCache.prototype._runWriteCore = function(variables, path, value, forceCreate) {
+	return path(variables, path, value, forceCreate)
 }
 PathCache.prototype.run = function(variables, pathStr) {
 	var path = this._compiledPaths[pathStr]
@@ -150,6 +157,74 @@ PathCache.prototype.run = function(variables, pathStr) {
 		path = this.compile(pathStr)
 	} 
 	return this._runCore(variables, path)
+}
+
+PathCache.prototype.compileWrite = function(pathStr) {
+	var pathFileName = pathStr + ".writePath.js"
+	var ast = this.parse(pathStr)
+	var buffer = new StringBuffer()
+	
+	buffer.writeLine("_compiledFunction = function(variables, path, value, forceCreate){")
+	buffer.indent()
+	buffer.writeLine("var currentVal = undefined;")
+	var iterator = new Iterator(ast);
+	while(iterator.next()) {
+		var entry = iterator.current();
+		if(iterator.isFirst()) {
+			
+			buffer.writeLine("if(!forceCreate) {")
+			buffer.indent()
+			buffer.writeLine("currentVal = variables['" + entry.key +"'];")
+			buffer.unindent()
+			buffer.writeLine("}")
+			buffer.writeLine("if(!currentVal) {")
+			buffer.indent()
+			buffer.writeLine("currentVal =  variables['" + entry.key +"'] = new Variable();")
+			buffer.unindent()
+			buffer.writeLine("}")
+			if(iterator.isLast()) {
+				buffer.writeLine("currentVal.set(value)");
+			} else {
+				buffer.writeLine("var varVal = currentVal.get()");
+				buffer.writeLine("if(!varVal) {");
+				buffer.indent()
+				buffer.writeLine("varVal = {};");
+				buffer.writeLine("currentVal.set(varVal);");
+				buffer.unindent()
+				buffer.writeLine("}");
+				buffer.writeLine("currentVal = varVal;");
+			}
+		} else if(entry.type == AstEntryType.Property) {
+			if(iterator.isLast()) {
+				buffer.writeLine("currentVal['" + entry.key +"'] = value;")
+			} else {
+				buffer.writeLine("var varVal = currentVal['" + entry.key +"']");
+				buffer.writeLine("if(!varVal){")
+				buffer.indent()
+				buffer.writeLine("varVal = currentVal['" + entry.key +"'] = {};")
+				buffer.unindent()
+				buffer.writeLine("}")
+				buffer.writeLine("currentVal = varVal;");
+			}
+		}
+	}
+	buffer.unindent()
+	buffer.writeLine("}")
+	var compilationResults = {
+		"_compiledFunction": null,
+		Variable: Variable
+	}
+	vm.runInNewContext(buffer.toString(), compilationResults, pathFileName);
+	
+	return this._compiledWritePaths[pathStr] = compilationResults._compiledFunction
+}
+
+PathCache.prototype.runWrite = function(variables, pathStr, value, forceCreate) {
+	var path = this._compiledWritePaths[pathStr]
+	if(path === undefined) {
+		path = this.compileWrite(pathStr)
+	} 
+	return this._runWriteCore(variables, path, value, forceCreate)
 }
 
 module.exports.PathCache = PathCache

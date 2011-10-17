@@ -4056,4 +4056,321 @@ vows.describe('priest createVar').addBatch({
 			
 		}
 	}
+	,
+	'When I use @get over a variable called "point" after using @set to write a paths "point.x" and "point.y"': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testWritePath",
+				json: {
+					"@set(point.x)": 150,
+					"@set(point.y)": 120,
+					"@get(point)" :null
+				}
+			})
+			return runtime
+		},
+			"when we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testWritePath", contextBase ,null)
+				},
+				"the result should be a structure with the member x and y": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res,{
+						x: 150,
+						y: 120
+					})
+				}
+			
+		}
+	}
+}).export(module)
+
+vows.describe('priest @index').addBatch({
+	'When I use @index with no path': {
+		"and the last result is undefined":{
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIndex",
+					json: {
+						"@index": 2
+					}
+				})
+				return runtime
+			},
+				"when we execute": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("testIndex", contextBase ,null)
+					},
+					"it should bypass the undefined value": function(err, res) {
+						assert.isNull(err)
+						assert.isUndefined(res)
+					}
+
+			}
+		},
+		"and the last result is null": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIndex",
+					json: {
+						"@return": null,
+						"@index": 2
+					}
+				})
+				return runtime
+			},
+				"when we execute": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("testIndex", contextBase ,null)
+					},
+					"it should bypass the null value": function(err, res) {
+						assert.isNull(err)
+						assert.deepEqual(res,null)
+					}
+
+			}
+		},
+		"and the last result is an object": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIndex",
+					json: {
+						"@return": {
+							name: "Steve"
+						},
+						"@index": "name"
+					}
+				})
+				return runtime
+			},
+				"and the input the name of the property": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("testIndex", contextBase ,null)
+					},
+					"it should return the value of the property": function(err, res) {
+						assert.isNull(err)
+						assert.equal(res, "Steve")
+					}
+
+			}
+		},
+		"and the last result is an Array": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIndex",
+					json: {
+						"@return": ["One", "Two"],
+						"@index": 1
+					}
+				})
+				return runtime
+			},
+			"and the input is the number of the index": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIndex", contextBase ,null)
+				},
+				"it should return the value of the given index in the array": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res, "Two")
+				}
+			}
+		}
+	},
+	'When I use @index with a path': {
+		"and the variable path does not exists":{
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIndex",
+					json: {
+						"@index(something)": 2
+					}
+				})
+				return runtime
+			},
+				"when we execute": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("testIndex", contextBase ,null)
+					},
+					"it should bypass the undefined value": function(err, res) {
+						assert.isNull(err)
+						assert.isUndefined(res)
+					}
+
+			}
+		},
+		"and the variable path is a null object": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIndex",
+					json: {
+						"@set(person)": null,
+						"@index(person)": "name"
+					}
+				})
+				return runtime
+			},
+				"when we execute": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("testIndex", contextBase ,null)
+					},
+					"it should bypass the value": function(err, res) {
+						assert.isNull(err)
+						assert.isUndefined(res)
+					}
+
+			}
+		},
+		"and the variable path is an object": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIndex",
+					json: {
+						"@set(contact)": {
+							name: "Steve"
+						},
+						"@index(contact)": "name"
+					}
+				})
+				return runtime
+			},
+			"and the input the name of the property": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIndex", contextBase ,null)
+				},
+				"it should return the value of the property": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res, "Steve")
+				}
+			}
+		},
+		"and the last result is an Array": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIndex",
+					json: {
+						"@set(numbers)": ["One", "Two"],
+						"@index(numbers)": 1
+					}
+				})
+				return runtime
+			},
+			"and the input is the number of the index": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIndex", contextBase ,null)
+				},
+				"it should return the value of the given index in the array": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res, "Two")
+				}
+			}
+		}
+	}
 }).export(module)

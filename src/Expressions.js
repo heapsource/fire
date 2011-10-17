@@ -47,23 +47,23 @@ Expression.prototype.skip = function() {
 }
 
 Expression.prototype.setVar = function(name, value) {
-	setVarCore(this._blockContext._variables, name, value)
+	setVarCore(this._blockContext._runtime, this._blockContext._variables, name, value)
 }
 
 Expression.prototype.setScopeVar = function(name, value) {
-	setVarCore(this._blockContext._variables, name, value, true)
+	setVarCore(this._blockContext._runtime, this._blockContext._variables, name, value, true)
 }
 
 Expression.prototype.setParentScopeVar = function(name, value) {
-	setVarCore(this._blockContext._parentContext._variables, name, value, true)
+	setVarCore(this._blockContext._runtime, this._blockContext._parentContext._variables, name, value, true)
 }
 
 Expression.prototype.getVar = function(name) {
 	return this._blockContext._runtime.getPaths().run(this._blockContext._variables, name)
 }
 
-Expression.prototype.setParentVar = function(name, value) {
-	setVarCore(this._blockContext._parentContext._variables, name, value)
+Expression.prototype.setParentVar = function(path, value) {
+	setVarCore(this._blockContext._runtime, this._blockContext._parentContext._variables, path, value)
 }
 
 Expression.prototype.getParentVar = function(name) {
@@ -106,14 +106,8 @@ Expression.prototype.requireHint = function() {
 	return true
 }
 
-function setVarCore(bag, name, value, forceCreate) {
-	if(forceCreate || bag[name] == undefined) {
-		var v = new Variable()
-		v.set(value)
-		bag[name] = v
-	} else {
-		bag[name].set(value)
-	}
+function setVarCore(runtime, bag, path, value, forceCreate) {
+	runtime.getPaths().runWrite(bag, path, value, forceCreate)
 }
 
 Expression.prototype.runExp = function(exp, context_block_overrides) {

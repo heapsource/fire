@@ -688,7 +688,7 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	}
 	var variablesObjects = {}
 	for(var k in variables) {
-		setVarCore(variablesObjects, k, variables[k])
+		setVarCore(runtime, variablesObjects, k, variables[k])
 	}
 	var contextBase = {}
 	contextBase._resultCallback = resultCallback
@@ -717,11 +717,14 @@ module.exports.DEFAULT_ENVIRONMENT = DEFAULT_ENVIRONMENT
 module.exports.DEFAULT_MANIFEST_FILE_NAME = DEFAULT_MANIFEST_FILE_NAME
 module.exports.DEFAULT_SCRIPT_EXTENSION = DEFAULT_SCRIPT_EXTENSION
 
-module.exports.setBlockContextVariable = function(blockContext, name, value) {
+module.exports.setBlockContextVariable = function(runtime, blockContext, name, value) {
+	if(!(runtime instanceof Runtime)) {
+		throw "setBlockContextVariable requires a runtime instance" 
+	}
 	if(!blockContext._variables) {
 		blockContext._variables = {}
 	} 
-	setVarCore(blockContext._variables, name, value)
+	setVarCore(runtime, blockContext._variables, name, value)
 }
 
 module.exports.inferExpressionNameByFileName = function(fileName) {

@@ -298,3 +298,127 @@ vows.describe('priest Paths Values').addBatch({
 		}
 	}
 }).export(module);
+
+vows.describe('priest Write Paths').addBatch({
+	"When I write a variable using a single part path": {
+		topic: function(){
+			var pathCache = new PathCache()
+			var variables = {};
+			pathCache.runWrite(variables, "x" , "Root Val");
+			return {
+				variables: variables,
+				pathCache: pathCache
+			}
+		},
+		"the variables bag should contain the variable assigned": function(res) {
+			assert.instanceOf(res.variables.x, Variable)
+			assert.equal(res.variables.x.get(), "Root Val")
+		},
+		"the path should remain compiled": function(res) {
+			assert.isTrue(res.pathCache.writeIsCompiled("x"), "writeIsCompiled should return true")
+		}
+	}, 
+	"When I write a variable using a two object parts variable path": {
+		topic: function(){
+			var pathCache = new PathCache()
+			var variables = {};
+			pathCache.runWrite(variables, "point.x" , 534);
+			return {
+				variables: variables,
+				pathCache: pathCache
+			}
+		},
+		"the variable should contain the assigned member": function(res) {
+			assert.instanceOf(res.variables.point, Variable)
+			assert.deepEqual(res.variables.point.get(), {
+				x: 534
+			})
+		}	,
+			"then when I assign another variable at the same level": {
+				topic: function(res) {
+					var pathCache = res.pathCache
+					var variables = res.variables
+					pathCache.runWrite(variables, "point.y" , 632);
+					return {
+						variables: variables,
+						pathCache: pathCache
+					}
+				},
+				"the first and second assignment should remain in the object": function(res) {
+					assert.instanceOf(res.variables.point, Variable)
+					assert.deepEqual(res.variables.point.get(), {
+							x: 534,
+							y: 632
+					})
+				}
+			}
+	}, 
+	"When I write a variable using a three object parts variable path": {
+		topic: function(){
+			var pathCache = new PathCache()
+			var variables = {};
+			pathCache.runWrite(variables, "rect.point1.x" , 534);
+			return {
+				variables: variables,
+				pathCache: pathCache
+			}
+		},
+		"the variable should contain the assigned third part variable": function(res) {
+			assert.instanceOf(res.variables.rect, Variable)
+			assert.deepEqual(res.variables.rect.get(), {
+				point1: {
+					x: 534
+				}
+			})
+		},
+		"then when I assign another variable at the same level": {
+			topic: function(res) {
+				var pathCache = res.pathCache
+				var variables = res.variables
+				pathCache.runWrite(variables, "rect.point1.y" , 632);
+				return {
+					variables: variables,
+					pathCache: pathCache
+				}
+			},
+			"the first and second assignment should remain in the object": function(res) {
+				assert.instanceOf(res.variables.rect, Variable)
+				assert.deepEqual(res.variables.rect.get(), {
+					point1: {
+						x: 534,
+						y: 632
+					}
+				})
+			}
+		}
+	},
+	"When I write a variable using forceCreate": {
+		topic: function(){
+			var pathCache = new PathCache()
+			var originalVar = new Variable("Original Value")
+			var variables = {
+				rect: originalVar
+			};
+			pathCache.runWrite(variables, "rect.point1.x" , 534, 
+				true // force create
+			);
+			return {
+				variables: variables,
+				pathCache: pathCache,
+				originalVar: originalVar
+			}
+		},
+		"the variable should contain the assigned third part variable": function(res) {
+			assert.instanceOf(res.variables.rect, Variable)
+			assert.deepEqual(res.variables.rect.get(), {
+				point1: {
+					x: 534
+				}
+			})
+		},
+		"the original variable value should not be modified": function(res) {
+			assert.instanceOf(res.originalVar, Variable)
+			assert.equal(res.originalVar.get(), "Original Value")
+		}
+	}
+}).export(module);
