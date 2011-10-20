@@ -3,6 +3,7 @@ var assert = require('assert')
 var jsonCode = require('../src/core.js')
 var Runtime = jsonCode.Runtime
 var Expression = jsonCode.Expression
+var exec  = require('child_process').exec
 jsonCode.exportTestOnlyFunctions();
 
 var fs = require('fs'),
@@ -4372,3 +4373,24 @@ vows.describe('priest @index').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe('priest - dependentModules').addBatch({
+	'When a priest module loads a third priest module': {
+		topic: function() {
+			var self = this
+			exec('bin/./priest test/dependentModules/dependentModules.Main.priest.json', function (error, stdout, stderr) {
+				self.callback(error, {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				})
+			});
+		},
+		"both modules should be automatically loaded only by referring one in the manifest": function(output){
+			assert.equal(output.stderr,'')
+			assert.isNotNull(output.stdout)
+			assert.include(output.stdout, "Expression Two Result")
+		}
+	}
+}).export(module)
+
