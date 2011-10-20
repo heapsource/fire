@@ -3889,9 +3889,9 @@ vows.describe('priest loadedModules').addBatch({
 				"it should return an error": function(err, res) {
 					assert.isNull(err)
 					assert.equal(res.res, "Loaded Expression Two Result")
-					assert.deepEqual(res.runtime.getModules().names(),["loadedModule1","loadedModule2"])
-					assert.equal(res.runtime.getModules()["loadedModule1"].superName, "Super Module One")
-					assert.equal(res.runtime.getModules()["loadedModule2"].superName, "Super Module Two")
+					assert.deepEqual(res.runtime.getModules(),[require("loadedModule1"),require("loadedModule2")])
+					assert.equal(res.runtime.getModules()[0].superName, "Super Module One")
+					assert.equal(res.runtime.getModules()[1].superName, "Super Module Two")
 				}
 			}
 		}
@@ -4394,4 +4394,16 @@ vows.describe('priest - dependentModules').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe('priest - invalid module registration').addBatch({
+	'When I try to register a module instance using loadModuleInstance and the module instance does not export expressions': function() {
+		var runtime = new Runtime()
+		try {
+			runtime.loadModuleInstance({}, "someInvalidModule")
+		}catch(err) {
+			assert.equal(err, "Module 'someInvalidModule' is not a priest module")
+		}
+	}
+}).export(module)
+
 

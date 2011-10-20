@@ -13,13 +13,22 @@ var setVarCore = require('./Expressions').setVarCore
 var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = require('./Expressions').TEST_PRINT_TRACE_ON_INTERNAL_ERROR
 var throwInternalError = require('./Expressions').throwInternalError
 var EventEmitter = require('events').EventEmitter
-var DEFAULT_ENVIRONMENT = "development"
+
 var PathCache = require('./Paths').PathCache
 var Iterator = require('./Iterator')
 var mergeWith = require('./mergeWith.js')
+var ModuleInitializer = require('./ModuleInitializer.js')
 module.exports.Error = Error
 module.exports.Expression = Expression
 module.exports.Iterator = Iterator
+
+var contants = require('./constants.js')
+
+
+var DEFAULT_ENVIRONMENT = contants.DEFAULT_ENVIRONMENT
+var DEFAULT_MANIFEST_FILE_NAME = contants.DEFAULT_MANIFEST_FILE_NAME
+var DEFAULT_SCRIPT_EXTENSION = contants.DEFAULT_SCRIPT_EXTENSION
+
 
 var SPECIAL_KEY_SYMBOL = "@"
 var HINT_START_SYMBOL = "("
@@ -370,7 +379,7 @@ PriestCollection.prototype.names = function() {
 function Runtime() {
 	this.loadedExpressions = {}; // Contains a member per expression implementation <Function>
 	this.loadedExpressionsMeta = new PriestCollection(); // Contains a member per full definition of the expression, like {name:<String>, implementation:<Function>}
-	this.loadedModules = new PriestCollection();
+	this.loadedModules = []
 	
 	var dirName = path.join(__dirname, "built-in")
 	this.registerWellKnownExpressionDir(dirName)
@@ -491,13 +500,13 @@ Runtime.prototype.setModuleConfiguration = function(moduleName, value) {
 	this.configurations[moduleName] = value
 }
 
-Runtime.prototype.loadModule = function(moduleName) {
-	if(this.loadedModules[moduleName]) return // Skip if already loaded
-	
-	var priestModule = this.moduleRequire(moduleName)
-	var priestExpressions = priestModule.priestExpressions
-	if(priestExpressions === undefined || priestExpressions === null) {
-		throw "priest module " + moduleName + " does not export any priest expression"
+Runtime.prototype.loadModuleInstance = function(priestModule, fictionalName) {
+	if(!fictionalName) throw "loadModuleInstance requires a fictionalName"
+	if(this.loadedModules.indexOf(priestModule) != -1) return false
+	var priestExports = priestModule.priest
+	var priestExpressions = priestExports ? priestExports.expressions :  undefined
+	if(!priestExpressions) {
+		throw "Module '" + fictionalName + "' is not a priest module"
 	}
 	if(priestModule.priest) {
 		if(priestModule.priest.manifestFile) {
@@ -507,7 +516,13 @@ Runtime.prototype.loadModule = function(moduleName) {
 	priestExpressions.forEach(function(expressionDefintion) {
 		this.registerWellKnownExpressionDefinition(expressionDefintion)
 		}, this)
-	this.loadedModules[moduleName] = priestModule
+	this.loadedModules.push(priestModule)
+	return true
+}
+
+Runtime.prototype.loadNamedModule = function(moduleName) {
+	var priestModule = this.moduleRequire(moduleName)
+	this.loadModuleInstance(priestModule, moduleName)
 }
 
 Runtime.prototype._loadManifestFile = function(manifestFile) {
@@ -539,7 +554,7 @@ Runtime.prototype._loadModules = function(modulesList) {
 	for(var i = 0;i < modulesList.length;i++) {
 		var currentModuleCount = modulesList.length
 		var moduleName = modulesList[i]
-		this.loadModule(moduleName)
+		this.loadNamedModule(moduleName)
 		// Check if new modules has been added to the list
 		if(currentModuleCount != modulesList.length) {
 			i = 0
@@ -559,10 +574,9 @@ Runtime.prototype.load = function() {
 	this.loadManifestModules()
 	
 	// Intialize all the Modules
-	this.loadedModules.names().forEach(function(moduleName) {
-		var priestModule = self.loadedModules[moduleName]
-		if(priestModule.priestModuleInit) {
-			priestModule.priestModuleInit(self)
+	this.loadedModules.forEach(function(priestModule) {
+		if(priestModule.priest && priestModule.priest.init) {
+			priestModule.priest.init(self)
 		}
 	})
 	
@@ -571,7 +585,7 @@ Runtime.prototype.load = function() {
 	this.scanScriptsDirs()
 	
 	// STEP 1. Load Configurations from Manifest
-	// (Configurations must be loaded first so the priestModuleInit callback of all modules can work properly)
+	// (Configurations must be loaded first so the priest.init callback of all modules can work properly)
 	var configurations = this.mergedManifest.environments;
 	if(configurations) {
 		self.configurations = configurations[self.environmentName]
@@ -740,21 +754,12 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	*/
 	runtime.runExpressionFunc(baseFunc, contextBase, null)
 }
-var DEFAULT_SCRIPT_EXTENSION = ".priest.json"
-var DEFAULT_MANIFEST_FILE_NAME = "priest.manifest.json"
 
-module.exports.DEFAULT_ENVIRONMENT = DEFAULT_ENVIRONMENT
-module.exports.DEFAULT_MANIFEST_FILE_NAME = DEFAULT_MANIFEST_FILE_NAME
-module.exports.DEFAULT_SCRIPT_EXTENSION = DEFAULT_SCRIPT_EXTENSION
 
-module.exports.enableModule = function(thirdPartyModule) {
-	var moduleDirName = path.dirname(thirdPartyModule.filename)
-	var moduleManifestFile = path.join(moduleDirName, DEFAULT_MANIFEST_FILE_NAME)
-	thirdPartyModule.exports.priest = thirdPartyModule.exports.priest || {};
-	
-	if(path.existsSync(moduleManifestFile)) {
-		thirdPartyModule.exports.priest.manifestFile = moduleManifestFile
-	}
+mergeWith(module.exports, contants)
+
+module.exports.enableModule = function(thirdPartyModule, moduleInit) {
+	return new ModuleInitializer(thirdPartyModule, moduleInit)
 }
 
 module.exports.setBlockContextVariable = function(runtime, blockContext, name, value) {
