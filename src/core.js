@@ -16,7 +16,7 @@ var EventEmitter = require('events').EventEmitter
 var DEFAULT_ENVIRONMENT = "development"
 var PathCache = require('./Paths').PathCache
 var Iterator = require('./Iterator')
-var overrideWith = require('./overrideWith.js')
+var mergeWith = require('./mergeWith.js')
 module.exports.Error = Error
 module.exports.Expression = Expression
 module.exports.Iterator = Iterator
@@ -501,7 +501,7 @@ Runtime.prototype.loadModule = function(moduleName) {
 	}
 	if(priestModule.priest) {
 		if(priestModule.priest.manifestFile) {
-			this._overrideWithManifestFile(priestModule.priest.manifestFile)
+			this._mergeWithManifestFile(priestModule.priest.manifestFile)
 		}
 	}
 	priestExpressions.forEach(function(expressionDefintion) {
@@ -509,14 +509,18 @@ Runtime.prototype.loadModule = function(moduleName) {
 		}, this)
 	this.loadedModules[moduleName] = priestModule
 }
-Runtime.prototype._overrideWithManifestFile = function(manifestFile) {
+
+Runtime.prototype._loadManifestFile = function(manifestFile) {
+	var jsonStr = fs.readFileSync(manifestFile, 'utf8')
+	return JSON.parse(jsonStr)
+}
+
+Runtime.prototype._mergeWithManifestFile = function(manifestFile) {
 	var manifestDirName = path.dirname(manifestFile)
 	var self = this
-	var jsonStr = fs.readFileSync(manifestFile, 'utf8')
-	
-	var manifest = JSON.parse(jsonStr)
+	var manifest = this._loadManifestFile(manifestFile)
 	if(manifest) {
-		overrideWith(self.mergedManifest, manifest)
+		mergeWith(self.mergedManifest, manifest)
 		// STEP 2. Extract additional script directories and append them to the main array.
 		if(manifest && manifest.scriptDirectories) {
 			manifest.scriptDirectories.forEach(function(dirName) {
@@ -526,21 +530,25 @@ Runtime.prototype._overrideWithManifestFile = function(manifestFile) {
 	}
 }
 Runtime.prototype.loadFromManifestFile = function(manifestFile) {
-	this._overrideWithManifestFile(manifestFile)
+	this._mergeWithManifestFile(manifestFile)
 	this.load()
 	return true
 }
 
-Runtime.prototype.loadManifestModules = function() {
-	for(var i = 0;i < this.mergedManifest.modules.length;i++) {
-		var currentModuleCount = this.mergedManifest.modules.length
-		var moduleName = this.mergedManifest.modules[i]
+Runtime.prototype._loadModules = function(modulesList) {
+	for(var i = 0;i < modulesList.length;i++) {
+		var currentModuleCount = modulesList.length
+		var moduleName = modulesList[i]
 		this.loadModule(moduleName)
 		// Check if new modules has been added to the list
-		if(currentModuleCount != this.mergedManifest.modules.length) {
+		if(currentModuleCount != modulesList.length) {
 			i = 0
 		}
 	}
+}
+
+Runtime.prototype.loadManifestModules = function() {
+	this._loadModules(this.mergedManifest.modules)
 }
 
 /*
@@ -562,14 +570,12 @@ Runtime.prototype.load = function() {
 	// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
 	this.scanScriptsDirs()
 	
-	
 	// STEP 1. Load Configurations from Manifest
 	// (Configurations must be loaded first so the priestModuleInit callback of all modules can work properly)
 	var configurations = this.mergedManifest.environments;
-	if(configurations !== undefined && configurations !== null) {
+	if(configurations) {
 		self.configurations = configurations[self.environmentName]
 	}
-	
 	this.events.emit('load', this)
 	this.events.removeAllListeners('load')
 }

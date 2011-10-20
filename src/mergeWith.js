@@ -1,4 +1,4 @@
-function overrideWith(original, override) {
+function mergeWith(original, override) {
 	if(typeof(original) == 'object' && (original instanceof Array)) {
 		// Array
 		for(var i in override) {
@@ -12,13 +12,17 @@ function overrideWith(original, override) {
 		// Object
 		if(override && original) {
 			Object.keys(override).forEach(function(overrideKey) {
-				original[overrideKey] = overrideWith(original[overrideKey], override[overrideKey])
+				if(!original[overrideKey]) {
+					original[overrideKey] = override[overrideKey]
+				} else {
+					original[overrideKey] = mergeWith(original[overrideKey], override[overrideKey])
+				}
 			})
 		} else if(!original) {
 			return override
 		}
 		return original
 	}
-	return override
+	return original
 }
-module.exports = overrideWith
+module.exports = mergeWith

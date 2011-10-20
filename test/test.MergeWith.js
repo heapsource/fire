@@ -1,9 +1,9 @@
 var vows = require('vows')
 var assert = require('assert')
 
-var overrideWith = require('../src/overrideWith.js')
+var mergeWith = require('../src/mergeWith.js')
 
-vows.describe('priest overrideWith').addBatch({
+vows.describe('priest mergeWith').addBatch({
 	"When I merge an object with properties at first level": {
 		"with another object no properties the original object should remain intact": function() {
 			var expectedObject = {
@@ -14,10 +14,10 @@ vows.describe('priest overrideWith').addBatch({
 				"x": 100,
 				"y": 200
 			};
-			var overrideObject =  {
+			var mergeObject =  {
 				
 			};
-			overrideWith(originalObject, overrideObject);
+			mergeWith(originalObject, mergeObject);
 			assert.deepEqual(originalObject, expectedObject);
 		}
 		,"with another object with one additional properties the merged object should contain the additional property": function() {
@@ -30,10 +30,10 @@ vows.describe('priest overrideWith').addBatch({
 				"x": 100,
 				"y": 200
 			};
-			var overrideObject =  {
+			var mergeObject =  {
 				"z": 300
 			};
-			overrideWith(originalObject, overrideObject);
+			mergeWith(originalObject, mergeObject);
 			assert.deepEqual(originalObject, expectedObject);
 		}
 		,"with another object at second level the merged object should contain the new property with the nested object": function() {
@@ -48,12 +48,12 @@ vows.describe('priest overrideWith').addBatch({
 				"x": 100,
 				"y": 200
 			};
-			var overrideObject =  {
+			var mergeObject =  {
 				"info": {
 					"id": "Favorite Point"
 				}
 			};
-			overrideWith(originalObject, overrideObject);
+			mergeWith(originalObject, mergeObject);
 			assert.deepEqual(originalObject, expectedObject);
 		}
 		,"with another object that at second level contains an array, the merged object should contain the array": function() {
@@ -69,13 +69,13 @@ vows.describe('priest overrideWith').addBatch({
 				"x": 100,
 				"y": 200
 			};
-			var overrideObject =  {
+			var mergeObject =  {
 				"info": {
 					"id": "Favorite Point",
 					"tags": ["starters", "mids"]
 				}
 			};
-			overrideWith(originalObject, overrideObject);
+			mergeWith(originalObject, mergeObject);
 			assert.deepEqual(originalObject, expectedObject);
 		}
 	}
@@ -87,10 +87,10 @@ vows.describe('priest overrideWith').addBatch({
 			var originalObject = {
 				"tags": ["tag1"]
 			};
-			var overrideObject =  {
+			var mergeObject =  {
 				"tags": ["tag2", "tag3", "tag1"]
 			};
-			overrideWith(originalObject, overrideObject);
+			mergeWith(originalObject, mergeObject);
 			assert.deepEqual(originalObject, expectedObject);
 		},
 		"with another object with arrays of complex values for the same properties, the original object should have the merged arrays with simple and complex values with no duplicated values": function() {
@@ -103,7 +103,7 @@ vows.describe('priest overrideWith').addBatch({
 			var originalObject = {
 				"tags": ["tag1"]
 			};
-			var overrideObject =  {
+			var mergeObject =  {
 				"tags": [
 				"tag1",
 				{
@@ -111,7 +111,7 @@ vows.describe('priest overrideWith').addBatch({
 					"description": "all about news"
 				}]
 			};
-			overrideWith(originalObject, overrideObject);
+			mergeWith(originalObject, mergeObject);
 			assert.deepEqual(originalObject, expectedObject);
 		}
 	}
@@ -132,16 +132,16 @@ vows.describe('priest overrideWith').addBatch({
 				},
 				"point2": null
 			};
-			var overrideObject =  {
+			var mergeObject =  {
 				"point1": {
-					"x": 20
+					"x": 140
 				},
 				"point2": {
 					"x": 30,
 					"y": 40
 				}
 			};
-			overrideWith(originalObject, overrideObject);
+			mergeWith(originalObject, mergeObject);
 			assert.deepEqual(originalObject, expectedObject);
 		}
 	}

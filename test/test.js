@@ -4389,7 +4389,8 @@ vows.describe('priest - dependentModules').addBatch({
 		"both modules should be automatically loaded only by referring one in the manifest": function(output){
 			assert.equal(output.stderr,'')
 			assert.isNotNull(output.stdout)
-			assert.include(output.stdout, "Expression Two Result")
+			assert.isNull(output.error)
+			assert.equal(output.stdout, JSON.stringify("Expression Two Result"))
 		}
 	}
 }).export(module)
