@@ -44,22 +44,29 @@ CommandLine.prototype.run = function() {
 		}
 		var manifestPath = priest.DEFAULT_MANIFEST_FILE_NAME
 		path.exists(manifestPath, function(manifestFound) {
+				var self = this
+			var initializationFinished = function(err) {
+				if(err) {
+					console.error(err.toString())
+					process.exit(1)
+				}
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					sys.print(JSON.stringify(res))
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};   
+				contextBase._errorCallback =  function() {};
+				runtime.runExpressionByName(expressionName, contextBase ,null)
+			}
+			
 			if(manifestFound) {
-				runtime.loadFromManifestFile(manifestPath)
+				runtime.loadFromManifestFile(manifestPath, initializationFinished)
 			} else {
 				// Manually load the scripts
-				runtime.load()
+				runtime.load(initializationFinished)
 			}
-			var self = this
-			var contextBase = {};
-			contextBase._resultCallback = function(res) {
-				sys.print(JSON.stringify(res))
-			}
-			contextBase._loopCallback = function() {};
-			contextBase._inputExpression  = function() {};
-			contextBase._variables = {};   
-			contextBase._errorCallback =  function() {};
-			runtime.runExpressionByName(expressionName, contextBase ,null)
 		})
 	}
 }

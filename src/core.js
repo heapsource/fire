@@ -13,7 +13,7 @@ var setVarCore = require('./Expressions').setVarCore
 var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = require('./Expressions').TEST_PRINT_TRACE_ON_INTERNAL_ERROR
 var throwInternalError = require('./Expressions').throwInternalError
 var EventEmitter = require('events').EventEmitter
-
+var InitializerError = require('./InitializerError.js')
 var PathCache = require('./Paths').PathCache
 var Iterator = require('./Iterator')
 var mergeWith = require('./mergeWith.js')
@@ -22,12 +22,14 @@ module.exports.Error = Error
 module.exports.Expression = Expression
 module.exports.Iterator = Iterator
 
-var contants = require('./constants.js')
+var constants = require('./constants.js')
 
 
-var DEFAULT_ENVIRONMENT = contants.DEFAULT_ENVIRONMENT
-var DEFAULT_MANIFEST_FILE_NAME = contants.DEFAULT_MANIFEST_FILE_NAME
-var DEFAULT_SCRIPT_EXTENSION = contants.DEFAULT_SCRIPT_EXTENSION
+var DEFAULT_ENVIRONMENT = constants.DEFAULT_ENVIRONMENT
+var DEFAULT_MANIFEST_FILE_NAME = constants.DEFAULT_MANIFEST_FILE_NAME
+var DEFAULT_SCRIPT_EXTENSION = constants.DEFAULT_SCRIPT_EXTENSION
+
+mergeWith(module.exports, constants)
 
 
 var SPECIAL_KEY_SYMBOL = "@"
@@ -389,7 +391,9 @@ function Runtime() {
 		return require(moduleName)
 	}
 	this.events = new EventEmitter()
-	this.scriptDirectories = ['.']
+	this.scriptDirectories = [{
+		path: '.'
+	}]
 	
 	this.mergedManifest = {
 		modules: []
@@ -418,20 +422,38 @@ var Utils  = require('./Utils')
 /*
  * Load .priest.json files from a directory.
  */
-Runtime.prototype.scanScriptsDir = function(absoluteDirPath) {
+Runtime.prototype.scanScriptsDir = function(dirInfo) {
+	var absoluteDirPath = dirInfo.path
 	var fileNames = Utils.getFilesWithExtension(absoluteDirPath, DEFAULT_SCRIPT_EXTENSION)
 	fileNames.forEach(function(file) {
 		var absoluteFileName = path.join(absoluteDirPath, file)
-		this.registerWellKnownJSONExpressionFile(absoluteFileName)
+		this.registerWellKnownJSONExpressionFile(absoluteFileName, dirInfo.attributes)
 	}, this)
 }
 
-
 Runtime.prototype.scanScriptsDirs = function() {
 	var self = this
-	this.scriptDirectories.forEach(function(dirName) {
-		self.scanScriptsDir(dirName)
+	this.scriptDirectories.forEach(function(scriptDirInfo) {
+		self.scanScriptsDir(scriptDirInfo)
 	})
+}
+
+/*
+ * Load directores for the current environment. The path must be absolute. If the path does not exists it will do nothing
+ */
+Runtime.prototype.registerInitializersDir = function(initializersDirPath) {
+	if(path.existsSync(initializersDirPath)) {
+		var envInitPath = path.join(initializersDirPath, this.environmentName);
+		
+		if(path.existsSync(envInitPath)) {
+			this.scriptDirectories.push({
+				path: envInitPath,
+				attributes: {
+					initialize: [this.environmentName]
+				}
+			})
+		}
+	}
 }
 
 /*
@@ -451,9 +473,15 @@ Runtime.prototype.registerWellKnownExpressionFile = function(absoluteFilePath) {
 	return definition
 }
 
-Runtime.prototype.registerWellKnownJSONExpressionFile = function(absoluteFilePath) {
+/*
+ * Load .priest.json file, attributes can be specified.
+ */
+Runtime.prototype.registerWellKnownJSONExpressionFile = function(absoluteFilePath, attributes) {
 	var jsonSourceCode = fs.readFileSync(absoluteFilePath, 'utf8')
 	var definition = JSON.parse(jsonSourceCode)
+	if(attributes) {
+		mergeWith(definition, attributes)
+	}
 	this.registerWellKnownExpressionDefinition(definition)
 	return definition
 }
@@ -512,6 +540,9 @@ Runtime.prototype.loadModuleInstance = function(priestModule, fictionalName) {
 		if(priestModule.priest.manifestFile) {
 			this._mergeWithManifestFile(priestModule.priest.manifestFile)
 		}
+		if(priestModule.priest.initializersDir) {
+			this.registerInitializersDir(priestModule.priest.initializersDir)
+		}
 	}
 	priestExpressions.forEach(function(expressionDefintion) {
 		this.registerWellKnownExpressionDefinition(expressionDefintion)
@@ -539,14 +570,16 @@ Runtime.prototype._mergeWithManifestFile = function(manifestFile) {
 		// STEP 2. Extract additional script directories and append them to the main array.
 		if(manifest && manifest.scriptDirectories) {
 			manifest.scriptDirectories.forEach(function(dirName) {
-				self.scriptDirectories.push(path.join(manifestDirName,dirName))
+				self.scriptDirectories.push({
+					path: path.join(manifestDirName,dirName)
+				})
 			})
 		}
 	}
 }
-Runtime.prototype.loadFromManifestFile = function(manifestFile) {
+Runtime.prototype.loadFromManifestFile = function(manifestFile, initializationCallback) {
 	this._mergeWithManifestFile(manifestFile)
-	this.load()
+	this.load(initializationCallback)
 	return true
 }
 
@@ -567,9 +600,10 @@ Runtime.prototype.loadManifestModules = function() {
 }
 
 /*
-Prepares the Runtime to Run
+Prepares the Runtime to Run. Since the introduction of initializer expressions, you can provide a callback to know when the initialization finishes. If no callback is provided no initialization will be executed.
 */
-Runtime.prototype.load = function() {
+Runtime.prototype.load = function(initializationCallback) {
+	this.registerInitializersDir(path.resolve(constants.INITIALIZERS_DIR_NAME))
 	var self = this
 	this.loadManifestModules()
 	
@@ -579,7 +613,6 @@ Runtime.prototype.load = function() {
 			priestModule.priest.init(self)
 		}
 	})
-	
 	
 	// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
 	this.scanScriptsDirs()
@@ -592,7 +625,48 @@ Runtime.prototype.load = function() {
 	}
 	this.events.emit('load', this)
 	this.events.removeAllListeners('load')
+	
+	var initializeExpressions = []
+	this.loadedExpressionsMeta.names().forEach(function(expName) {
+		var expDef = this.loadedExpressionsMeta[expName]
+		if(expDef.initialize && expDef.initialize.indexOf(this.environmentName) != -1) {
+			// it's a initializer for the current environment
+			initializeExpressions.push(expDef)
+		}
+	}, this)
+	if(initializationCallback) {
+		if(initializeExpressions.length > 0) {
+			var initIterator = new Iterator(initializeExpressions)
+			this._runNextInitializer(initIterator, initializationCallback)
+		} else {
+			initializationCallback(null)
+		}
+	}
 }
+
+Runtime.prototype._runNextInitializer = function(iterator, finishCallback) {
+	var self = this
+	if(!iterator.next()) {
+		finishCallback(null)
+		return
+	}
+	var expDef = iterator.current()
+	this.runExpressionByName(expDef.name, {
+		_variables: {},
+		_resultCallback: function() {
+			self._runNextInitializer(iterator, finishCallback)
+		}
+		,_errorCallback: function(err) {
+			finishCallback(new InitializerError(expDef, err))
+		},
+		_loopCallback: function(cmd) {},
+		_inputExpression: function() {
+			this.setResult(null)
+		}
+	}, null)
+}
+
+module.exports.InitializerError = InitializerError
 
 function blockContextHasHint(blockContext) {
 	return blockContext && blockContext._hint
@@ -756,7 +830,6 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 }
 
 
-mergeWith(module.exports, contants)
 
 module.exports.enableModule = function(thirdPartyModule, moduleInit) {
 	return new ModuleInitializer(thirdPartyModule, moduleInit)

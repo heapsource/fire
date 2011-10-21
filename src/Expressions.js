@@ -128,7 +128,7 @@ function throwInternalError(msg) {
 	{
 		console.trace()
 	}
-	throw "priest internssssssssal error, " + msg
+	throw "priest internal error, " + msg
 }
 
 module.exports.Expression = Expression

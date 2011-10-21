@@ -78,7 +78,7 @@ vows.describe('priest command line utility').addBatch({
 		}
 	}
 	,
-	"When I run the command line in a proyect with a manifest that specifies additional directories and the main script returns a value from an additional directory": {
+	"When I run the command line in a project with a manifest that specifies additional directories and the main script returns a value from an additional directory": {
 		topic: function() {
 			var self = this
 			exec('bin/./priest test/commandLineDirs/withSubScripts/myMain.priest.json', function (error, stdout, stderr) {
@@ -93,6 +93,40 @@ vows.describe('priest command line utility').addBatch({
 			assert.equal(output.stderr,'')
 			assert.isNotNull(output.stdout)
 			assert.include(output.stdout, "Value from a Sub expression")
+		}
+	},
+	"When I run the command line in a project with a failing initializer": {
+		topic: function() {
+			var self = this
+				exec('bin/./priest test/commandLineDirs/failingInitializer/failingInitializer.Main.priest.json', function (error, stdout, stderr) {
+					self.callback(null, {
+						error: error, 
+						stdout: stdout, 
+						stderr: stderr
+					})
+				});
+		},
+		"I should see the error description in the stderr": function(output){
+			assert.equal(output.stderr,"priest runtime initializer 'failingInitializer.Init' failed with error: 'priest runtime error: Can not find the right configuration'\n")
+			assert.isNotNull(output.stdout)
+			assert.isEmpty(output.stdout)
+		}
+	},
+	"When I run the command line in a project with a initializer in a module that prints a message to the console": {
+		topic: function() {
+			var self = this
+				exec('bin/./priest test/commandLineDirs/moduleInitializers/moduleInitializers.Main.priest.json', function (error, stdout, stderr) {
+					self.callback(null, {
+						error: error, 
+						stdout: stdout, 
+						stderr: stderr
+					})
+				});
+		},
+		"I should see the message in the output": function(output){
+			assert.isNotNull(output.stdout)
+			assert.isEmpty(output.stderr)
+			assert.equal(output.stdout,"Initialized from Module in Dev Mode\n")
 		}
 	}
 }).export(module);

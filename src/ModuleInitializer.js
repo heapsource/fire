@@ -14,6 +14,10 @@ function ModuleInitializer(thirdPartyModule, moduleInit) {
 	if(path.existsSync(moduleManifestFile)) {
 		thirdPartyModule.exports.priest.manifestFile = moduleManifestFile
 	}
+	var initializersDir = path.join(moduleDirName, constants.INITIALIZERS_DIR_NAME)
+	if(path.existsSync(initializersDir)) {
+		thirdPartyModule.exports.priest.initializersDir = initializersDir
+	}
 }
 
 ModuleInitializer.prototype.exportExpressions = function(expDefArray) {

@@ -1988,8 +1988,9 @@ vows.describe('priest manifests').addBatch({
 vows.describe('priest environments').addBatch({
 	'Having a Runtime running in production': {
 		topic: function() {
-			process.env.NODE_ENV="production"
-			return new Runtime()
+			return tempChangeEnv("production", function() {
+				return new Runtime()
+			})
 		},
 		"when I query what is the environment of the runtime ": {
 			topic:function(runtime) {
@@ -2002,8 +2003,9 @@ vows.describe('priest environments').addBatch({
 	},
 	'Having a Runtime running in development': {
 		topic: function() {
-			process.env.NODE_ENV="development"
-			return new Runtime()
+			return tempChangeEnv("development", function() {
+				return new Runtime()
+			})
 		},
 		"when I query what is the environment of the runtime ": {
 			topic:function(runtime) {
@@ -2029,12 +2031,24 @@ vows.describe('priest environments').addBatch({
 	}
 }).export(module);
 
+function tempChangeEnv(envName, call) {
+	var original = process.env.NODE_ENV
+	process.env.NODE_ENV = envName
+	var result = call()
+	if(original === undefined) {
+		delete process.env.NODE_ENV
+	}
+	return result
+}
+
 vows.describe('priest configurations').addBatch({
 	'Working in a custom environment': {
 		topic: function() {
 			require.paths.unshift(path.join(__dirname,'manifests/testConfig/node_modules')); // because we are testing in a different directory
-			process.env.NODE_ENV="customEnv1"
-			return new Runtime()
+			
+			return tempChangeEnv("customEnv1", function() {
+				return new Runtime()
+			})
 		},
 		"when I set up a runtime": {
 			topic:function(runtime) {
@@ -4379,7 +4393,7 @@ vows.describe('priest - dependentModules').addBatch({
 		topic: function() {
 			var self = this
 			exec('bin/./priest test/dependentModules/dependentModules.Main.priest.json', function (error, stdout, stderr) {
-				self.callback(error, {
+				self.callback(null, {
 					error: error, 
 					stdout: stdout, 
 					stderr: stderr
@@ -4402,6 +4416,62 @@ vows.describe('priest - invalid module registration').addBatch({
 			runtime.loadModuleInstance({}, "someInvalidModule")
 		}catch(err) {
 			assert.equal(err, "Module 'someInvalidModule' is not a priest module")
+		}
+	}
+}).export(module)
+
+function copyProcessEnv() {
+	var e = {}
+	Object.keys(process.env).forEach(function(k) {
+		e[k] = process.env[k]
+	});
+	return e
+}
+
+vows.describe('priest - initializers').addBatch({
+	"The priest module should expose InitializerError type": function() {
+		var moduleType = require('../src/core.js').InitializerError
+		assert.isNotNull(moduleType)
+		assert.equal(moduleType, require('../src/InitializerError.js'))
+	},
+	"When I run the app with NODE_ENV set as 'test' and one initializer prints a test message": {
+		topic: function() {
+			var self = this
+			var testEnv = copyProcessEnv()
+			testEnv.NODE_ENV = 'test'
+			exec('bin/./priest test/initializersTest/initializersTest.Main.priest.json',{
+				env: testEnv
+			}, function (error, stdout, stderr) {
+				self.callback(error, {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				})
+			});
+		},
+		"I should see the test message in the console": function(output){
+			assert.equal(output.stderr,'')
+			assert.isNotNull(output.stdout)
+			assert.isNull(output.error)
+			assert.equal(output.stdout, "Init in Testing Mode\n")
+		}
+	},
+	"When I run the app with no implicit and one initializer prints a test message": {
+		topic: function() {
+			var self = this
+			exec('bin/./priest test/initializersTest/initializersTest.Main.priest.json', function (error, stdout, stderr) {
+				self.callback(error, {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				})
+			});
+		},
+		"I should see the development message in the console": function(output){
+			assert.equal(output.stderr,'')
+			assert.isNotNull(output.stdout)
+			assert.isNull(output.error)
+			assert.equal(output.stdout, "Init in Development Mode\n")
 		}
 	}
 }).export(module)

@@ -1,0 +1,6 @@
+{
+	"name": "initializersTest.Dev.Init",
+	"json": {
+		"@initializersTest.Log": "Init in Development Mode"
+	}
+}

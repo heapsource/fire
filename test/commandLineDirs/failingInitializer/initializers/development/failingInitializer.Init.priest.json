@@ -1,0 +1,6 @@
+{
+	"name": "failingInitializer.Init",
+	"json": {
+		"@raiseError": "Can not find the right configuration"
+	}
+}
