@@ -4548,3 +4548,254 @@ vows.describe('priest - initial last result').addBatch({
 		}
 	}
 }).export(module)
+
+
+vows.describe('priest - @isEmpty').addBatch({
+	'When I use @isEmpty with a undefined hint': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testIsEmpty",
+				json: {
+					"@isEmpty(something)": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+				},
+				"the result should be true": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, true)
+				}
+		
+		}
+	},
+	'When I use @isEmpty with a hint with a string path': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testIsEmpty",
+				json: {
+					"@set(x)": 200,
+					"@isEmpty(x)": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+				},
+				"the result should be false": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, false)
+				}
+		
+		}
+	}
+	,'When I use @isEmpty with no hint and the last result is a string': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testIsEmpty",
+				json: {
+					"@return": "some val",
+					"@isEmpty": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+				},
+				"the result should be false": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, false)
+				}
+		
+		}
+	}
+}).export(module)
+
+
+vows.describe('priest - @isNotEmpty').addBatch({
+	'When I use @isNotEmpty with a undefined hint': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testIsEmpty",
+				json: {
+					"@isNotEmpty(something)": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+				},
+				"the result should be false": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, false)
+				}
+		
+		}
+	},
+	'When I use @isNotEmpty with a hint with a string path': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testIsEmpty",
+				json: {
+					"@set(x)": 200,
+					"@isNotEmpty(x)": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+				},
+				"the result should be true": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, true)
+				}
+		
+		}
+	}
+	,'When I use @isNotEmpty with no hint and the last result is a string': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testIsEmpty",
+				json: {
+					"@return": "some val",
+					"@isNotEmpty": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+				},
+				"the result should be true": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, true)
+				}
+		
+		}
+	}
+	,'When I use @isNotEmpty with no hint and the last result is an empty string': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testIsEmpty",
+				json: {
+					"@return": "",
+					"@isNotEmpty": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+				},
+				"the result should be false": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, false)
+				}
+		
+		}
+	}
+}).export(module)
