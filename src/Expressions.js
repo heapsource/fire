@@ -98,6 +98,22 @@ Expression.prototype.getExpressionName = function() {
 	return !this.expressionName ? "<Anonymous>" : this.expressionName
 }
 
+Expression.prototype.getRootBlockContext = function() {
+	var _rootExpressionContext = null
+	var currentBlockScope = this._blockContext._parentContext
+	while(true) {
+		if(!currentBlockScope) {
+			break;
+		}
+		if(currentBlockScope._rootExpression) {
+			_rootExpressionContext = currentBlockScope
+			break
+		}
+		currentBlockScope = currentBlockScope._parentContext
+	}
+	return _rootExpressionContext
+}
+
 Expression.prototype.requireHint = function() {
 	if(!this.hasHint()) {
 		this.raiseError("Expression '" + this.getExpressionName()  + "' requires a hint")
