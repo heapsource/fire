@@ -361,7 +361,10 @@ var compileExpressionFuncFromJSON = function(jsonBlock, virtualFileName, outputF
 		generatedSourceCode = generateFunctionFromJSONExpression(jsonBlock, virtualFileName, hint);
 	}
 	//console.warn("ABOUT TO LOAD THE FOLLOWING JS INTO THE VM:")
-	//console.warn(generatedSourceCode)
+	/*if(virtualFileName == "Assert.NonEmpty.implementation.js")
+	{
+		console.warn(generatedSourceCode)
+	}*/
 
 	vm.runInThisContext(generatedSourceCode,virtualFileName, true)
 	return _expressionFunc; // defined inside the script.

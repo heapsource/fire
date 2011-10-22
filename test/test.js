@@ -4592,7 +4592,7 @@ vows.describe('priest - @isEmpty').addBatch({
 			runtime.registerWellKnownExpressionDefinition({
 				name:"testIsEmpty",
 				json: {
-					"@set(x)": 200,
+					"@set(x)": "some val",
 					"@isEmpty(x)": null
 				}
 			})
@@ -4620,15 +4620,14 @@ vows.describe('priest - @isEmpty').addBatch({
 		
 		}
 	}
-	,'When I use @isEmpty with no hint and the last result is a string': {
+	,'When I use @isEmpty with no hint and the input is a string': {
 		topic: function() {
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
 				name:"testIsEmpty",
 				json: {
-					"@return": "some val",
-					"@isEmpty": null
+					"@isEmpty": "some val"
 				}
 			})
 			return runtime
@@ -4728,15 +4727,14 @@ vows.describe('priest - @isNotEmpty').addBatch({
 		
 		}
 	}
-	,'When I use @isNotEmpty with no hint and the last result is a string': {
+	,'When I use @isNotEmpty with no hint and the input is a string': {
 		topic: function() {
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
 				name:"testIsEmpty",
 				json: {
-					"@return": "some val",
-					"@isNotEmpty": null
+					"@isNotEmpty": "some val"
 				}
 			})
 			return runtime

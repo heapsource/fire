@@ -12,12 +12,7 @@ ParentResult.prototype.execute = function() {
 		throw "@parentResult can not be directly used by custom implementations. Only priest.js compiler is allowed to use it. You should be using the getParentResult function instead."
 	}
 	// run the input...
-	this.runInputFunction(_rootExpressionContext._inputExpression, {
-		_resultCallback: function(res) {
-			// and return the values. any errors are bubbled up
-			self.setResult(_rootExpressionContext._parentResult)
-		}
-	});
+	self.setResult(_rootExpressionContext._parentResult)
 }
 
 module.exports = {

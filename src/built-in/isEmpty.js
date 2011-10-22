@@ -4,13 +4,22 @@ function IsEmpty() {
 
 }
 IsEmpty.prototype = new Expression()
+IsEmpty.prototype.isEmptyCore = function(val) {
+	var isEmpty = (val == undefined || val == null || val == '')
+	this.setResult(isEmpty)
+}
 IsEmpty.prototype.execute = function() {
 	var self = this
 	
-	var met = this.hasHint() ? this.getHintVariableValue() : this.getParentResult();
-	
-	var isEmpty = !met || met == ''
-	this.setResult(isEmpty)
+	if(this.hasHint()) {
+		this.isEmptyCore(this.getHintVariableValue())
+	} else {
+		this.runInput({
+			_resultCallback: function(res) {
+				self.isEmptyCore(res)
+			}
+		})
+	}
 }
 
 module.exports = {

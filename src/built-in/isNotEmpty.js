@@ -4,15 +4,23 @@ function IsNotEmpty() {
 
 }
 IsNotEmpty.prototype = new Expression()
+IsNotEmpty.prototype.isNotEmptyCore = function(val) {
+	var isEmpty = (val != undefined && val != null && val != '')
+	this.setResult(isEmpty)
+}
 IsNotEmpty.prototype.execute = function() {
 	var self = this
 	
-	var met = this.hasHint() ? this.getHintVariableValue() : this.getParentResult();
-	
-	var isEmpty = (met != undefined && met != null && met != '')
-	this.setResult(isEmpty)
+	if(this.hasHint()) {
+		this.isNotEmptyCore(this.getHintVariableValue())
+	} else {
+		this.runInput({
+			_resultCallback: function(res) {
+				self.isNotEmptyCore(res)
+			}
+		})
+	}
 }
-
 module.exports = {
 	name:"isNotEmpty",
 	flags: "hint",
