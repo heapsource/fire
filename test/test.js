@@ -4477,3 +4477,74 @@ vows.describe('priest - initializers').addBatch({
 }).export(module)
 
 
+vows.describe('priest - initial last result').addBatch({
+	'When I use a expression that initializes the last result of the input with certain value"': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			var testInitInputResult = function() {
+				
+			}
+			testInitInputResult.prototype = new Expression()
+			testInitInputResult.prototype.execute = function() {
+				var self = this
+				this.runInput({
+					_resultCallback: function(res) {
+						self.setResult(res)
+					},
+					_initialResult: self.getHintValue()
+				})
+			}
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name: "testInitInputResult",
+				flags: ["hint"],
+				implementation: testInitInputResult
+			})
+			
+			var someBypasser = function() {
+				
+			}
+			someBypasser.prototype = new Expression()
+			someBypasser.prototype.execute = function() {
+				this.skip()
+			}
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name: "someBypasser",
+				implementation: someBypasser
+			})
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testWritePath",
+				json: {
+					"@testInitInputResult(Initialized value)": {
+						"@someBypasser": null
+					}
+				}
+			})
+			return runtime
+		},
+			"and the expressions in the input bypass the result": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("testWritePath", contextBase ,null)
+				},
+				"the result should be the initialized value of the caller expression": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, "Initialized value")
+				}
+		
+		}
+	}
+}).export(module)

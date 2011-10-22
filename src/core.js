@@ -779,6 +779,10 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 	_blockContext._parentContext = block_context_base
 	_blockContext._rootExpression = undefined // _rootScope can not be inherited.
 	
+	// The override key '_initialResult' can set the initial value of the calling expression block.
+	if(context_block_overrides && context_block_overrides._initialResult != null && context_block_overrides._initialResult != undefined) {
+		_blockContext._result = context_block_overrides._initialResult
+	}
 	
 	expressionInstance._blockContext = _blockContext
 	expressionInstance.execute() // run it
