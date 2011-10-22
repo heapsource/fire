@@ -1,0 +1,14 @@
+{
+	"name": "moduleScriptDirs.Main",
+	"json": {
+		"superExpression1": {
+			"@superExpression1": null
+		},
+		"superExpression2": {
+			"@superExpression2": null
+		},
+		"superExpression3": {
+			"@superExpression3": null
+		}
+	}
+}

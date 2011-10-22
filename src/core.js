@@ -395,7 +395,7 @@ function Runtime() {
 	}
 	this.events = new EventEmitter()
 	this.scriptDirectories = [{
-		path: '.'
+		path: path.resolve('.')
 	}]
 	
 	this.mergedManifest = {
@@ -546,6 +546,9 @@ Runtime.prototype.loadModuleInstance = function(priestModule, fictionalName) {
 		if(priestModule.priest.initializersDir) {
 			this.registerInitializersDir(priestModule.priest.initializersDir)
 		}
+		if(priestModule.priest.scriptDirs) {
+			this.scriptDirectories = this.scriptDirectories.concat(priestModule.priest.scriptDirs)
+		}
 	}
 	priestExpressions.forEach(function(expressionDefintion) {
 		this.registerWellKnownExpressionDefinition(expressionDefintion)
@@ -616,7 +619,6 @@ Runtime.prototype.load = function(initializationCallback) {
 			priestModule.priest.init(self)
 		}
 	})
-	
 	// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
 	this.scanScriptsDirs()
 	

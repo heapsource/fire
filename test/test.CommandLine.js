@@ -128,5 +128,25 @@ vows.describe('priest command line utility').addBatch({
 			assert.isEmpty(output.stderr)
 			assert.equal(output.stdout,"Initialized from Module in Dev Mode\n")
 		}
+	},
+	"When I run the command line in a project with modules that contain scripts in the root of the module and declares some additional directories": {
+		topic: function() {
+			var self = this
+				exec('bin/./priest test/commandLineDirs/moduleScriptDirs/moduleScriptDirs.Main.priest.json', function (error, stdout, stderr) {
+					self.callback(null, {
+						error: error, 
+						stdout: stdout, 
+						stderr: stderr
+					})
+				});
+		},
+		"I should see the message in the output": function(output){
+			assert.isNotNull(output.stdout)
+			assert.isEmpty(output.stderr)
+			assert.equal(output.stdout,JSON.stringify({
+				"superExpression1":"Something from Super Expression One",
+				"superExpression2":"This expression was loaded from an aux directori exported using exportScriptsDir",
+				"superExpression3":"This expression was loaded from an aux directori exported using the module manifest"}))
+			}	
 	}
 }).export(module);

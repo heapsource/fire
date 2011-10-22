@@ -9,7 +9,7 @@ function ModuleInitializer(thirdPartyModule, moduleInit) {
 	this.thirdPartyModule.exports.priest.expressions = thirdPartyModule.exports.priest.expressions || []
 	this.thirdPartyModule.exports.priest.init = moduleInit
 	
-	var moduleDirName = path.dirname(thirdPartyModule.filename)
+	var moduleDirName = this.moduleDirName = path.dirname(thirdPartyModule.filename)
 	var moduleManifestFile = path.join(moduleDirName, constants.DEFAULT_MANIFEST_FILE_NAME)
 	if(path.existsSync(moduleManifestFile)) {
 		thirdPartyModule.exports.priest.manifestFile = moduleManifestFile
@@ -18,6 +18,10 @@ function ModuleInitializer(thirdPartyModule, moduleInit) {
 	if(path.existsSync(initializersDir)) {
 		thirdPartyModule.exports.priest.initializersDir = initializersDir
 	}
+	this.thirdPartyModule.exports.priest.scriptDirs = []
+	
+	// automatically add the root of the module as a scripts directory.
+	this.exportScriptsDir('.')
 }
 
 ModuleInitializer.prototype.exportExpressions = function(expDefArray) {
@@ -27,6 +31,17 @@ ModuleInitializer.prototype.exportExpressions = function(expDefArray) {
 	}
 	expDefArray.forEach(function(expDef) {
 		self.thirdPartyModule.exports.priest.expressions.push(expDef)
+	})
+}
+
+ModuleInitializer.prototype.exportScriptsDir = function(dir, attributes) {
+	var dirFullPath = path.join(this.moduleDirName, dir)
+	if(!path.existsSync(dirFullPath)) {
+		throw "ModuleInitializer could't find the scripts directory '" + dirFullPath + "'. Make sure the directory exists before using exportScriptsDir." 
+	}
+	this.thirdPartyModule.exports.priest.scriptDirs.push({
+		path: dirFullPath,
+		attributes: attributes
 	})
 }
 
