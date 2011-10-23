@@ -7,7 +7,9 @@ function CommandLine() {
 	var packageJSON = JSON.parse(fs.readFileSync(path.join(__dirname,"../package.json"), 'utf8'))
 	this.versionNumber = packageJSON.version
 }
-
+CommandLine.IgnoreOutput = function() {
+	
+}
 CommandLine.prototype.run = function() {
 	var pureArgs = process.argv.slice(2)
 	var noArgs = pureArgs.length == 0
@@ -52,7 +54,10 @@ CommandLine.prototype.run = function() {
 				}
 				var contextBase = {};
 				contextBase._resultCallback = function(res) {
-					sys.print(JSON.stringify(res))
+					if(!(res instanceof CommandLine.IgnoreOutput)) {
+						sys.print(JSON.stringify(res))
+					}
+					process.exit(0)
 				}
 				contextBase._loopCallback = function() {};
 				contextBase._inputExpression  = function() {};

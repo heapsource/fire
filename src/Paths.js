@@ -34,7 +34,7 @@ PathCache.prototype.parse = function(pathStr) {
 	var list = []
 	var currentEntry = new Entry(AstEntryType.Property)
 	var phase = undefined
-	for(var i in pathStr) {
+	for(var i = 0; i < pathStr.length;i++) {
 		var c = pathStr.charAt(i)
 		if(c === '.') {
 			//console.warn("period found at char 					" + i)
