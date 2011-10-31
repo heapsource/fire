@@ -92,7 +92,11 @@ vows.describe('priest command line utility').addBatch({
 		"I should see the additional directory expression value in the console": function(output){
 			assert.equal(output.stderr,'')
 			assert.isNotNull(output.stdout)
-			assert.include(output.stdout, "Value from a Sub expression")
+			assert.deepEqual(output.stdout, JSON.stringify({
+				subExp: "Value from a Sub expression",
+				customSubExp: "customSubExpression",
+				customExp: "customExpression"
+			}))
 		}
 	},
 	"When I run the command line in a project with a failing initializer": {
@@ -146,7 +150,11 @@ vows.describe('priest command line utility').addBatch({
 			assert.equal(output.stdout,JSON.stringify({
 				"superExpression1":"Something from Super Expression One",
 				"superExpression2":"This expression was loaded from an aux directori exported using exportScriptsDir",
-				"superExpression3":"This expression was loaded from an aux directori exported using the module manifest"}))
+				"superExpression3":"This expression was loaded from an aux directori exported using the module manifest",
+				"superExpression4":"This expression was loaded from a custom javascrip file in a manifest script dir",
+				"superExpression5": "This custom expression was loaded from a module explicit subdir",
+				"superExpression1b": "This custom expression was loaded from the root of the app"
+				}))
 			}	
 	}
 }).export(module);

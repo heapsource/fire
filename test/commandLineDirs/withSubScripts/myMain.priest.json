@@ -1,6 +1,14 @@
 {
 	"name" : "myMain",
 	"json" : {
-		"@myOtherExpression": null
+		"subExp": {
+			"@myOtherExpression": null
+		},
+		"customSubExp": {
+			"@customSubExpression": null
+		},
+		"customExp": {
+			"@customExpression": null
+		}
 	}
 }

@@ -28,6 +28,7 @@ var constants = require('./constants.js')
 var DEFAULT_ENVIRONMENT = constants.DEFAULT_ENVIRONMENT
 var DEFAULT_MANIFEST_FILE_NAME = constants.DEFAULT_MANIFEST_FILE_NAME
 var DEFAULT_SCRIPT_EXTENSION = constants.DEFAULT_SCRIPT_EXTENSION
+var DEFAULT_CUSTOM_SCRIPT_EXTENSION = constants.DEFAULT_CUSTOM_SCRIPT_EXTENSION
 
 mergeWith(module.exports, constants)
 
@@ -432,6 +433,12 @@ Runtime.prototype.scanScriptsDir = function(dirInfo) {
 		var absoluteFileName = path.join(absoluteDirPath, file)
 		this.registerWellKnownJSONExpressionFile(absoluteFileName, dirInfo.attributes)
 	}, this)
+	
+	fileNames = Utils.getFilesWithExtension(absoluteDirPath, DEFAULT_CUSTOM_SCRIPT_EXTENSION)
+	fileNames.forEach(function(file) {
+		var absoluteFileName = path.join(absoluteDirPath, file)
+		this.registerWellKnownExpressionFile(absoluteFileName, dirInfo.attributes)
+	}, this)
 }
 
 Runtime.prototype.scanScriptsDirs = function() {
@@ -470,8 +477,11 @@ Runtime.prototype.registerWellKnownExpressionDir = function(absoluteDirPath) {
 	}, this)
 }
 
-Runtime.prototype.registerWellKnownExpressionFile = function(absoluteFilePath) {
+Runtime.prototype.registerWellKnownExpressionFile = function(absoluteFilePath, attributes) {
 	var definition = require(absoluteFilePath)
+	if(attributes) {
+		mergeWith(definition, attributes)
+	}
 	this.registerWellKnownExpressionDefinition(definition)
 	return definition
 }
@@ -568,7 +578,7 @@ Runtime.prototype._loadManifestFile = function(manifestFile) {
 }
 
 Runtime.prototype._mergeWithManifestFile = function(manifestFile) {
-	var manifestDirName = path.dirname(manifestFile)
+	var manifestDirName = path.resolve(path.dirname(manifestFile))
 	var self = this
 	var manifest = this._loadManifestFile(manifestFile)
 	if(manifest) {
