@@ -5029,3 +5029,37 @@ vows.describe('priest - @test').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe('priest - null json body on implementation').addBatch({
+	'When I register an expression with null body': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"testNullBody",
+				json: null
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.runExpressionByName("testNullBody", contextBase ,null)
+			},
+			"the result should be null": function(err, res) {
+				assert.isNull(err)
+				assert.isNull(res)
+			}
+		}
+	}
+}).export(module)

@@ -509,7 +509,7 @@ Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDef
 	}
 	var implementation = expressionDefinition.implementation
 	if(implementation=== undefined) {
-		if(expressionDefinition.json === undefined || expressionDefinition.json === null) {
+		if(expressionDefinition.json === undefined) {
 			throwInternalError("expression definition requires either an implementation or a json block")
 		}
 		var implementationFunc = compileExpressionFuncFromJSON(expressionDefinition.json, name + ".implementation.js")
