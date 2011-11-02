@@ -157,7 +157,7 @@ vows.describe('priest command line utility').addBatch({
 				}))
 			}	
 	},
-	"When I run a command with --print-expressions": {
+	"When I run an app with --print-expressions": {
 		topic: function() {
 			var self = this
 				exec('bin/./priest --print-expressions test/commandLineDirs/expressionsList/MyApp.Main.priest.json', function (error, stdout, stderr) {
@@ -187,6 +187,24 @@ vows.describe('priest command line utility').addBatch({
 				name: "get",
 				flags: ["hint"]
 			})
+		}
+	}
+	,
+	"When I run an app with a package.json instead of a JSON script": {
+		topic: function() {
+			var self = this
+				exec('bin/./priest test/commandLineDirs/packageJson/package.json', function (error, stdout, stderr) {
+					self.callback(null, {
+						error: error, 
+						stdout: stdout, 
+						stderr: stderr
+					})
+				});
+		},
+		"the app should start with the expression based on the name of the app": function(output){
+			assert.isNotNull(output.stdout)
+			assert.isEmpty(output.stderr)
+			assert.deepEqual(JSON.parse(output.stdout), "Hello from a pacakge.json launched app")
 		}
 	}
 }).export(module);

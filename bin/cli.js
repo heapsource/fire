@@ -32,12 +32,20 @@ module.exports = function() {
 	var noArgs = pureArgs.length == 0
 	var mainScriptPath = module.filename
 	var mainScriptDirName = path.dirname(mainScriptPath)
-
-	var expressionName = priest.inferExpressionNameByFileName(path.basename(mainScriptPath))
-	if(!expressionName) {
-		throw "The file '" + scriptName+ "' was not recognized as a priest script due file name extension incompatibility"
-		return
+	var expressionName = null
+	if(path.basename(mainScriptPath) == "package.json") {
+		// Read package.json
+		var packageJson = JSON.parse(fs.readFileSync(mainScriptPath, 'utf8'))
+		expressionName = packageJson.name + ".Main"
+	} else {
+		// Exec the app.
+		var expressionName = priest.inferExpressionNameByFileName(path.basename(mainScriptPath))
+		if(!expressionName) {
+			throw "The file '" + mainScriptPath+ "' was not recognized as a priest script due file name extension incompatibility"
+			return
+		}
 	}
+	
 
 	require.paths.unshift(path.join(mainScriptDirName,'node_modules'))
 
