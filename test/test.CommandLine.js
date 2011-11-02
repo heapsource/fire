@@ -156,5 +156,37 @@ vows.describe('priest command line utility').addBatch({
 				"superExpression1b": "This custom expression was loaded from the root of the app"
 				}))
 			}	
+	},
+	"When I run a command with --print-expressions": {
+		topic: function() {
+			var self = this
+				exec('bin/./priest --print-expressions test/commandLineDirs/expressionsList/MyApp.Main.priest.json', function (error, stdout, stderr) {
+					self.callback(null, {
+						error: error, 
+						stdout: stdout, 
+						stderr: stderr
+					})
+				});
+		},
+		"I should a JSON document the list of all loaded expressions in the output": function(output){
+			assert.isNotNull(output.stdout)
+			assert.isEmpty(output.stderr)
+			var result = JSON.parse(output.stdout)
+			assert.isArray(result)
+			assert.notEqual(result.length, 0)
+			var getExp = null
+			for(var i = 0; i < result.length; i++) {
+				var exp = result[i]
+				if(exp.name == 'get') {
+					getExp = exp
+					break
+				}
+			}
+			assert.isNotNull(getExp, "it should at least export the 'get' built-in expression")
+			assert.deepEqual(getExp, {
+				name: "get",
+				flags: ["hint"]
+			})
+		}
 	}
 }).export(module);

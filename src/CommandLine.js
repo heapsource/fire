@@ -17,7 +17,7 @@ CommandLine.prototype.run = function() {
 		this.printHelp()
 		process.exit(0);
 	} else {
-		var scriptName = pureArgs[0]
+		var scriptName = pureArgs[pureArgs.length -1]
 		
 		
 		var mainScriptPath = path.resolve(scriptName)
@@ -52,18 +52,33 @@ CommandLine.prototype.run = function() {
 					console.error(err.toString())
 					process.exit(1)
 				}
-				var contextBase = {};
-				contextBase._resultCallback = function(res) {
-					if(!(res instanceof CommandLine.IgnoreOutput)) {
-						sys.print(JSON.stringify(res))
+				if(pureArgs.indexOf('--print-expressions') != -1) {
+					var expressions = []
+					var expNames = Object.keys(runtime.loadedExpressionsMeta)
+					for(var i = 0; i < expNames.length; i++) {
+						var meta = runtime.loadedExpressionsMeta[expNames[i]]
+						expressions.push({
+							name: meta.name,
+							flags: meta.flags
+						})
 					}
+					sys.print(JSON.stringify(expressions))
 					process.exit(0)
+				} else 
+				{
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						if(!(res instanceof CommandLine.IgnoreOutput)) {
+							sys.print(JSON.stringify(res))
+						}
+						process.exit(0)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};   
+					contextBase._errorCallback =  function() {};
+					runtime.runExpressionByName(expressionName, contextBase ,null)
 				}
-				contextBase._loopCallback = function() {};
-				contextBase._inputExpression  = function() {};
-				contextBase._variables = {};   
-				contextBase._errorCallback =  function() {};
-				runtime.runExpressionByName(expressionName, contextBase ,null)
 			}
 			
 			if(manifestFound) {
@@ -79,6 +94,8 @@ CommandLine.prototype.run = function() {
 CommandLine.prototype.printHelp = function() {
 	console.log("Priest Runtime version " + this.versionNumber)
 	console.log("usage: priest TheProject.Main.priest.json")
+	console.log("options:")
+	console.log("	--print-expressions: print all the expression names and flags loaded by the runtime as a JSON document to stdout")
 	console.log("")
 	console.log("Copyright (C) 2011 Firebase and Contributors. http://priest.firebase.co")
 }

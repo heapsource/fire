@@ -22,6 +22,6 @@ Get.prototype.execute = function() {
 
 module.exports = {
 	name:"get",
-	flags: "hint",
+	flags: ["hint"],
 	implementation:Get
 }
