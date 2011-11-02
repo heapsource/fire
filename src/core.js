@@ -1,3 +1,23 @@
+// Copyright (c) 2011 Firebase.co and Contributors - http://www.firebase.co
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 var vm = require('vm')
 var util = require('util')
 var StringBuffer = require('./StringBuffer')
@@ -391,17 +411,17 @@ function Runtime() {
 	this.registerWellKnownExpressionDir(dirName)
 	this._paths = new PathCache()
 	this.environmentName = process.env.NODE_ENV === undefined ? DEFAULT_ENVIRONMENT : process.env.NODE_ENV 
+	this.scriptDirectories = []
 	this.moduleRequire = function(moduleName) {
 		return require(moduleName)
 	}
 	this.events = new EventEmitter()
-	this.scriptDirectories = [{
-		path: path.resolve('.')
-	}]
+	
 	
 	this.mergedManifest = {
 		modules: []
 	}
+	this.baseDir = '.'
 }
 
 /*
@@ -593,7 +613,17 @@ Runtime.prototype._mergeWithManifestFile = function(manifestFile) {
 		}
 	}
 }
+
+Runtime.prototype.setBaseDir = function(dir) {
+	this.baseDir = dir
+}
+
+Runtime.prototype.pathFromBaseDir = function(dir) {
+	return path.join(this.baseDir, dir)
+}
+
 Runtime.prototype.loadFromManifestFile = function(manifestFile, initializationCallback) {
+	this.setBaseDir(path.dirname(manifestFile))
 	this._mergeWithManifestFile(manifestFile)
 	this.load(initializationCallback)
 	return true
@@ -619,7 +649,10 @@ Runtime.prototype.loadManifestModules = function() {
 Prepares the Runtime to Run. Since the introduction of initializer expressions, you can provide a callback to know when the initialization finishes. If no callback is provided no initialization will be executed.
 */
 Runtime.prototype.load = function(initializationCallback) {
-	this.registerInitializersDir(path.resolve(constants.INITIALIZERS_DIR_NAME))
+	this.scriptDirectories.push({
+		path: this.pathFromBaseDir('.')
+	})
+	this.registerInitializersDir(this.pathFromBaseDir(constants.INITIALIZERS_DIR_NAME))
 	var self = this
 	this.loadManifestModules()
 	
@@ -878,4 +911,7 @@ module.exports.exportTestOnlyFunctions = function() {
 	module.exports._testOnly_getHint = getHint
 	
 }
-
+module.exports.IgnoreOutput = function() {
+	
+}
+module.exports.PackageInfo = JSON.parse(fs.readFileSync(path.join(__dirname,"../package.json"), 'utf8'))
