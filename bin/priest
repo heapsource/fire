@@ -22,16 +22,25 @@
 var fs = require('fs')
 var path = require('path')
 var priest = require('priest')
-require.extensions['.json'] = function (module, filename) {
+var nopt = require('nopt')
+
+	require.extensions[".json"] = function (module, filename) {
             return module._compile(fs.readFileSync(path.join(__dirname,"cli.js"), 'utf8'), filename);
         };
-var pureArgs = process.argv.slice(2)
-var noArgs = pureArgs.length == 0
+
+process.parsedArgv = nopt({
+	"print-expressions" : Boolean
+},
+{
+	"pe": ["--print-expressions", true]
+},process.argv, 2)
+var noArgs = process.parsedArgv.argv.remain.length == 0
 if(noArgs) {
 	printHelp()
 	process.exit(0);
 } else {
-	var initialFileName = pureArgs[pureArgs.length -1]
+	var initialFileName = process.parsedArgv.argv.remain.shift()
+	process.parsedArgv.argv.cooked.splice(process.parsedArgv.argv.cooked.indexOf(initialFileName), 1)
 	var initialFileName = path.resolve(initialFileName)
 	require(initialFileName)() // run the cli... check cli.js for more info.
 }

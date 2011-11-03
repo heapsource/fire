@@ -18,6 +18,9 @@
     },
     "keywords": ["API", "REST", "RESTful", "JSON", "Mongo", "MongoDB", "mongoose"],
     "repository": "git://github.com/firebaseco/priest",
+	"dependencies": {
+		"nopt": ">= 1.0.10"
+	},
     "devDependencies": {
         "vows": ">= 0.5.11"
     },

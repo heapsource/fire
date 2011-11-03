@@ -206,5 +206,23 @@ vows.describe('priest command line utility').addBatch({
 			assert.isEmpty(output.stderr)
 			assert.deepEqual(JSON.parse(output.stdout), "Hello from a pacakge.json launched app")
 		}
+	},
+	"When I run an app the parsedArgv should not contain the script file name or the package file name": {
+		topic: function() {
+			var self = this
+				exec('bin/./priest test/commandLineDirs/parsedArgv/Parsed.Main.priest.json --something true', function (error, stdout, stderr) {
+					self.callback(null, {
+						error: error, 
+						stdout: stdout, 
+						stderr: stderr
+					})
+				});
+		},
+		"the app should start with the script but the remaining should not have the script name or path": function(output){
+			assert.isNotNull(output.stdout)
+			assert.isEmpty(output.stderr)
+			assert.deepEqual(JSON.parse(output.stdout), [
+			"--something", 'true'])
+		}
 	}
 }).export(module);

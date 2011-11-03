@@ -49,6 +49,7 @@ var DEFAULT_ENVIRONMENT = constants.DEFAULT_ENVIRONMENT
 var DEFAULT_MANIFEST_FILE_NAME = constants.DEFAULT_MANIFEST_FILE_NAME
 var DEFAULT_SCRIPT_EXTENSION = constants.DEFAULT_SCRIPT_EXTENSION
 var DEFAULT_CUSTOM_SCRIPT_EXTENSION = constants.DEFAULT_CUSTOM_SCRIPT_EXTENSION
+var DEFAULT_EXPRESSION_EXTENSIONS = constants.DEFAULT_EXPRESSION_EXTENSIONS
 
 mergeWith(module.exports, constants)
 
@@ -899,8 +900,13 @@ module.exports.setBlockContextVariable = function(runtime, blockContext, name, v
 
 module.exports.inferExpressionNameByFileName = function(fileName) {
 	if(!fileName) return null
-	if(fileName.indexOf(DEFAULT_SCRIPT_EXTENSION) == -1) return null
-	return fileName.substring(0, fileName.indexOf(DEFAULT_SCRIPT_EXTENSION))
+	for(var i = 0; i < DEFAULT_EXPRESSION_EXTENSIONS.length; i++) {
+		var extension = DEFAULT_EXPRESSION_EXTENSIONS[i]
+		if(fileName.indexOf(extension) != -1) {
+			return fileName.substring(0, fileName.indexOf(extension))
+		}
+	}
+	return null
 }
 
 module.exports.exportTestOnlyFunctions = function() {

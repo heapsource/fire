@@ -3777,6 +3777,22 @@ vows.describe('priest file extension inference').addBatch({
 			assert.equal(expressionName,"myApp.SomeFeature.SomeExpression")
 		}
 	},
+	"When I infer the expression name from a simple name file with the official custom expression extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("some.priest.js")
+		},
+		"the expression name should be the name of the file without the extension": function(expressionName) {
+			assert.equal(expressionName,"some")
+		}
+	},
+	"When I infer the expression name from a namespaced file name with the official custom expression extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.priest.js")
+		},
+		"the expression name should be the name of the file without the extension": function(expressionName) {
+			assert.equal(expressionName,"myApp.SomeFeature.SomeExpression")
+		}
+	},
 	"When I infer the expression name from a file name without the official script extension": {
 		topic: function() {
 			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.priest.mp3")

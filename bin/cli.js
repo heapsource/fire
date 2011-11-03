@@ -47,7 +47,7 @@ module.exports = function() {
 	}
 	
 
-	require.paths.unshift(path.join(mainScriptDirName,'node_modules'))
+	//require.paths.unshift(path.join(mainScriptDirName,'node_modules'))
 
 	var runtime = new priest.Runtime()
 	runtime.moduleRequire = function(moduleName) {
