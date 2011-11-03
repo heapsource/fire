@@ -19,37 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-var fs = require('fs')
 var path = require('path')
 var priest = require('priest')
-var nopt = require('nopt')
-
-	require.extensions[".json"] = function (module, filename) {
-            return module._compile(fs.readFileSync(path.join(__dirname,"cli.js"), 'utf8'), filename);
-        };
-
-process.parsedArgv = nopt({
-	"print-expressions" : Boolean
-},
-{
-	"pe": ["--print-expressions", true]
-},process.argv, 2)
-var noArgs = process.parsedArgv.argv.remain.length == 0
-if(noArgs) {
-	printHelp()
-	process.exit(0);
-} else {
-	var initialFileName = process.parsedArgv.argv.remain.shift()
-	process.parsedArgv.argv.cooked.splice(process.parsedArgv.argv.cooked.indexOf(initialFileName), 1)
-	var initialFileName = path.resolve(initialFileName)
-	require(initialFileName)() // run the cli... check cli.js for more info.
-}
-	
-function printHelp() {
-	console.log("Priest Runtime version " + priest.PackageInfo.version)
-	console.log("usage: priest TheProject.Main.priest.json")
-	console.log("options:")
-	console.log("	--print-expressions: print all the expression names and flags loaded by the runtime as a JSON document to stdout")
-	console.log("")
-	console.log("Copyright (C) 2011 Firebase and Contributors. http://priest.firebase.co")
-}
+var path = require('path')
+var priest = require('priest')
+priest.executeApplication(process.argv.slice(2))

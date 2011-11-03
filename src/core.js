@@ -38,6 +38,7 @@ var PathCache = require('./Paths').PathCache
 var Iterator = require('./Iterator')
 var mergeWith = require('./mergeWith.js')
 var ModuleInitializer = require('./ModuleInitializer.js')
+var nopt = require('nopt')
 module.exports.Error = Error
 module.exports.Expression = Expression
 module.exports.Iterator = Iterator
@@ -921,3 +922,37 @@ module.exports.IgnoreOutput = function() {
 	
 }
 module.exports.PackageInfo = JSON.parse(fs.readFileSync(path.join(__dirname,"../package.json"), 'utf8'))
+
+module.exports.executeApplication = function(argv) {
+	
+
+		require.extensions[".json"] = function (module, filename) {
+	            return module._compile(fs.readFileSync(path.join(__dirname,"cli.js"), 'utf8'), filename);
+	        };
+
+	process.parsedArgv = nopt({
+		"print-expressions" : Boolean
+	},
+	{
+		"pe": ["--print-expressions", true]
+	},argv, 0)
+	var noArgs = process.parsedArgv.argv.remain.length == 0
+	if(noArgs) {
+		printHelp()
+		process.exit(0);
+	} else {
+		var initialFileName = process.parsedArgv.argv.remain.shift()
+		process.parsedArgv.argv.cooked.splice(process.parsedArgv.argv.cooked.indexOf(initialFileName), 1)
+		var initialFileName = path.resolve(initialFileName)
+		require(initialFileName)() // run the cli... check cli.js for more info.
+	}
+
+	function printHelp() {
+		console.log("Priest Runtime version " + module.exports.PackageInfo.version)
+		console.log("usage: priest TheProject.Main.priest.json")
+		console.log("options:")
+		console.log("	--print-expressions: print all the expression names and flags loaded by the runtime as a JSON document to stdout")
+		console.log("")
+		console.log("Copyright (C) 2011 Firebase and Contributors. http://priest.firebase.co")
+	}
+}
