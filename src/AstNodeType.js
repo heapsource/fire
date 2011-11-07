@@ -1,0 +1,7 @@
+module.exports.null = "null"
+module.exports.number = "number"
+module.exports.string = "string"
+module.exports.hash = "hash"
+module.exports.array = "array"
+module.exports.block = "block"
+module.exports.expression = "expression"
