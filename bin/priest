@@ -20,7 +20,5 @@
 // THE SOFTWARE.
 
 var path = require('path')
-var priest = require('priest')
-var path = require('path')
-var priest = require('priest')
+var priest = require('../index.js')
 priest.executeApplication(process.argv.slice(2))

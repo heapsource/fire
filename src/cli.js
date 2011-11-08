@@ -85,7 +85,10 @@ module.exports = function() {
 					contextBase._loopCallback = function() {};
 					contextBase._inputExpression  = function() {};
 					contextBase._variables = {};   
-					contextBase._errorCallback =  function() {};
+					contextBase._errorCallback =  function(err) {
+						console.error(err)
+						process.exit(1)
+					};
 					runtime.runExpressionByName(expressionName, contextBase ,null)
 				}
 			}
