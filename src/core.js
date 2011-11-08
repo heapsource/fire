@@ -552,7 +552,7 @@ Runtime.prototype.isExpressionLoaded = function(name) {
 }
 
 Runtime.prototype.getModuleConfiguration = function(moduleName) {
-	if(this.configurations === undefined) return undefined;
+	if(!this.configurations) return null;
 	return this.configurations[moduleName]
 }
 
