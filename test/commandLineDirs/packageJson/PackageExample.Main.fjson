@@ -1,0 +1,4 @@
+{
+	"name": "PackageExample.Main",
+	"json": "Hello from a package.json launched app"
+}

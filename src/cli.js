@@ -19,10 +19,10 @@
 // THE SOFTWARE.
 
 /*
- * This file bootstraps the Runtime for the Command Line. It's compiled in place of the initial script of the app. Check the file bin/priest
+ * This file bootstraps the Runtime for the Command Line. It's compiled in place of the initial script of the app. Check the file bin/firejs
  */
 
-var priest = require('priest')
+var fire = require('fire')
 var path = require('path')
 var sys = require('sys')
 var fs = require('fs')
@@ -39,9 +39,9 @@ module.exports = function() {
 		expressionName = packageJson.name + ".Main"
 	} else {
 		// Exec the app.
-		var expressionName = priest.inferExpressionNameByFileName(path.basename(mainScriptPath))
+		var expressionName = fire.inferExpressionNameByFileName(path.basename(mainScriptPath))
 		if(!expressionName) {
-			throw "The file '" + mainScriptPath+ "' was not recognized as a priest script due file name extension incompatibility"
+			throw "The file '" + mainScriptPath+ "' was not recognized as a fire script due file name extension incompatibility"
 			return
 		}
 	}
@@ -49,11 +49,11 @@ module.exports = function() {
 
 	//require.paths.unshift(path.join(mainScriptDirName,'node_modules'))
 
-	var runtime = new priest.Runtime()
+	var runtime = new fire.Runtime()
 	runtime.moduleRequire = function(moduleName) {
 		return require(moduleName)
 	}
-	var manifestPath = path.join(mainScriptDirName, priest.DEFAULT_MANIFEST_FILE_NAME)
+	var manifestPath = path.join(mainScriptDirName, fire.DEFAULT_MANIFEST_FILE_NAME)
 	path.exists(manifestPath, function(manifestFound) {
 		var self = this
 		var initializationFinished = function(err) {
@@ -77,7 +77,7 @@ module.exports = function() {
 				{
 					var contextBase = {};
 					contextBase._resultCallback = function(res) {
-						if(!(res instanceof priest.IgnoreOutput)) {
+						if(!(res instanceof fire.IgnoreOutput)) {
 							sys.print(JSON.stringify(res))
 						}
 						process.exit(0)

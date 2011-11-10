@@ -4,7 +4,7 @@ var Variable = require('../src/Variable')
 var setBlockContextVariable = require('../src/core.js').setBlockContextVariable
 var Runtime = require('../src/core.js').Runtime
 
-vows.describe('priest Variable').addBatch({
+vows.describe('firejs Variable').addBatch({
 	"When I have a variable": {
 		topic: function() {
 			return new Variable()
@@ -24,7 +24,7 @@ vows.describe('priest Variable').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest setBlockContextVariable').addBatch({
+vows.describe('firejs setBlockContextVariable').addBatch({
 	"When I set a variable in some context object": {
 		topic: function() {
 			var runtime = new Runtime()

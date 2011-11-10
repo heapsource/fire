@@ -1,9 +1,9 @@
-var priest = require('priest')
+var fire = require('fire')
 
 function ParsedMain() {
 	
 }
-ParsedMain.prototype = new priest.Expression()
+ParsedMain.prototype = new fire.Expression()
 ParsedMain.prototype.execute = function() {
 	this.setResult(process.parsedArgv.argv.cooked)
 }

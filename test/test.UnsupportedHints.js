@@ -12,7 +12,7 @@ globalContextBase._inputExpression  = function() {};
 globalContextBase._variables = {};            
 globalContextBase._errorCallback =  function() {};
 
-vows.describe('priest').addBatch({
+vows.describe('firejs').addBatch({
 	'Having a JSON code that uses @return with a hint': {
 		topic: function() {
 			return new Runtime()

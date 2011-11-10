@@ -31,7 +31,7 @@ HintExpression.prototype.execute = function() {
 	var _rootExpressionContext = this.getRootBlockContext()
 	if(!_rootExpressionContext) {
 		// Crap! They are trying to call @hint from a custom implementation... shouldn't they be using getHintValue function?
-		throw "@hint can not be directly used by custom implementations. Only priest.js compiler is allowed to use it. You should be using the getHintValue function instead."
+		throw "@hint can not be directly used by custom implementations. Only fire.js compiler is allowed to use it. You should be using the getHintValue function instead."
 	}
 	//get the hint
 	this.setResult(_rootExpressionContext._hint)

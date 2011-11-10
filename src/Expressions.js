@@ -144,7 +144,7 @@ function throwInternalError(msg) {
 	{
 		console.trace()
 	}
-	throw "priest internal error, " + msg
+	throw "fire.js internal error, " + msg
 }
 
 module.exports.Expression = Expression

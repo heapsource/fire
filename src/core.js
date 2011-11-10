@@ -54,6 +54,11 @@ var DEFAULT_EXPRESSION_EXTENSIONS = constants.DEFAULT_EXPRESSION_EXTENSIONS
 
 mergeWith(module.exports, constants)
 
+require.extensions[DEFAULT_CUSTOM_SCRIPT_EXTENSION] = function (module, filename) {
+  var content = fs.readFileSync(filename, 'utf8');
+  module._compile(content, filename);
+}
+
 
 var SPECIAL_KEY_SYMBOL = "@"
 var HINT_START_SYMBOL = "("
@@ -434,7 +439,7 @@ Runtime.prototype.getWellKnownExpressions = function() {
 }
 
 /*
- * Returns all the priest.js modules loaded on the runtime.
+ * Returns all the fire.js modules loaded on the runtime.
  */
 Runtime.prototype.getModules = function() {
 	return this.loadedModules;
@@ -446,7 +451,7 @@ Runtime.prototype.getPaths = function() {
 var Utils  = require('./Utils')
 
 /*
- * Load .priest.json files from a directory.
+ * Load .fjson and .fjs files from a directory.
  */
 Runtime.prototype.scanScriptsDir = function(dirInfo) {
 	var absoluteDirPath = dirInfo.path
@@ -509,7 +514,7 @@ Runtime.prototype.registerWellKnownExpressionFile = function(absoluteFilePath, a
 }
 
 /*
- * Load .priest.json file, attributes can be specified.
+ * Load .fjson file, attributes can be specified.
  */
 Runtime.prototype.registerWellKnownJSONExpressionFile = function(absoluteFilePath, attributes) {
 	var jsonSourceCode = fs.readFileSync(absoluteFilePath, 'utf8')
@@ -563,35 +568,35 @@ Runtime.prototype.setModuleConfiguration = function(moduleName, value) {
 	this.configurations[moduleName] = value
 }
 
-Runtime.prototype.loadModuleInstance = function(priestModule, fictionalName) {
+Runtime.prototype.loadModuleInstance = function(fireModule, fictionalName) {
 	if(!fictionalName) throw "loadModuleInstance requires a fictionalName"
-	if(this.loadedModules.indexOf(priestModule) != -1) return false
-	var priestExports = priestModule.priest
-	var priestExpressions = priestExports ? priestExports.expressions :  undefined
-	if(!priestExpressions) {
-		throw "Module '" + fictionalName + "' is not a priest module"
+	if(this.loadedModules.indexOf(fireModule) != -1) return false
+	var fireExports = fireModule.ignition
+	var fireExpressions = fireExports ? fireExports.expressions :  undefined
+	if(!fireExpressions) {
+		throw "Module '" + fictionalName + "' is not a fire.js module"
 	}
-	if(priestModule.priest) {
-		if(priestModule.priest.manifestFile) {
-			this._mergeWithManifestFile(priestModule.priest.manifestFile)
+	if(fireModule.ignition) {
+		if(fireModule.ignition.manifestFile) {
+			this._mergeWithManifestFile(fireModule.ignition.manifestFile)
 		}
-		if(priestModule.priest.initializersDir) {
-			this.registerInitializersDir(priestModule.priest.initializersDir)
+		if(fireModule.ignition.initializersDir) {
+			this.registerInitializersDir(fireModule.ignition.initializersDir)
 		}
-		if(priestModule.priest.scriptDirs) {
-			this.scriptDirectories = this.scriptDirectories.concat(priestModule.priest.scriptDirs)
+		if(fireModule.ignition.scriptDirs) {
+			this.scriptDirectories = this.scriptDirectories.concat(fireModule.ignition.scriptDirs)
 		}
 	}
-	priestExpressions.forEach(function(expressionDefintion) {
+	fireExpressions.forEach(function(expressionDefintion) {
 		this.registerWellKnownExpressionDefinition(expressionDefintion)
 		}, this)
-	this.loadedModules.push(priestModule)
+	this.loadedModules.push(fireModule)
 	return true
 }
 
 Runtime.prototype.loadNamedModule = function(moduleName) {
-	var priestModule = this.moduleRequire(moduleName)
-	this.loadModuleInstance(priestModule, moduleName)
+	var fireModule = this.moduleRequire(moduleName)
+	this.loadModuleInstance(fireModule, moduleName)
 }
 
 Runtime.prototype._loadManifestFile = function(manifestFile) {
@@ -659,16 +664,16 @@ Runtime.prototype.load = function(initializationCallback) {
 	this.loadManifestModules()
 	
 	// Intialize all the Modules
-	this.loadedModules.forEach(function(priestModule) {
-		if(priestModule.priest && priestModule.priest.init) {
-			priestModule.priest.init(self)
+	this.loadedModules.forEach(function(fireModule) {
+		if(fireModule.ignition && fireModule.ignition.init) {
+			fireModule.ignition.init(self)
 		}
 	})
 	// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
 	this.scanScriptsDirs()
 	
 	// STEP 1. Load Configurations from Manifest
-	// (Configurations must be loaded first so the priest.init callback of all modules can work properly)
+	// (Configurations must be loaded first so the ignition.init callback of all modules can work properly)
 	var configurations = this.mergedManifest.environments;
 	if(configurations) {
 		self.configurations = configurations[self.environmentName]
@@ -924,11 +929,11 @@ module.exports.IgnoreOutput = function() {
 module.exports.PackageInfo = JSON.parse(fs.readFileSync(path.join(__dirname,"../package.json"), 'utf8'))
 
 module.exports.executeApplication = function(argv) {
-	
-
-		require.extensions[".json"] = function (module, filename) {
-	            return module._compile(fs.readFileSync(path.join(__dirname,"cli.js"), 'utf8'), filename);
-	        };
+	var loaderFunction = function (module, filename) {
+		return module._compile(fs.readFileSync(path.join(__dirname,"cli.js"), 'utf8'), filename);
+	};
+	require.extensions[".json"] = loaderFunction
+	require.extensions[".fjson"] = loaderFunction
 
 	process.parsedArgv = nopt({
 		"print-expressions" : Boolean
@@ -948,11 +953,12 @@ module.exports.executeApplication = function(argv) {
 	}
 
 	function printHelp() {
-		console.log("Priest Runtime version " + module.exports.PackageInfo.version)
-		console.log("usage: priest TheProject.Main.priest.json")
+		console.log("Fire.JS Runtime version " + module.exports.PackageInfo.version)
+		console.log("usage: firejs TheProject.Main.fjson")
+		console.log("usage: firejs package.json")
 		console.log("options:")
 		console.log("	--print-expressions: print all the expression names and flags loaded by the runtime as a JSON document to stdout")
 		console.log("")
-		console.log("Copyright (C) 2011 Firebase and Contributors. http://priest.firebase.co")
+		console.log("Copyright (C) 2011 Firebase and Contributors. http://firejs.firebase.co")
 	}
 }

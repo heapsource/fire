@@ -13,9 +13,9 @@ function getTempTestOutputFileName(filename) {
 	return "/tmp/" + filename
 }
 
-vows.describe('priest').addBatch({
+vows.describe('firejs').addBatch({
 		
-	'When I have a object with no priest special keys': {
+	'When I have a object with no firejs special keys': {
 		topic: function() {
 			return {
 				"name":"Johan", 
@@ -113,7 +113,7 @@ vows.describe('priest').addBatch({
 			})
 		}
 	}
-	,'When I have a simple priest expression that returns 2': {
+	,'When I have a simple firejs expression that returns 2': {
 		topic: function() {
 			return {
 				"@return": 2
@@ -484,7 +484,7 @@ vows.describe('priest').addBatch({
 	
 }).export(module); 
 
-vows.describe('priest variables scopes').addBatch({
+vows.describe('firejs variables scopes').addBatch({
 	'When I have a JSON document with a set expression, other expressions on the same level should see the variable': {
 		topic: function() {
 			return {
@@ -649,7 +649,7 @@ vows.describe('priest variables scopes').addBatch({
 	},
 }).export(module);
 
-vows.describe('priest _result tests').addBatch({
+vows.describe('firejs _result tests').addBatch({
 	'When the first expression in a block returns a value and the last expression returns the parent value': {
 		topic: function() {
 			return  {
@@ -794,7 +794,7 @@ vows.describe('priest _result tests').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest error handling').addBatch({
+vows.describe('firejs error handling').addBatch({
 	'When a nested expression raises an error and is not handled by any of the nested expressions': {
 		topic: function() {
 			return  {
@@ -1181,7 +1181,7 @@ vows.describe('priest error handling').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest loop control').addBatch({
+vows.describe('firejs loop control').addBatch({
 	'When an expression contains a loop control expression, the loopCallback should be called': {
 		topic: function() {
 			return  {
@@ -1880,7 +1880,7 @@ vows.describe('priest loop control').addBatch({
 	}
 }).export(module);
  
-vows.describe('priest @get paths').addBatch({
+vows.describe('firejs @get paths').addBatch({
 	'When I use @get to get a nested member in a variable': {
 		topic: function() {
 			return  {
@@ -1907,7 +1907,7 @@ vows.describe('priest @get paths').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest manifests').addBatch({
+vows.describe('firejs manifests').addBatch({
 	'Having a Runtime with no configuration': {
 		topic: function() {
 			require.paths.unshift(path.join(__dirname,'manifests/testModules/node_modules')); // because we are testing in a different directory
@@ -1917,7 +1917,7 @@ vows.describe('priest manifests').addBatch({
 		"when I set up a runtime with a manifest with two modules ": {
 			topic:function(runtime) {
 				
-				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testModules/priest.manifest.json"))
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testModules/ignition.manifest.json"))
 				return runtime
 			},
 			"the expression expressionModule1 should be loaded": function(runtime) {
@@ -1969,7 +1969,7 @@ vows.describe('priest manifests').addBatch({
 			require.paths.unshift(path.join(__dirname,'manifests/testConfigMissing/node_modules')); // because we are testing in a different directory
 			var runtime = new Runtime()
 			assert.throws(function() {
-				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/priest.manifest.json"))
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"))
 				})
 		},
 		"the load from manifest should fail with message": function() {
@@ -1977,7 +1977,7 @@ vows.describe('priest manifests').addBatch({
 			var runtime = new Runtime()
 			
 			try {
-				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/priest.manifest.json"))
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"))
 			}catch(moduleErrorMsg) {
 				assert.equal(moduleErrorMsg,"database connection info is missing")
 			}
@@ -1985,7 +1985,7 @@ vows.describe('priest manifests').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest environments').addBatch({
+vows.describe('firejs environments').addBatch({
 	'Having a Runtime running in production': {
 		topic: function() {
 			return tempChangeEnv("production", function() {
@@ -2041,7 +2041,7 @@ function tempChangeEnv(envName, call) {
 	return result
 }
 
-vows.describe('priest configurations').addBatch({
+vows.describe('firejs configurations').addBatch({
 	'Working in a custom environment': {
 		topic: function() {
 			require.paths.unshift(path.join(__dirname,'manifests/testConfig/node_modules')); // because we are testing in a different directory
@@ -2052,7 +2052,7 @@ vows.describe('priest configurations').addBatch({
 		},
 		"when I set up a runtime": {
 			topic:function(runtime) {
-				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfig/priest.manifest.json"))
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfig/ignition.manifest.json"))
 				return runtime
 			},
 			"and once the modules are loaded": {
@@ -2078,8 +2078,8 @@ vows.describe('priest configurations').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest JSON definition registration').addBatch({
-	'Having a JSON document with the definition of a priest expression': {
+vows.describe('firejs JSON definition registration').addBatch({
+	'Having a JSON document with the definition of a firejs expression': {
 		topic: function() {
 			return new Runtime()
 		},
@@ -2106,7 +2106,7 @@ vows.describe('priest JSON definition registration').addBatch({
 						contextBase._errorCallback =  function() {};
 						runtime.runExpressionByName("customJsonExpression", contextBase ,null)
 					},
-					"it should return the value specified in the priest JSON document given in the definition": function(err, res) {
+					"it should return the value specified in the firejs JSON document given in the definition": function(err, res) {
 					 	assert.equal(res, 500)
 					}
 			}
@@ -2114,7 +2114,7 @@ vows.describe('priest JSON definition registration').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest @each built-in expression').addBatch({
+vows.describe('firejs @each built-in expression').addBatch({
 	'Having a JSON document with an @each expression with hint': {
 		topic: function() {
 			return new Runtime()
@@ -2253,7 +2253,7 @@ vows.describe('priest @each built-in expression').addBatch({
 }).export(module);
 
 
-vows.describe('priest @if built-in expression').addBatch({
+vows.describe('firejs @if built-in expression').addBatch({
 	'Having a JSON document with an @if expression and there is no result in the block': {
 		topic: function() {
 			return new Runtime()
@@ -2426,7 +2426,7 @@ vows.describe('priest @if built-in expression').addBatch({
 
 
 
-vows.describe('priest booleans').addBatch({
+vows.describe('firejs booleans').addBatch({
 	'Having a JSON document with a boolean value false': {
 		topic: function() {
 			return new Runtime()
@@ -2495,7 +2495,7 @@ vows.describe('priest booleans').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest @unless built-in expression').addBatch({
+vows.describe('firejs @unless built-in expression').addBatch({
 	'Having a JSON document with an @unless expression and there is no result in the block': {
 		topic: function() {
 			return new Runtime()
@@ -2701,7 +2701,7 @@ vows.describe('priest @unless built-in expression').addBatch({
 }).export(module);
 
 
-vows.describe('priest @equals').addBatch({
+vows.describe('firejs @equals').addBatch({
 	'Having a @equals expressions without at least two comparable values': {
 		topic: function() {
 			return new Runtime()
@@ -2971,7 +2971,7 @@ vows.describe('priest @equals').addBatch({
 
 
 
-vows.describe('priest @notEquals').addBatch({
+vows.describe('firejs @notEquals').addBatch({
 	'Having a @notEquals expressions without at least two comparable values': {
 		topic: function() {
 			return new Runtime()
@@ -3238,7 +3238,7 @@ vows.describe('priest @notEquals').addBatch({
 	},
 }).export(module);
 
-vows.describe('priest @increment').addBatch({
+vows.describe('firejs @increment').addBatch({
 	'Having a @increment expression without a hint': {
 		topic: function() {
 			return new Runtime()
@@ -3386,7 +3386,7 @@ vows.describe('priest @increment').addBatch({
 }).export(module);
 
 
-vows.describe('priest @decrement').addBatch({
+vows.describe('firejs @decrement').addBatch({
 	'Having a @decrement expression without a hint': {
 		topic: function() {
 			return new Runtime()
@@ -3533,7 +3533,7 @@ vows.describe('priest @decrement').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest async execution').addBatch({
+vows.describe('firejs async execution').addBatch({
 	'When I have a JSON doc that creates a regular object based on async expression keys': {
 		topic: function() {
 			return {
@@ -3664,7 +3664,7 @@ vows.describe('priest async execution').addBatch({
 
 }).export(module);
 
-vows.describe('priest @input').addBatch({
+vows.describe('firejs @input').addBatch({
 	'Having a JSON code that returns the input using a @input at first level': {
 		topic: function() {
 			return new Runtime()
@@ -3745,7 +3745,7 @@ vows.describe('priest @input').addBatch({
 	},
 }).export(module);
 
-vows.describe('priest getWellKnownExpressions').addBatch({
+vows.describe('firejs getWellKnownExpressions').addBatch({
 	"When I initialize a runtime":{
 		topic: function() {
 			return new Runtime()
@@ -3760,10 +3760,10 @@ vows.describe('priest getWellKnownExpressions').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest file extension inference').addBatch({
+vows.describe('firejs file extension inference').addBatch({
 	"When I infer the expression name from a simple name file with the official script extension": {
 		topic: function() {
-			return jsonCode.inferExpressionNameByFileName("some.priest.json")
+			return jsonCode.inferExpressionNameByFileName("some.fjson")
 		},
 		"the expression name should be the name of the file without the extension": function(expressionName) {
 			assert.equal(expressionName,"some")
@@ -3771,7 +3771,7 @@ vows.describe('priest file extension inference').addBatch({
 	},
 	"When I infer the expression name from a namespaced file name with the official script extension": {
 		topic: function() {
-			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.priest.json")
+			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.fjson")
 		},
 		"the expression name should be the name of the file without the extension": function(expressionName) {
 			assert.equal(expressionName,"myApp.SomeFeature.SomeExpression")
@@ -3779,7 +3779,7 @@ vows.describe('priest file extension inference').addBatch({
 	},
 	"When I infer the expression name from a simple name file with the official custom expression extension": {
 		topic: function() {
-			return jsonCode.inferExpressionNameByFileName("some.priest.js")
+			return jsonCode.inferExpressionNameByFileName("some.fjs")
 		},
 		"the expression name should be the name of the file without the extension": function(expressionName) {
 			assert.equal(expressionName,"some")
@@ -3787,7 +3787,7 @@ vows.describe('priest file extension inference').addBatch({
 	},
 	"When I infer the expression name from a namespaced file name with the official custom expression extension": {
 		topic: function() {
-			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.priest.js")
+			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.fjs")
 		},
 		"the expression name should be the name of the file without the extension": function(expressionName) {
 			assert.equal(expressionName,"myApp.SomeFeature.SomeExpression")
@@ -3795,7 +3795,7 @@ vows.describe('priest file extension inference').addBatch({
 	},
 	"When I infer the expression name from a file name without the official script extension": {
 		topic: function() {
-			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.priest.mp3")
+			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.mp3")
 		},
 		"the expression name should be null": function(expressionName) {
 			assert.equal(expressionName,null)
@@ -3803,7 +3803,7 @@ vows.describe('priest file extension inference').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest @undefined').addBatch({
+vows.describe('firejs @undefined').addBatch({
 	'Having a JSON code that returns @undefined at the end of the expression-block': {
 		topic: function() {
 			return new Runtime()
@@ -3841,7 +3841,7 @@ vows.describe('priest @undefined').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest @raiseError').addBatch({
+vows.describe('firejs @raiseError').addBatch({
 	'Having a JSON code that raises an error using @raiseError': {
 		topic: function() {
 			return new Runtime()
@@ -3880,7 +3880,7 @@ vows.describe('priest @raiseError').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest loadedModules').addBatch({
+vows.describe('firejs loadedModules').addBatch({
 	'Having a Runtime which loads two modules': {
 		topic: function() {
 			require.paths.unshift(path.join(__dirname,'loadedModules/node_modules')); // because we are testing in a different directory
@@ -3888,7 +3888,7 @@ vows.describe('priest loadedModules').addBatch({
 		},
 		"when we register it": {
 			topic:function(runtime) {
-				runtime.loadFromManifestFile(path.join(__dirname,"loadedModules/priest.manifest.json"))
+				runtime.loadFromManifestFile(path.join(__dirname,"loadedModules/ignition.manifest.json"))
 				runtime.registerWellKnownExpressionDefinition({
 					name:"testLoadedModules",
 					json: {
@@ -3928,7 +3928,7 @@ vows.describe('priest loadedModules').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest Runtime on("load") event').addBatch({
+vows.describe('firejs Runtime on("load") event').addBatch({
 	'When a Runtime loads from Manifest file': {
 			topic:function() {
 				var runtime = new Runtime()
@@ -3939,7 +3939,7 @@ vows.describe('priest Runtime on("load") event').addBatch({
 						r:r
 					})
 				})
-				runtime.loadFromManifestFile(path.join(__dirname,"onLoadTest/priest.manifest.json"))
+				runtime.loadFromManifestFile(path.join(__dirname,"onLoadTest/ignition.manifest.json"))
 			},
 			"it should invoke the 'load' event": function(res) {
 				assert.equal(res.runtime, res.r, "expecting the event to send the runtime instance as the first argument") 
@@ -3965,7 +3965,7 @@ vows.describe('priest Runtime on("load") event').addBatch({
 
 
 
-vows.describe('priest createVar').addBatch({
+vows.describe('firejs createVar').addBatch({
 	'Having a Expression that uses setScopeVar instead setVar': {
 		topic: function() {
 			var runtime = new Runtime()
@@ -4126,7 +4126,7 @@ vows.describe('priest createVar').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest @index').addBatch({
+vows.describe('firejs @index').addBatch({
 	'When I use @index with no path': {
 		"and the last result is undefined":{
 			topic: function() {
@@ -4404,11 +4404,11 @@ vows.describe('priest @index').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest - dependentModules').addBatch({
-	'When a priest module loads a third priest module': {
+vows.describe('firejs - dependentModules').addBatch({
+	'When a firejs module loads a third firejs module': {
 		topic: function() {
 			var self = this
-			exec('bin/./priest test/dependentModules/dependentModules.Main.priest.json', function (error, stdout, stderr) {
+			exec('bin/./firejs test/dependentModules/dependentModules.Main.fjson', function (error, stdout, stderr) {
 				self.callback(null, {
 					error: error, 
 					stdout: stdout, 
@@ -4425,13 +4425,13 @@ vows.describe('priest - dependentModules').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest - invalid module registration').addBatch({
+vows.describe('firejs - invalid module registration').addBatch({
 	'When I try to register a module instance using loadModuleInstance and the module instance does not export expressions': function() {
 		var runtime = new Runtime()
 		try {
 			runtime.loadModuleInstance({}, "someInvalidModule")
 		}catch(err) {
-			assert.equal(err, "Module 'someInvalidModule' is not a priest module")
+			assert.equal(err, "Module 'someInvalidModule' is not a fire.js module")
 		}
 	}
 }).export(module)
@@ -4444,8 +4444,8 @@ function copyProcessEnv() {
 	return e
 }
 
-vows.describe('priest - initializers').addBatch({
-	"The priest module should expose InitializerError type": function() {
+vows.describe('firejs - initializers').addBatch({
+	"The firejs module should expose InitializerError type": function() {
 		var moduleType = require('../src/core.js').InitializerError
 		assert.isNotNull(moduleType)
 		assert.equal(moduleType, require('../src/InitializerError.js'))
@@ -4455,7 +4455,7 @@ vows.describe('priest - initializers').addBatch({
 			var self = this
 			var testEnv = copyProcessEnv()
 			testEnv.NODE_ENV = 'test'
-			exec('bin/./priest test/initializersTest/initializersTest.Main.priest.json',{
+			exec('bin/./firejs test/initializersTest/initializersTest.Main.fjson',{
 				env: testEnv
 			}, function (error, stdout, stderr) {
 				self.callback(error, {
@@ -4475,7 +4475,7 @@ vows.describe('priest - initializers').addBatch({
 	"When I run the app with no implicit and one initializer prints a test message": {
 		topic: function() {
 			var self = this
-			exec('bin/./priest test/initializersTest/initializersTest.Main.priest.json', function (error, stdout, stderr) {
+			exec('bin/./firejs test/initializersTest/initializersTest.Main.fjson', function (error, stdout, stderr) {
 				self.callback(error, {
 					error: error, 
 					stdout: stdout, 
@@ -4493,7 +4493,7 @@ vows.describe('priest - initializers').addBatch({
 }).export(module)
 
 
-vows.describe('priest - initial last result').addBatch({
+vows.describe('firejs - initial last result').addBatch({
 	'When I use a expression that initializes the last result of the input with certain value"': {
 		topic: function() {
 			var runtime = new Runtime()
@@ -4566,7 +4566,7 @@ vows.describe('priest - initial last result').addBatch({
 }).export(module)
 
 
-vows.describe('priest - @isEmpty').addBatch({
+vows.describe('firejs - @isEmpty').addBatch({
 	'When I use @isEmpty with a undefined hint': {
 		topic: function() {
 			var runtime = new Runtime()
@@ -4673,7 +4673,7 @@ vows.describe('priest - @isEmpty').addBatch({
 }).export(module)
 
 
-vows.describe('priest - @isNotEmpty').addBatch({
+vows.describe('firejs - @isNotEmpty').addBatch({
 	'When I use @isNotEmpty with a undefined hint': {
 		topic: function() {
 			var runtime = new Runtime()
@@ -4814,7 +4814,7 @@ vows.describe('priest - @isNotEmpty').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest - @parentResult').addBatch({
+vows.describe('firejs - @parentResult').addBatch({
 	'When I use @parentResult': {
 		topic: function() {
 			var runtime = new Runtime()
@@ -4862,7 +4862,7 @@ vows.describe('priest - @parentResult').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest - @test').addBatch({
+vows.describe('firejs - @test').addBatch({
 	'When I use @test with no hint and a matching string as the input': {
 		topic: function() {
 			var runtime = new Runtime()
@@ -5046,7 +5046,7 @@ vows.describe('priest - @test').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest - null json body on implementation').addBatch({
+vows.describe('firejs - null json body on implementation').addBatch({
 	'When I register an expression with null body': {
 		topic: function() {
 			var runtime = new Runtime()
@@ -5080,7 +5080,7 @@ vows.describe('priest - null json body on implementation').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest - @getModuleConfig').addBatch({
+vows.describe('firejs - @getModuleConfig').addBatch({
 	'When I use getModuleConfig with no input and a hint': {
 		topic: function() {
 			var runtime = new Runtime()
@@ -5116,7 +5116,7 @@ vows.describe('priest - @getModuleConfig').addBatch({
 	}
 }).export(module)
 
-vows.describe('priest - @hint').addBatch({
+vows.describe('firejs - @hint').addBatch({
 	'When I use @hint': {
 		topic: function() {
 			var runtime = new Runtime()
@@ -5158,7 +5158,7 @@ vows.describe('priest - @hint').addBatch({
 }).export(module)
 
 
-vows.describe('priest - @concat').addBatch({
+vows.describe('firejs - @concat').addBatch({
 	'When I use @concat to concatenate a null with a non-null value': {
 		topic: function() {
 			var runtime = new Runtime()

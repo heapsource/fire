@@ -20,5 +20,5 @@
 // THE SOFTWARE.
 
 var path = require('path')
-var priest = require('../index.js')
-priest.executeApplication(process.argv.slice(2))
+var fire = require('../index.js')
+fire.executeApplication(process.argv.slice(2))

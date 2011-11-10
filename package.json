@@ -1,23 +1,26 @@
 {
-    "name": "priest",
-    "description": "Message-Oriented REST API Framework for node.js, express.js and MongoDB ",
-    "version": "1.0.0",
+    "name": "fire",
+    "description": "An experimental Framework that uses JSON structures to simplify the definition of complex behaviors from asynchronous sources in Node.js",
+    "version": "0.1.0",
     "author": "Johan Hernandez <johan@firebase.co>",
-    "main": "index",
+    "main": "./index.js",
     "bin": {
-        "priest": "./bin/priest"
+        "firejs": "./bin/firejs"
     },
     "repository":
     {
-        "type": "git"
-        ,
-        "url": "http://github.com/firebaseco/priest.git"
+        "type": "git",
+        "url": "http://github.com/firejs/firejs.git"
     },
     "bugs": {
-        "web": "https://github.com/firebaseco/priest/issues"
+		"email": "firejs@firebase.co",
+        "url": "https://github.com/firejs/firejs/issues"
     },
-    "keywords": ["API", "REST", "RESTful", "JSON", "Mongo", "MongoDB", "mongoose"],
-    "repository": "git://github.com/firebaseco/priest",
+    "keywords": ["JSON", "framework", "runtime"],
+    "repository": {
+		"type": "git",
+		"url": "git://github.com/firejs/firejs"
+	},
 	"dependencies": {
 		"nopt": ">= 1.0.10"
 	},
