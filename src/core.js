@@ -58,7 +58,11 @@ require.extensions[DEFAULT_CUSTOM_SCRIPT_EXTENSION] = function (module, filename
   var content = fs.readFileSync(filename, 'utf8');
   module._compile(content, filename);
 }
-
+var loaderFunction = function (module, filename) {
+	return module._compile(fs.readFileSync(path.join(__dirname,"cli.js"), 'utf8'), filename);
+};
+require.extensions[".json"] = loaderFunction // loader for package.json
+require.extensions[DEFAULT_SCRIPT_EXTENSION] = loaderFunction
 
 var SPECIAL_KEY_SYMBOL = "@"
 var HINT_START_SYMBOL = "("
@@ -398,20 +402,20 @@ var compileExpressionFuncFromJSON = function(jsonBlock, virtualFileName, outputF
 	return _expressionFunc; // defined inside the script.
 }
 
-function PriestCollection() {
+function FireCollection() {
 	
 }
 
 /*
  * Returns the name of all modules loaded.
  */
-PriestCollection.prototype.names = function() {
+FireCollection.prototype.names = function() {
 	return Object.keys(this)
 }
 
 function Runtime() {
 	this.loadedExpressions = {}; // Contains a member per expression implementation <Function>
-	this.loadedExpressionsMeta = new PriestCollection(); // Contains a member per full definition of the expression, like {name:<String>, implementation:<Function>}
+	this.loadedExpressionsMeta = new FireCollection(); // Contains a member per full definition of the expression, like {name:<String>, implementation:<Function>}
 	this.loadedModules = []
 	
 	var dirName = path.join(__dirname, "built-in")
@@ -929,11 +933,7 @@ module.exports.IgnoreOutput = function() {
 module.exports.PackageInfo = JSON.parse(fs.readFileSync(path.join(__dirname,"../package.json"), 'utf8'))
 
 module.exports.executeApplication = function(argv) {
-	var loaderFunction = function (module, filename) {
-		return module._compile(fs.readFileSync(path.join(__dirname,"cli.js"), 'utf8'), filename);
-	};
-	require.extensions[".json"] = loaderFunction
-	require.extensions[".fjson"] = loaderFunction
+	
 
 	process.parsedArgv = nopt({
 		"print-expressions" : Boolean

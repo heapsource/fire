@@ -1,7 +1,6 @@
 var path = require('path')
 var fs = require('fs')
 var assert = require('assert')
-//var PriestError = require('./Error.js')
 
 
 function endsWith(str, suffix) {
@@ -24,21 +23,3 @@ module.exports.getFilesWithExtension = function(absoluteDirPath, extension) {
 	})
 	return list
 }
-
-/*
-module.exports.loadJSONFile = function(fileUnderServicesDir) {
-	var jsonDefinition = null;
-	try {
-		jsonDefinition = JSON.parse(fs.readFileSync(fileUnderServicesDir, 'utf8'));
-	}catch(ex) {
-		throw new PriestError("PUE10008", "Source " +  fileUnderServicesDir + " content is not valid as a JSON structure. The error was " + ex.message);
-	}
-	return jsonDefinition;
-}
-
-function isNullOrEmpty(value) {
-	return value === undefined || value == null || value === ""
-}
-
-module.exports.isNullOrEmpty = isNullOrEmpty
-*/

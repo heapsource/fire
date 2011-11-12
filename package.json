@@ -19,7 +19,7 @@
     "keywords": ["JSON", "framework", "runtime"],
     "repository": {
 		"type": "git",
-		"url": "git://github.com/firejs/firejs"
+		"url": "git://github.com/firejs/firejs.git"
 	},
 	"dependencies": {
 		"nopt": ">= 1.0.10"
