@@ -1,58 +1,70 @@
-# priest.js
+# fire.js
 
-priest.js is a programming language embedded in JSON as a set of special 'keys' which aims to make ridiculously easy the creation of Javascript objects from asynchronous sources in node.js.
+fire.js is an experimental Framework that uses JSON structures to simplify the definition of complex behaviors from asynchronous sources in Node.js.
 
-The Runtime takes a JSON document and compiles it for asynchronous Javascript execution:
+The goal is to reuse "building blocks" called "expressions" so you can define behavior on the server side without dealing with the infamous *Javascript asynchronous spaghetti code*.
+
+The Runtime takes a JSON document and compiles it to asynchronous Javascript:
 
     JSON Document -> Deserialization -> Compilation to Javascript -> Execution
 
-## More Info
+### Example
 
-+ [Tutorials](https://github.com/firebaseco/priest/wiki/Tutorials)
+Example JSON Structure using a [MongoDB](http://www.mongodb.org/) database:
 
-+ [Wiki](https://github.com/firebaseco/priest/wiki)
+    {
+	    "enabledEmails": {
+			"@Mongo.Find(users)": {
+				"enabled": true
+			},
+			"@each": {
+				"@get(CurrentItem.email)": null
+			}
+		},
+		"disabledEmails": {
+			"@Mongo.Find(users)": {
+				"enabled": false
+			},
+			"@each": {
+				"@get(CurrentItem.email)": null
+			}
+		}
+    }
 
-## FAQ
+The result will be:
+
+	{
+		"enabledEmails": [...],
+		"disabledEmails": [...]
+	}
 
 ### Is it a replacement for Javascript in Node.js?
 
-Definitely no. The goal of priest.js is to reuse "building blocks" so you can write node.js applications without dealing with the infamous *Javascript asynchronous spaghetti code*.
+Definitely no. In fact, fire.js is itself written in Javascript, you can define your own expressions in Javascript and the runtime will compile all the JSON source code to Javascript, Node.JS will do the rest.
+	
+## More Information
 
-### Why JSON?
++ [Tutorials](https://github.com/firejs/firejs/wiki/Tutorials)
 
-Because JSON Documents are a serialized representation of Javascript Objects. This makes it easier for the Runtime to understand and humans to edit.
-
-### Why "priest"?
-
-[here](http://en.wikipedia.org/wiki/Judas_Priest)... I was thinking of calling it "judas.js" but I rather keep Lady Gaga out of my mind(this is the part when you laugh).
++ [Wiki](https://github.com/firejs/firejs/wiki)
 
 
 ## Cloning the Repository
 
-    git clone https://github.com/firebaseco/priest.git
+    git clone https://github.com/firejs/firejs.git
 
 
-### Preparing your Development Environment and running the Tests
-
-priest depends on [vows](http://vowsjs.org/) and other development tools, you can install all of them by simply running:
-
-     make install-dev-dependencies
-
-Once it's finished then you can run the tests:
+### Tests
 
     make run-tests
 
-There is also:
+### Contributors
 
-    make remove-dev-dependencies
-
-### Collaborating
-
-* Johan (author). Email: *johan@firebase.co*, Skype: *thepumpkin1979*
+* Johan (author). Email: *johan@firebase.co*
 
 ## MIT License
 
-Copyright (c) 2011 Firebase.co - http://www.firebase.co
+Copyright (c) 2011 Firebase.co and Contributors - http://www.firebase.co
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

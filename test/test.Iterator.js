@@ -2,7 +2,7 @@ var vows = require('vows')
 var assert = require('assert')
 var Iterator = require('../src/Iterator')
 
-vows.describe('priest Iterator').addBatch({
+vows.describe('firejs Iterator').addBatch({
 	"When I have an Iterator created with an empty array": {
 		topic: function() {
 			return new Iterator([])
@@ -135,9 +135,9 @@ vows.describe('priest Iterator').addBatch({
 			}
 		}
 	}	,
-		"When I load the priest.js module the Iterator type must be exported":  function(){
-			var priestExports = require('../index')
-			assert.isFunction(priestExports.Iterator)
-			assert.equal(Iterator, priestExports.Iterator)
+		"When I load the firejs.js module the Iterator type must be exported":  function(){
+			var fireExports = require('../index')
+			assert.isFunction(fireExports.Iterator)
+			assert.equal(Iterator, fireExports.Iterator)
 		}
 	}).export(module);

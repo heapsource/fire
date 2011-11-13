@@ -3,6 +3,6 @@ var Error = function(code, message) {
 	this.message = message;
 };
 Error.prototype.toString = function() {
-	return "priest error " + this.code + ": " + this.message
+	return "fire.js error " + this.code + ": " + this.message
 }
 module.exports = Error;

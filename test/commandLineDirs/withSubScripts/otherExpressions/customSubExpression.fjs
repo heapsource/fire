@@ -1,9 +1,9 @@
-var priest = require('priest')
+var fire = require('fire')
 
 function customSubExpression() {
 	
 }
-customSubExpression.prototype = new priest.Expression()
+customSubExpression.prototype = new fire.Expression()
 customSubExpression.prototype.execute = function() {
 	this.setResult("customSubExpression")
 }

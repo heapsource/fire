@@ -4,13 +4,13 @@ var PathCache = require('../src/Paths').PathCache
 var AstEntryType = require('../src/Paths').AstEntryType
 var Variable = require('../src/Variable')
 var exec  = require('child_process').exec
-var priest = require('../src/core.js')
+var fire = require('../src/core.js')
 
-vows.describe('priest command line utility').addBatch({
+vows.describe('firejs command line utility').addBatch({
 	"When I run the command line with no args": {
 		topic: function() {
 			var self = this
-			exec('bin/./priest', function (error, stdout, stderr) {
+			exec('bin/./firejs', function (error, stdout, stderr) {
 				self.callback(error, {
 					error: error, 
 					stdout: stdout, 
@@ -28,7 +28,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run the command line in a directory with a single folder and single JSON file": {
 		topic: function() {
 			var self = this
-			exec(' (cd test/commandLineDirs/simple && ../../../bin/./priest mySimpleMain.priest.json)', function (error, stdout, stderr) {
+			exec(' (cd test/commandLineDirs/simple && ../../../bin/./firejs mySimpleMain.fjson)', function (error, stdout, stderr) {
 				self.callback(error, {
 					error: error, 
 					stdout: stdout, 
@@ -36,7 +36,7 @@ vows.describe('priest command line utility').addBatch({
 				})
 			});
 		},
-		"I should see the output of the priest expression": function(output){
+		"I should see the output of the fire.js expression": function(output){
 			assert.equal(output.stderr,'')
 			assert.isNotNull(output.stdout)
 			assert.include(output.stdout, "Hello World from the Simplest JSON Expression")
@@ -45,7 +45,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run the command line in a directory with a single folder with a JSON file and a Manifest and the module returns a value from the configuration section": {
 		topic: function() {
 			var self = this
-			exec('bin/./priest test/commandLineDirs/withManifest2/myMain.priest.json', function (error, stdout, stderr) {
+			exec('bin/./firejs test/commandLineDirs/withManifest2/myMain.fjson', function (error, stdout, stderr) {
 				self.callback(error, {
 					error: error, 
 					stdout: stdout, 
@@ -63,7 +63,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run the command line in a directory with two json scripts and the main script uses the second script as the result": {
 		topic: function() {
 			var self = this
-			exec('bin/./priest test/commandLineDirs/withRootLevelFiles/myMain.priest.json', function (error, stdout, stderr) {
+			exec('bin/./firejs test/commandLineDirs/withRootLevelFiles/myMain.fjson', function (error, stdout, stderr) {
 				self.callback(error, {
 					error: error, 
 					stdout: stdout, 
@@ -81,7 +81,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run the command line in a project with a manifest that specifies additional directories and the main script returns a value from an additional directory": {
 		topic: function() {
 			var self = this
-			exec('bin/./priest test/commandLineDirs/withSubScripts/myMain.priest.json', function (error, stdout, stderr) {
+			exec('bin/./firejs test/commandLineDirs/withSubScripts/myMain.fjson', function (error, stdout, stderr) {
 				self.callback(error, {
 					error: error, 
 					stdout: stdout, 
@@ -102,7 +102,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run the command line in a project with a failing initializer": {
 		topic: function() {
 			var self = this
-				exec('bin/./priest test/commandLineDirs/failingInitializer/failingInitializer.Main.priest.json', function (error, stdout, stderr) {
+				exec('bin/./firejs test/commandLineDirs/failingInitializer/failingInitializer.Main.fjson', function (error, stdout, stderr) {
 					self.callback(null, {
 						error: error, 
 						stdout: stdout, 
@@ -111,7 +111,7 @@ vows.describe('priest command line utility').addBatch({
 				});
 		},
 		"I should see the error description in the stderr": function(output){
-			assert.equal(output.stderr,"priest runtime initializer 'failingInitializer.Init' failed with error: 'priest runtime error: Can not find the right configuration'\n")
+			assert.equal(output.stderr,"fire.js runtime initializer 'failingInitializer.Init' failed with error: 'fire.js runtime error: Can not find the right configuration'\n")
 			assert.isNotNull(output.stdout)
 			assert.isEmpty(output.stdout)
 		}
@@ -119,7 +119,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run the command line in a project with a initializer in a module that prints a message to the console": {
 		topic: function() {
 			var self = this
-				exec('bin/./priest test/commandLineDirs/moduleInitializers/moduleInitializers.Main.priest.json', function (error, stdout, stderr) {
+				exec('bin/./firejs test/commandLineDirs/moduleInitializers/moduleInitializers.Main.fjson', function (error, stdout, stderr) {
 					self.callback(null, {
 						error: error, 
 						stdout: stdout, 
@@ -136,7 +136,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run the command line in a project with modules that contain scripts in the root of the module and declares some additional directories": {
 		topic: function() {
 			var self = this
-				exec('bin/./priest test/commandLineDirs/moduleScriptDirs/moduleScriptDirs.Main.priest.json', function (error, stdout, stderr) {
+				exec('bin/./firejs test/commandLineDirs/moduleScriptDirs/moduleScriptDirs.Main.fjson', function (error, stdout, stderr) {
 					self.callback(null, {
 						error: error, 
 						stdout: stdout, 
@@ -160,7 +160,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run an app with --print-expressions": {
 		topic: function() {
 			var self = this
-				exec('bin/./priest --print-expressions test/commandLineDirs/expressionsList/MyApp.Main.priest.json', function (error, stdout, stderr) {
+				exec('bin/./firejs --print-expressions test/commandLineDirs/expressionsList/MyApp.Main.fjson', function (error, stdout, stderr) {
 					self.callback(null, {
 						error: error, 
 						stdout: stdout, 
@@ -193,7 +193,7 @@ vows.describe('priest command line utility').addBatch({
 	"When I run an app with a package.json instead of a JSON script": {
 		topic: function() {
 			var self = this
-				exec('bin/./priest test/commandLineDirs/packageJson/package.json', function (error, stdout, stderr) {
+				exec('bin/./firejs test/commandLineDirs/packageJson/package.json', function (error, stdout, stderr) {
 					self.callback(null, {
 						error: error, 
 						stdout: stdout, 
@@ -204,13 +204,13 @@ vows.describe('priest command line utility').addBatch({
 		"the app should start with the expression based on the name of the app": function(output){
 			assert.isNotNull(output.stdout)
 			assert.isEmpty(output.stderr)
-			assert.deepEqual(JSON.parse(output.stdout), "Hello from a pacakge.json launched app")
+			assert.deepEqual(JSON.parse(output.stdout), "Hello from a package.json launched app")
 		}
 	},
 	"When I run an app the parsedArgv should not contain the script file name or the package file name": {
 		topic: function() {
 			var self = this
-				exec('bin/./priest test/commandLineDirs/parsedArgv/Parsed.Main.priest.json --something true', function (error, stdout, stderr) {
+				exec('bin/./firejs test/commandLineDirs/parsedArgv/Parsed.Main.fjson --something true', function (error, stdout, stderr) {
 					self.callback(null, {
 						error: error, 
 						stdout: stdout, 

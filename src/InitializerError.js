@@ -6,6 +6,6 @@ function InitializerError(epDef, error) {
 	this.error = error;
 };
 InitializerError.prototype.toString = function() {
-	return "priest runtime initializer '" + this.expressionDefinition.name + "' failed with error: '" + this.error + "'"
+	return "fire.js runtime initializer '" + this.expressionDefinition.name + "' failed with error: '" + this.error + "'"
 }
 module.exports = InitializerError;

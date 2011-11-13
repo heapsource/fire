@@ -2,7 +2,7 @@ var vows = require('vows')
 var assert = require('assert')
 var extractComparableValues = require('../src/Comparable').extractComparableValues
 
-vows.describe('priest comparable values').addBatch({
+vows.describe('firejs comparable values').addBatch({
 	"the comparable values of any array it's the array itself": function() {
 		var comparables = extractComparableValues(['1','2'])
 		assert.deepEqual(comparables, ['1','2'])
@@ -36,6 +36,6 @@ vows.describe('priest comparable values').addBatch({
 		assert.deepEqual(comparables, ['W','o','r','d'])
 	}
 	/*
-		NOTE: If you add a new case, make sure you update the priest specification, section "Comparable Values"
+		NOTE: If you add a new case, make sure you update the fire.js specification, section "Comparable Values"
 	*/
 }).export(module);

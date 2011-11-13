@@ -5,20 +5,20 @@ function ModuleInitializer(thirdPartyModule, moduleInit) {
 		throw new "moduleInit must be a function"
 	}
 	this.thirdPartyModule = thirdPartyModule
-	this.thirdPartyModule.exports.priest = thirdPartyModule.exports.priest || {}
-	this.thirdPartyModule.exports.priest.expressions = thirdPartyModule.exports.priest.expressions || []
-	this.thirdPartyModule.exports.priest.init = moduleInit
+	this.thirdPartyModule.exports.ignition = thirdPartyModule.exports.ignition || {}
+	this.thirdPartyModule.exports.ignition.expressions = thirdPartyModule.exports.ignition.expressions || []
+	this.thirdPartyModule.exports.ignition.init = moduleInit
 	
 	var moduleDirName = this.moduleDirName = path.dirname(thirdPartyModule.filename)
 	var moduleManifestFile = path.join(moduleDirName, constants.DEFAULT_MANIFEST_FILE_NAME)
 	if(path.existsSync(moduleManifestFile)) {
-		thirdPartyModule.exports.priest.manifestFile = moduleManifestFile
+		thirdPartyModule.exports.ignition.manifestFile = moduleManifestFile
 	}
 	var initializersDir = path.join(moduleDirName, constants.INITIALIZERS_DIR_NAME)
 	if(path.existsSync(initializersDir)) {
-		thirdPartyModule.exports.priest.initializersDir = initializersDir
+		thirdPartyModule.exports.ignition.initializersDir = initializersDir
 	}
-	this.thirdPartyModule.exports.priest.scriptDirs = []
+	this.thirdPartyModule.exports.ignition.scriptDirs = []
 	
 	// automatically add the root of the module as a scripts directory.
 	this.exportScriptsDir('.')
@@ -30,7 +30,7 @@ ModuleInitializer.prototype.exportExpressions = function(expDefArray) {
 		throw "exportExpressions requires an Array with all the expression defintions"
 	}
 	expDefArray.forEach(function(expDef) {
-		self.thirdPartyModule.exports.priest.expressions.push(expDef)
+		self.thirdPartyModule.exports.ignition.expressions.push(expDef)
 	})
 }
 
@@ -39,13 +39,13 @@ ModuleInitializer.prototype.exportScriptsDir = function(dir, attributes) {
 	if(!path.existsSync(dirFullPath)) {
 		throw "ModuleInitializer could't find the scripts directory '" + dirFullPath + "'. Make sure the directory exists before using exportScriptsDir." 
 	}
-	this.thirdPartyModule.exports.priest.scriptDirs.push({
+	this.thirdPartyModule.exports.ignition.scriptDirs.push({
 		path: dirFullPath,
 		attributes: attributes
 	})
 }
 
 ModuleInitializer.prototype.exportExpression = function(expDef) {
-	this.thirdPartyModule.exports.priest.expressions.push(expDef)
+	this.thirdPartyModule.exports.ignition.expressions.push(expDef)
 }
 module.exports = ModuleInitializer

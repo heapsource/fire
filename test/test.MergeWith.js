@@ -3,7 +3,7 @@ var assert = require('assert')
 
 var mergeWith = require('../src/mergeWith.js')
 
-vows.describe('priest mergeWith').addBatch({
+vows.describe('firejs mergeWith').addBatch({
 	"When I merge an object with properties at first level": {
 		"with another object no properties the original object should remain intact": function() {
 			var expectedObject = {

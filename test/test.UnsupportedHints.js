@@ -1,7 +1,7 @@
 var vows = require('vows')
 var assert = require('assert')
 var jsonCode = require('../src/core.js')
-var PriestError = require('../src/core.js').Error
+var FireError = require('../src/core.js').Error
 var Runtime = jsonCode.Runtime
 jsonCode.exportTestOnlyFunctions();
 
@@ -12,7 +12,7 @@ globalContextBase._inputExpression  = function() {};
 globalContextBase._variables = {};            
 globalContextBase._errorCallback =  function() {};
 
-vows.describe('priest').addBatch({
+vows.describe('firejs').addBatch({
 	'Having a JSON code that uses @return with a hint': {
 		topic: function() {
 			return new Runtime()
@@ -27,10 +27,10 @@ vows.describe('priest').addBatch({
 				})
 				return runtime
 			},
-			"it should throw a PriestError": function(runtime) {
+			"it should throw a FireError": function(runtime) {
 				assert.throws(function() {
 					runtime.runExpressionByName("testForbiddenHints", globalContextBase ,null)
-				}, PriestError);
+				}, FireError);
 			},
 			"with error code UnsupportedHint": function(runtime) {
 				try{

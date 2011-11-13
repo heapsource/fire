@@ -4,7 +4,7 @@ var PathCache = require('../src/Paths').PathCache
 var AstEntryType = require('../src/Paths').AstEntryType
 var Variable = require('../src/Variable')
 
-vows.describe('priest Paths').addBatch({
+vows.describe('firejs Paths').addBatch({
 	"When I have a brand new cache": {
 		topic: function() {
 			return new PathCache()
@@ -15,7 +15,7 @@ vows.describe('priest Paths').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest Paths Valid AST').addBatch({
+vows.describe('firejs Paths Valid AST').addBatch({
 	"When I have the path 'var1'": {
 		topic: function() {
 			return new PathCache()
@@ -48,7 +48,7 @@ vows.describe('priest Paths Valid AST').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest Paths Invalid AST').addBatch({
+vows.describe('firejs Paths Invalid AST').addBatch({
 	"When I am checking errors and I have the path 'var1..'": {
 		topic: function() {
 			return "var1.."
@@ -84,7 +84,7 @@ vows.describe('priest Paths Invalid AST').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest Paths Values').addBatch({
+vows.describe('firejs Paths Values').addBatch({
 	"When I have a path cache": {
 		topic: function() {
 			return new PathCache()
@@ -137,7 +137,7 @@ vows.describe('priest Paths Values').addBatch({
 	}
 }).export(module);
 
-vows.describe('priest Write Paths').addBatch({
+vows.describe('firejs Write Paths').addBatch({
 	"When I write a variable using a single part path": {
 		topic: function(){
 			var pathCache = new PathCache()

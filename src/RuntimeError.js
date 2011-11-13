@@ -6,6 +6,6 @@ function RuntimeError(blockContext, error) {
 	this.error = error;
 };
 RuntimeError.prototype.toString = function() {
-	return "priest runtime error: " + this.error
+	return "fire.js runtime error: " + this.error
 }
 module.exports = RuntimeError;

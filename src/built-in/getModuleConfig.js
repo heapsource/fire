@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // Copyright (c) 2011 Firebase.co and Contributors - http://www.firebase.co
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,8 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-var path = require('path')
-var priest = require('priest')
-var path = require('path')
-var priest = require('priest')
-priest.executeApplication(process.argv.slice(2))
+
+var Expression = require("../Expressions").Expression
+
+function GetModuleConfigExpression() {
+
+}
+GetModuleConfigExpression.prototype = new Expression()
+GetModuleConfigExpression.prototype.execute = function() {
+	var self = this
+	var moduleName = this.getHintValue()
+	var moduleConfig = self._blockContext._runtime.getModuleConfiguration(moduleName)
+	this.setResult(moduleConfig)
+}
+
+module.exports = {
+	name: "getModuleConfig",
+	flags: ["hint"],
+	implementation: GetModuleConfigExpression
+}

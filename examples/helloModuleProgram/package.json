@@ -1,7 +1,7 @@
 {
-	"name": "helloModuleProgram",
+	"name": "Examples.Hello",
 	"version": "1.0.0",
 	"dependencies": {
-		"priest": ">= 1.0.0"
+		"fire": ">= 0.1.0"
 	}
 }

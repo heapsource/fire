@@ -1,9 +1,9 @@
-var priest = require('priest')
+var fire = require('fire')
 
 function customExpression() {
 	
 }
-customExpression.prototype = new priest.Expression()
+customExpression.prototype = new fire.Expression()
 customExpression.prototype.execute = function() {
 	this.setResult("customExpression")
 }
