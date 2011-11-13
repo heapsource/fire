@@ -29,5 +29,8 @@
     },
     "engines": {
         "node": ">= 0.1.98"
-    }
+    },
+	"scripts": {
+		"test": "make"
+	}
 }
