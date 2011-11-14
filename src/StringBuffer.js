@@ -3,7 +3,6 @@ var StringBuffer = function() {
 	this.str = ""
 	this.indentLevel = 0;
 }
-
 StringBuffer.prototype.indent = function() {
 	this.indentLevel++
 }
@@ -12,6 +11,7 @@ StringBuffer.prototype.unindent = function() {
 	if(this.unindentLevel == 0) return;
 	this.indentLevel--
 }
+
 StringBuffer.prototype.createIndent = function() {
 	var s = ""
 	var max = this.indentLevel * 2;
@@ -25,7 +25,7 @@ StringBuffer.prototype.toString = function() {
 	return this.str
 }
 
-StringBuffer.prototype.write = function(str) {
+StringBuffer.prototype.write = function(str, finishedCallback) {
 	this.str+=str
 }
 

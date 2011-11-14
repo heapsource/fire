@@ -17,50 +17,45 @@ vows.describe('firejs').addBatch({
 		
 	'When I have a object with no firejs special keys': {
 		topic: function() {
-			return {
-				"name":"Johan", 
-				"age": 25
-			};    
+			var self = this
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name: "NoSpecialKeysTest",
+				json: {
+					"name":"Johan", 
+					"age": 25
+				}
+			});
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {
+						self.callback("_loopCallback reached", null)
+					};
+					contextBase._inputExpression  = function() {
+						self.callback("_inputExpression reached", null)
+					};
+					contextBase._variables = {};        
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.runExpressionByName("NoSpecialKeysTest", contextBase ,null)
+				}
+			});
 		},
-		"and I compile it": {
-			topic: function(topic) {
-				return jsonCode._testOnly_compileExpressionFuncFromJSON(topic, "someFile.js",
-				getTempTestOutputFileName('json2code.js'),
-				"" // hint
-				);
-			},
-			"it should not be null": function(topic){
-				assert.isNotNull(topic)
-			},
-			"it should give a function Object": function(topic){
-				assert.instanceOf(topic, Function)
-			}
-		},
-		"and I run it": {
-			topic:function(topic) {
-				var cb = this.callback
-			jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-				//sendInput("")
-			}, function(){
-				// break
-			}, function(result) {
-				cb(null, result)
-			},getTempTestOutputFileName('json2code.js'),
-			"" // hint
-			)
-		},
-		"the result should not be null" : function(expressionResult) {
-			assert.isNotNull(expressionResult)
-		}
-		,
-		"the result should be a copy of the original JSON" : function(expressionResult) {
+		"the result should be a copy of the original JSON" : function(err, expressionResult) {
 			assert.deepEqual(expressionResult, {
 				"name":"Johan", 
 				"age": 25
 			});
+			assert.isNull(err)
 		}
-	}
-},
+	},
 'When I have a JSON with regular keys and expression keys at the same level': {
 	topic: function() {
 		return {

@@ -2,12 +2,77 @@ var RuntimeError = require('./RuntimeError')
 var Variable = require('./Variable')
 
 function Expression() {
-	
+	this.vars = {
+		result: undefined,
+		_parent: null
+	}
+	this.isRoot = false
+	this.reset()
 }
-
+Expression.prototype.reset = function() {
+	this.createInputExpression = null
+	this.parent = null
+	this.resultCallback = null
+	this.inputExpression = null
+	
+	// Unlink Variables
+	this.vars._parent = null
+}
 Expression.prototype.execute = function() {
 	console.trace()
 	throw "Expression requires derived classes or instances to override the 'execute' function with a expression-compliant function"
+}
+Expression.prototype.getParentResult = function() {
+	return this.parent !== undefined ? this.parent.getCurrentResult() : undefined
+}
+Expression.prototype.end = function(res) {
+	var self = this
+	if(!this.resultCallback) {
+		throw "resultCallback not implemented"
+	}else {
+		var callback = this.resultCallback
+		var parent = this.parent
+		process.nextTick(function() {
+			callback(res, parent)
+		})
+		self.reset()
+	}
+}
+Expression.prototype.setCurrentResult = function(res) {
+	this.vars._result = res 
+}
+Expression.prototype.getCurrentResult = function() {
+	return this.vars._result
+}
+Expression.prototype.bypass = function(res) {
+	this.end(this.getParentResult())
+}
+Expression.prototype.header = null
+Expression.prototype.hint = null
+Expression.prototype.input = null
+Expression.prototype.createInputExpression = null
+Expression.prototype.parent = null
+Expression.prototype.resultCallback = null
+Expression.prototype.inputExpression = null
+Expression.prototype.onPrepareInput = function() {
+	
+}
+Expression.prototype.runInput = function(onResult) {
+	if(this.createInputExpression) {
+		this.inputExpression = this.createInputExpression()
+		this.inputExpression.resultCallback = onResult
+		this.onPrepareInput()
+		this.inputExpression.run(this)
+	} else {
+		onResult(this.input)
+	}
+}
+Expression.prototype.run = function(parent) {
+	this.parent = parent
+	if(parent) {
+		this.vars._parent = parent.vars
+	}
+	this.execute()
 }
 
 Expression.prototype.raiseError = function(err) {

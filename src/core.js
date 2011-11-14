@@ -39,6 +39,8 @@ var Iterator = require('./Iterator')
 var mergeWith = require('./mergeWith.js')
 var ModuleInitializer = require('./ModuleInitializer.js')
 var nopt = require('nopt')
+var Compiler = require('./Compiler.js')
+
 module.exports.Error = Error
 module.exports.Expression = Expression
 module.exports.Iterator = Iterator
@@ -393,7 +395,7 @@ var compileExpressionFuncFromJSON = function(jsonBlock, virtualFileName, outputF
 		generatedSourceCode = generateFunctionFromJSONExpression(jsonBlock, virtualFileName, hint);
 	}
 	//console.warn("ABOUT TO LOAD THE FOLLOWING JS INTO THE VM:")
-	/*if(virtualFileName == "Assert.NonEmpty.implementation.js")
+	/*if(virtualFileName == "MyApp.Main.implementation.js")
 	{
 		console.warn(generatedSourceCode)
 	}*/
@@ -411,6 +413,15 @@ function FireCollection() {
  */
 FireCollection.prototype.names = function() {
 	return Object.keys(this)
+}
+
+FireCollection.prototype.toArray = function() {
+	var array = []
+	var names = this.names();
+	for(var i = 0; i < names.length; i++) {
+		array[i] = this[names[i]]
+	}
+	return array
 }
 
 function Runtime() {
@@ -651,11 +662,27 @@ Runtime.prototype._loadModules = function(modulesList) {
 		}
 	}
 }
-
 Runtime.prototype.loadManifestModules = function() {
 	this._loadModules(this.mergedManifest.modules)
 }
 
+Runtime.prototype._compile = function(finished) {
+	var self = this
+	var compiler = new Compiler(this);
+	compiler.outputFile = "/tmp/" + process.pid + ".js"
+	var toCompile = []
+	var expressions = this.loadedExpressionsMeta.toArray()
+	for(var i = 0; i < expressions.length; i++) {
+		var exp = expressions[i]
+		if(exp.json) {
+			toCompile.push(exp)
+		}
+	}
+	compiler.compile(toCompile, function() {
+		
+		finished.call(self)
+	})
+}
 /*
 Prepares the Runtime to Run. Since the introduction of initializer expressions, you can provide a callback to know when the initialization finishes. If no callback is provided no initialization will be executed.
 */
@@ -676,31 +703,33 @@ Runtime.prototype.load = function(initializationCallback) {
 	// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
 	this.scanScriptsDirs()
 	
-	// STEP 1. Load Configurations from Manifest
-	// (Configurations must be loaded first so the ignition.init callback of all modules can work properly)
-	var configurations = this.mergedManifest.environments;
-	if(configurations) {
-		self.configurations = configurations[self.environmentName]
-	}
-	this.events.emit('load', this)
-	this.events.removeAllListeners('load')
-	
-	var initializeExpressions = []
-	this.loadedExpressionsMeta.names().forEach(function(expName) {
-		var expDef = this.loadedExpressionsMeta[expName]
-		if(expDef.initialize && expDef.initialize.indexOf(this.environmentName) != -1) {
-			// it's a initializer for the current environment
-			initializeExpressions.push(expDef)
+	this._compile(function(compilationFinished) {
+		// STEP 1. Load Configurations from Manifest
+		// (Configurations must be loaded first so the ignition.init callback of all modules can work properly)
+		var configurations = this.mergedManifest.environments;
+		if(configurations) {
+			self.configurations = configurations[self.environmentName]
 		}
-	}, this)
-	if(initializationCallback) {
-		if(initializeExpressions.length > 0) {
-			var initIterator = new Iterator(initializeExpressions)
-			this._runNextInitializer(initIterator, initializationCallback)
-		} else {
-			initializationCallback(null)
+		this.events.emit('load', this)
+		this.events.removeAllListeners('load')
+
+		var initializeExpressions = []
+		this.loadedExpressionsMeta.names().forEach(function(expName) {
+			var expDef = this.loadedExpressionsMeta[expName]
+			if(expDef.initialize && expDef.initialize.indexOf(this.environmentName) != -1) {
+				// it's a initializer for the current environment
+				initializeExpressions.push(expDef)
+			}
+		}, this)
+		if(initializationCallback) {
+			if(initializeExpressions.length > 0) {
+				var initIterator = new Iterator(initializeExpressions)
+				this._runNextInitializer(initIterator, initializationCallback)
+			} else {
+				initializationCallback(null)
+			}
 		}
-	}
+	})
 }
 
 Runtime.prototype._runNextInitializer = function(iterator, finishCallback) {
@@ -844,7 +873,11 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 	}
 	
 	expressionInstance._blockContext = _blockContext
-	expressionInstance.execute() // run it
+	
+	expressionInstance.resultCallback = function(res, parent) {
+		_blockContext._resultCallback(res)
+	}
+	expressionInstance.run() // run it
 };
 
 
