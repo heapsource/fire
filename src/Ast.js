@@ -1,5 +1,8 @@
 var AstNodeType = require('./AstNodeType.js')
 var SPECIAL_KEY_SYMBOL = "@"
+var HINT_START_SYMBOL = "("
+var HINT_END_SYMBOL = ")"
+
 function Tree(doc) {
 	
 }
@@ -35,7 +38,19 @@ function isBlock(jsonObj) {
 	}
 	return true
 }
-
+function keyHasHint(propName) {
+	return propName.indexOf(HINT_START_SYMBOL) > -1
+}
+function getExpressionNameFromSpecialKey(propName) {
+	if(!isSpecialKey(propName)){
+		throw "Asked to extract special from a key that is not a special key, the key was '" + propName + "'"
+	}
+	propName = trimString(propName)
+	if(keyHasHint(propName)) {
+		propName = propName.substring(0,propName.indexOf(HINT_START_SYMBOL))
+	}
+	return propName.substring(1,propName.length)
+}
 Node.prototype.parse = function(value) {
 	this.value = value
 	if(this.type == null)
@@ -120,9 +135,26 @@ Node.prototype.addChild = function(node) {
 	this.children.push(node)
 }
 
-Node.prototype.isLiteral = function() {
+Node.prototype.hasChildren = function() {
+	return this.children.length > 0
+}
+Node.prototype.isPureValue = function() {
+	if(this.type ==  AstNodeType.expression || this.type == AstNodeType.block) {
+		return false
+	}
+	if(this.hasChildren()) {
+		for(var i = 0; i < this.children.length; i++) {
+			var child = this.children[i]
+			if(!child.isPureValue()) {
+				return false
+			}
+		}
+	}
 	return true
 }
 
 module.exports.SPECIAL_KEY_SYMBOL = SPECIAL_KEY_SYMBOL
 module.exports.Tree = Tree
+module.exports.isSpecialKey = isSpecialKey
+module.exports.keyHasHint = keyHasHint
+module.exports.getExpressionNameFromSpecialKey = getExpressionNameFromSpecialKey

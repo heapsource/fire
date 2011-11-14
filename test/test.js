@@ -142,27 +142,46 @@ vows.describe('firejs').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result should not be null" : function(expressionResult) {
+			"the result should not be null" : function(err, expressionResult) {
 				assert.isNotNull(expressionResult.result)
 			},
-			"the result should be 3, the last result in the expression block" : function(expressionResult) {
+			"the result should be 3, the last result in the expression block" : function(err, expressionResult) {
 				assert.equal(expressionResult.result, 3);
 			},
-			"the result callback should be called only once":  function(expressionResult) {
+			"the result callback should be called only once":  function(err, expressionResult) {
 				assert.equal(expressionResult.count, 1)
 			}
 		}
@@ -178,19 +197,38 @@ vows.describe('firejs').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result should not be null" : function(expressionResult) {
 				assert.isNotNull(expressionResult.result)
@@ -215,61 +253,43 @@ vows.describe('firejs').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result should not be null" : function(expressionResult) {
 				assert.isNotNull(expressionResult.result)
 			},
 			"the result should be an object with the regular keys and the expression value, the last result in the expression block" : function(expressionResult) {
-				assert.deepEqual(expressionResult.result, {
-					"name":"Super Dude"
-				});
-			},
-			"the result callback should be called only once":  function(expressionResult) {
-				assert.equal(expressionResult.count, 1)
-			}
-		}
-	},'When I have two expression and the last expression returns an object': {
-		topic: function() {
-			return {
-				"@return": 2,
-				" @return": {
-					"name":"Super Dude"
-				}
-			};    
-		},
-		"and I run it": {
-			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
-			},
-			"the result should not be null" : function(expressionResult) {
-				assert.isNotNull(expressionResult.result)
-			},
-			"the result should be the object, the last result in the expression block" : function(expressionResult) {
 				assert.deepEqual(expressionResult.result, {
 					"name":"Super Dude"
 				});

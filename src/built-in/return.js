@@ -4,12 +4,10 @@ function Return() {
 }
 Return.prototype = new Expression()
 Return.prototype.execute = function() {
-	var rc = this._blockContext._resultCallback
-	this.runInput({
-		_resultCallback: function(res) {
-			rc(res)
-		}
-	});
+	var self = this
+	this.runInput(function(res) {
+			self.end(res)
+		});
 }
 
 module.exports = {

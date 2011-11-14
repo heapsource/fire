@@ -25,6 +25,9 @@ Expression.prototype.execute = function() {
 Expression.prototype.getParentResult = function() {
 	return this.parent !== undefined ? this.parent.getCurrentResult() : undefined
 }
+Expression.prototype.finish = function() {
+	this.end(this.getCurrentResult())
+}
 Expression.prototype.end = function(res) {
 	var self = this
 	if(!this.resultCallback) {
@@ -49,7 +52,7 @@ Expression.prototype.bypass = function(res) {
 }
 Expression.prototype.header = null
 Expression.prototype.hint = null
-Expression.prototype.input = null
+Expression.prototype.input = undefined
 Expression.prototype.createInputExpression = null
 Expression.prototype.parent = null
 Expression.prototype.resultCallback = null
@@ -80,11 +83,11 @@ Expression.prototype.raiseError = function(err) {
 	var errorInfo = new RuntimeError(this._blockContext, err)
 	this._blockContext._errorCallback(errorInfo)
 }
-
+/*
 Expression.prototype.runInput = function(context_block_overrides) {
 	this.runInputFunction(this._blockContext._inputExpression, context_block_overrides)
 }
-
+*/
 /*
 * Run any expression input as a input expression. Used by @input
 */

@@ -7,28 +7,13 @@ var vm = require('vm')
 var Expression = require('./Expressions').Expression
 var CompilationError = require('./CompilationError')
 
-function SynTable() {
-	this.count = 0
-	this.prefix = "_"
-	this.names= {}
-}
-
-SynTable.prototype.syn = function(name) {
-	var syn = this.names[name]
-	if(!syn) {
-		syn = this.names[name] = this.prefix + (++this.count)
-	}
-	return syn
-}
-
 function Compiler(runtime) {
 	this.runtime = runtime
 	this.buffer = new StringBuffer()
-	this.expSynTable = new SynTable()
-	this.expSynTable.prefix = "E"
 	this.typeDefinitions = []
 }
 Compiler.prototype.outputFile = null
+Compiler.prototype.expSynTable = null
 Compiler.prototype.load = function() {
 	var context = {
 		Expression: Expression,
@@ -42,11 +27,100 @@ Compiler.prototype.load = function() {
 	console.warn("Compiler.load")
 	console.warn("dictionary", this.dictionaryType)
 }
+Compiler.prototype.generateCodeBlockChain = function(iterator, executeOnParent) {
+	var self = this
+	if(iterator.next()) {
+		var expNode = iterator.current()
+		var expressionName = Ast.getExpressionNameFromSpecialKey(expNode.value)
+		this.buffer.writeLine("//" + expNode.value)
+		this.buffer.writeLine("var exp = new(Runtime.loadedExpressionsSyn." + self.expSynTable.syn(expressionName) + ")")
+		var expValNode = expNode.children[0]
+		if(expValNode.isPureValue()) {
+			this.buffer.writeLine("exp.input = " + JSON.stringify(expValNode.value) )
+		} else {
+			this.buffer.writeLine("exp.createInputExpression = function() {")
+			this.buffer.indent()
+			this.buffer.writeLine("var exp = new Expression()")
+			this.buffer.writeLine("exp.execute = function() {")
+			this.buffer.indent()
+			this.generateAstNodeCode(expValNode)
+			this.buffer.unindent()
+			this.buffer.writeLine("}")
+			this.buffer.writeLine("return exp")
+			this.buffer.unindent()
+			this.buffer.writeLine("}")
+		}
+		this.buffer.writeLine("exp.resultCallback = function(res, parent) {")
+		this.buffer.indent()
+		this.buffer.writeLine("parent.setCurrentResult(res)")
+		if(iterator.isLast()) {
+			this.buffer.writeLine("parent.finish()")
+		} else {
+			this.generateCodeBlockChain(iterator, 
+				true // generate for execution by parent and not 'this'
+				)
+		}
+		this.buffer.unindent()
+		this.buffer.writeLine("}")
+		this.buffer.writeLine("exp.run(" + (executeOnParent ? "parent" : "this") + ")")
+	}
+}
+Compiler.prototype.generateCodeHashChain = function(hashNode, executeOnParent) {
+	var self = this
+	var targetName = (executeOnParent ? "parent" : "this")
+	this.buffer.writeLine("var hashResult = {}")
+	this.buffer.writeLine(targetName + ".setCurrentResult(hashResult)")
+	var iterator = new Iterator(hashNode.children)
+	this.generateCodeHashChainExpressions(iterator, targetName)
+}
+Compiler.prototype.generateCodeHashChainExpressions = function(iterator, target) {
+	var self = this
+	if(iterator.next()) {
+		var propNode = iterator.current()
+		if(propNode.isPureValue()) {
+			this.buffer.writeLine("hashResult[" + JSON.stringify(propNode.value) + "] = "+ JSON.stringify(propNode.children[0].value))
+			if(iterator.isLast()) {
+				this.buffer.writeLine(target + ".finish()")
+			} else {
+				this.generateCodeHashChainExpressions(iterator, target)
+			}
+		}else {
+			// Generate Anonymous Expression Block
+			this.buffer.writeLine("var exp = new Expression()")
+			this.buffer.writeLine("exp.execute = function() {")
+			this.buffer.indent()
+			this.generateAstNodeCode(propNode.children[0])
+			this.buffer.unindent()
+			this.buffer.writeLine("}")
+			this.buffer.writeLine("exp.resultCallback = function(res, parent) {")
+			this.buffer.indent()
+			this.buffer.writeLine("parent.getCurrentResult()[" + JSON.stringify(propNode.value) + "] = res")
+			if(iterator.isLast()) {
+				this.buffer.writeLine("parent.finish()")
+			} else {
+				this.generateCodeHashChainExpressions(iterator, "parent")
+			}
+			this.buffer.unindent()
+			this.buffer.writeLine("}")
+			this.buffer.writeLine("exp.run(" + target + ")")
+		}
+	}
+}
 Compiler.prototype.generateAstNodeCode = function(astNode) {
-	if(astNode.isLiteral()) {
+	if(astNode.isPureValue()) {
 		this.buffer.writeLine("this.end(" + JSON.stringify(astNode.value) + ")")
 	} else {
-		throw "can compile code yet"
+		if(astNode.type == AstNodeType.block) {
+			var iterator = new Iterator(astNode.children)
+			this.generateCodeBlockChain(iterator)
+		} 
+		else if(astNode.type == AstNodeType.hash) {
+			this.generateCodeHashChain(astNode)
+		}
+		else {
+			console.trace()
+			throw "can compile code yet for type " + astNode.type
+		}
 	}
 }
 Compiler.prototype.generateExpressionType = function(typeDefinition) {

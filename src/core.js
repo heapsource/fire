@@ -40,13 +40,12 @@ var mergeWith = require('./mergeWith.js')
 var ModuleInitializer = require('./ModuleInitializer.js')
 var nopt = require('nopt')
 var Compiler = require('./Compiler.js')
-
+var SynTable = require('./SynTable')
 module.exports.Error = Error
 module.exports.Expression = Expression
 module.exports.Iterator = Iterator
 
 var constants = require('./constants.js')
-
 
 var DEFAULT_ENVIRONMENT = constants.DEFAULT_ENVIRONMENT
 var DEFAULT_MANIFEST_FILE_NAME = constants.DEFAULT_MANIFEST_FILE_NAME
@@ -426,8 +425,11 @@ FireCollection.prototype.toArray = function() {
 
 function Runtime() {
 	this.loadedExpressions = {}; // Contains a member per expression implementation <Function>
+	this.loadedExpressionsSyn = {}; // Contains a synonymous member per expression implementation <Function>
 	this.loadedExpressionsMeta = new FireCollection(); // Contains a member per full definition of the expression, like {name:<String>, implementation:<Function>}
 	this.loadedModules = []
+	this.expSynTable = new SynTable()
+	this.expSynTable.prefix = "E"
 	
 	var dirName = path.join(__dirname, "built-in")
 	this.registerWellKnownExpressionDir(dirName)
@@ -564,6 +566,7 @@ Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDef
 	expressionDefinition.implementation = implementation
 	expressionDefinition.implementation.prototype.expressionName = expressionDefinition.name
 	this.loadedExpressions[name] = implementation
+	this.loadedExpressionsSyn[this.expSynTable.syn(name)] = implementation
 	this.loadedExpressionsMeta[name] = expressionDefinition
 }
 
@@ -669,6 +672,7 @@ Runtime.prototype.loadManifestModules = function() {
 Runtime.prototype._compile = function(finished) {
 	var self = this
 	var compiler = new Compiler(this);
+	compiler.expSynTable = this.expSynTable
 	compiler.outputFile = "/tmp/" + process.pid + ".js"
 	var toCompile = []
 	var expressions = this.loadedExpressionsMeta.toArray()
@@ -678,6 +682,7 @@ Runtime.prototype._compile = function(finished) {
 			toCompile.push(exp)
 		}
 	}
+	
 	compiler.compile(toCompile, function() {
 		
 		finished.call(self)
