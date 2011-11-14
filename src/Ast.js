@@ -26,12 +26,14 @@ function isSpecialKey(propName) {
 	return n.indexOf(SPECIAL_KEY_SYMBOL) == 0
 }
 function isBlock(jsonObj) {
-	for(var propName in jsonObj) {
-		if(isSpecialKey(propName)) {
-			return true
+	var keys = Object.keys(jsonObj)
+	for(var i = 0; i < keys.length; i++) {
+		var propName = keys[i]
+		if(!isSpecialKey(propName)) {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 Node.prototype.parse = function(value) {

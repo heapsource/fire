@@ -218,3 +218,42 @@ vows.describe('AST - Parsing Blocks').addBatch({
 		},
 	}
 }).export(module)
+
+vows.describe('AST - Mixed Keys Parsing').addBatch({
+	"When I parse a hash with mixed keys '{\"@return\": 23, \"get(var.o)\": null}' document": {
+		topic: function() {
+			var doc ={"@return": 23,"get(var.o)": null}
+			var ast = new Tree()
+			ast.parse(doc)
+			return ast
+		},
+		"the root node of the ast should be of 'hash' type":  function(ast) {
+			assert.isNotNull(ast.getRootNode())
+			assert.strictEqual(ast.getRootNode().type, AstNodeType.hash)
+		},
+		"the first node should be of 'property' type":  function(ast) {
+			assert.strictEqual(ast.getRootNode().children[0].type, AstNodeType.property)
+		},
+		"the first node should have the value '@return'":  function(ast) {
+			assert.strictEqual(ast.getRootNode().children[0].value, "@return")
+		},
+		"the sub-node of the first node should be of 'number' type":  function(ast) {
+			assert.strictEqual(ast.getRootNode().children[0].children[0].type, AstNodeType.number)
+		},
+		"the sub-node of the first node should have the value 23":  function(ast) {
+			assert.strictEqual(ast.getRootNode().children[0].children[0].value, 23)
+		},
+		"the second node should be of 'property' type":  function(ast) {
+			assert.strictEqual(ast.getRootNode().children[1].type, AstNodeType.property)
+		},
+		"the second node should have the value 'get(var.o)'":  function(ast) {
+			assert.strictEqual(ast.getRootNode().children[1].value, "get(var.o)")
+		},
+		"the sub-node of the second node should be of 'null' type":  function(ast) {
+			assert.strictEqual(ast.getRootNode().children[1].children[0].type, AstNodeType.null)
+		},
+		"the sub-node of the second node should have a null value":  function(ast) {
+			assert.strictEqual(ast.getRootNode().children[1].children[0].value, null)
+		},
+	}
+}).export(module)
