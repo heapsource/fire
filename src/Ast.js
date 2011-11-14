@@ -14,7 +14,7 @@ Tree.prototype.getRootNode = function() {
 }
 
 function Node() {
-	
+	this.children = []
 }
 Node.prototype.type = null
 function trimString(str) {
@@ -63,7 +63,59 @@ Node.prototype.parse = function(value) {
 			throw "Failed to recognize JSON type for '" + value + "', typeof '" + typeof(value) + "'"
 		}
 	}
+	if(this.shouldParseChildren()) {
+		this.parseChildren()
+	}
 	return this
+}
+
+Node.prototype.shouldParseChildren = function() {
+	return this.type == AstNodeType.array || this.type == AstNodeType.block || this.type == AstNodeType.hash
+}
+
+Node.prototype.parseChildren = function() {
+	if(this.type == AstNodeType.block) {
+		var keys = Object.keys(this.value)
+		for(var i = 0; i < keys.length; i++) {
+			var key = keys[i]
+			var node = new Node()
+			node.type = AstNodeType.expression
+			node.parse(key)
+			this.addChild(node)
+			
+			var subNode = new Node()
+			subNode.parse(this.value[key])
+			node.addChild(subNode)
+		}
+	} else if(this.type == AstNodeType.hash) {
+		var keys = Object.keys(this.value)
+		for(var i = 0; i < keys.length; i++) {
+			var key = keys[i]
+			var node = new Node()
+			node.type = AstNodeType.property
+			node.parse(key)
+			this.addChild(node)
+			
+			var subNode = new Node()
+			subNode.parse(this.value[key])
+			node.addChild(subNode)
+		}
+	} else if(this.type == AstNodeType.array) {
+		for(var i = 0; i < this.value.length; i++) {
+			var node = new Node()
+			node.type = AstNodeType.index
+			node.parse(i)
+			this.addChild(node)
+			
+			var subNode = new Node()
+			subNode.parse(this.value[i])
+			node.addChild(subNode)
+		}
+	}
+}
+
+Node.prototype.addChild = function(node) {
+	this.children.push(node)
 }
 
 Node.prototype.isLiteral = function() {

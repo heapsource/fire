@@ -5,6 +5,7 @@ var fs = require('fs')
 var StringBuffer = require('./StringBuffer')
 var vm = require('vm')
 var Expression = require('./Expressions').Expression
+var CompilationError = require('./CompilationError')
 
 function SynTable() {
 	this.count = 0
@@ -60,7 +61,6 @@ Compiler.prototype.generateExpressionType = function(typeDefinition) {
 	this.buffer.writeLine(expSynName + ".prototype.execute = function() {")
 	var ast = new Ast.Tree()
 	ast.parse(expDefinition.json)
-	console.log()
 	this.buffer.indent()
 	this.generateAstNodeCode(ast.getRootNode())
 	this.buffer.unindent()
