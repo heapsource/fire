@@ -531,4 +531,68 @@ vows.describe('firejs').addBatch({
 				}
 			}
 		},
+		'When I have expressions inside an array': {
+			topic: function() {
+				return [
+					{
+						"@return": 1
+					},
+					{
+						"@return": {
+							x:64.2,
+							y: 934.1
+						}
+					}
+				]
+			},
+			"and I run it": {
+				topic:function(topic) {
+					var self = this
+					var runtime = new Runtime()
+					runtime.registerWellKnownExpressionDefinition({
+						name: "Test",
+						json: topic
+					});
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						} else {
+							var contextBase = {};
+							var result = {
+								count: 0
+							}
+							contextBase._resultCallback = function(res) {
+								result.count++
+								result.result = res
+								self.callback(null, result)
+							}
+							contextBase._loopCallback = function() {
+								self.callback("_loopCallback reached", null)
+							};
+							contextBase._inputExpression  = function() {
+								self.callback("_inputExpression reached", null)
+							};
+							contextBase._variables = {};        
+							contextBase._errorCallback =  function(err) {
+								self.callback(err, null)
+							};
+							runtime.runExpressionByName("Test", contextBase ,null)
+						}
+					});
+				},
+				"the result should not be null" : function(expressionResult) {
+					assert.isNotNull(expressionResult.result)
+				},
+				"the result should be the array with the result of all expressions as items, the last result in the expression block" : function(expressionResult) {
+					assert.deepEqual(expressionResult.result, [1,{
+						x:64.2,
+						y: 934.1
+					}
+						]);
+				},
+				"the result callback should be called only once":  function(expressionResult) {
+					assert.equal(expressionResult.count, 1)
+				}
+			}
+		}
 }).export(module)

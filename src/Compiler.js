@@ -112,6 +112,47 @@ Compiler.prototype.generateCodeHashChainExpressions = function(iterator, target)
 		}
 	}
 }
+Compiler.prototype.generateCodeArrayChain = function(hashNode, executeOnParent) {
+	var self = this
+	var targetName = (executeOnParent ? "parent" : "this")
+	this.buffer.writeLine("var arrayResult = []")
+	this.buffer.writeLine(targetName + ".setCurrentResult(arrayResult)")
+	var iterator = new Iterator(hashNode.children)
+	this.generateCodeHashChainExpressions(iterator, targetName)
+}
+Compiler.prototype.generateCodeArrayChainExpressions = function(iterator, target) {
+	var self = this
+	if(iterator.next()) {
+		var propNode = iterator.current()
+		if(propNode.isPureValue()) {
+			this.buffer.writeLine("arrayResult[" + JSON.stringify(propNode.value) + "] = "+ JSON.stringify(propNode.children[0].value))
+			if(iterator.isLast()) {
+				this.buffer.writeLine(target + ".finish()")
+			} else {
+				this.generateCodeArrayChainExpressions(iterator, target)
+			}
+		}else {
+			// Generate Anonymous Expression Block
+			this.buffer.writeLine("var exp = new Expression()")
+			this.buffer.writeLine("exp.execute = function() {")
+			this.buffer.indent()
+			this.generateAstNodeCode(propNode.children[0])
+			this.buffer.unindent()
+			this.buffer.writeLine("}")
+			this.buffer.writeLine("exp.resultCallback = function(res, parent) {")
+			this.buffer.indent()
+			this.buffer.writeLine("parent.getCurrentResult()[" + JSON.stringify(propNode.value) + "] = res")
+			if(iterator.isLast()) {
+				this.buffer.writeLine("parent.finish()")
+			} else {
+				this.generateCodeArrayChainExpressions(iterator, "parent")
+			}
+			this.buffer.unindent()
+			this.buffer.writeLine("}")
+			this.buffer.writeLine("exp.run(" + target + ")")
+		}
+	}
+}
 Compiler.prototype.generateAstNodeCode = function(astNode) {
 	if(astNode.isPureValue()) {
 		this.buffer.writeLine("this.end(" + JSON.stringify(astNode.value) + ")")
@@ -122,6 +163,9 @@ Compiler.prototype.generateAstNodeCode = function(astNode) {
 		} 
 		else if(astNode.type == AstNodeType.hash) {
 			this.generateCodeHashChain(astNode)
+		}
+		else if(astNode.type == AstNodeType.array) {
+			this.generateCodeArrayChain(astNode)
 		}
 		else {
 			console.trace()
