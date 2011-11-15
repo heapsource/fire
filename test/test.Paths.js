@@ -2,7 +2,6 @@ var vows = require('vows')
 var assert = require('assert')
 var PathCache = require('../src/Paths').PathCache
 var AstEntryType = require('../src/Paths').AstEntryType
-var Variable = require('../src/Variable')
 
 vows.describe('firejs Paths').addBatch({
 	"When I have a brand new cache": {
@@ -89,15 +88,15 @@ vows.describe('firejs Paths Values').addBatch({
 		topic: function() {
 			return new PathCache()
 		},
-		"and I run a path": function(topic){
+		"and I get a path": function(topic){
 			assert.equal(topic.run({
-				"x":new Variable(200)
+				"x":200
 			},"x"), 200)
 		},
 		"it should stay compiled to be reused for further executions": function(topic) {
 			assert.isTrue(topic.isCompiled("x"))
 			assert.equal(topic.run({
-				"x":new Variable(200)
+				"x":200
 			},"x"), 200)
 		}
 	},
@@ -107,7 +106,7 @@ vows.describe('firejs Paths Values').addBatch({
 		},
 		"I should get the variable value": function(topic){
 			assert.deepEqual(new PathCache().run({
-				"var1": new Variable('value of variable 1')
+				"var1": 'value of variable 1'
 			},topic), 'value of variable 1');
 		}
 	},
@@ -117,9 +116,9 @@ vows.describe('firejs Paths Values').addBatch({
 		},
 		"I should get the variable value": function(topic){
 			assert.deepEqual(new PathCache().run({
-				"point": new Variable({
+				"point": {
 					"x": 200
-				})
+				}
 			},topic), 200);
 		}
 	},
@@ -129,10 +128,36 @@ vows.describe('firejs Paths Values').addBatch({
 		},
 		"I should get undefined since x is a number and there is no member y": function(topic){
 			assert.isUndefined(new PathCache().run({
-				"point": new Variable({
+				"point": {
 					"x": 200
-				})
+				}
 			},topic));
+		}
+	},
+	"When I run the path 'name' and the variables is registered in a parent scope": {
+		topic: function() {
+			return "name"
+		},
+		"I should get the value already set in the parent scope": function(topic){
+			assert.deepEqual(new PathCache().run({
+				_parent: {
+					"name": "Value for Name"
+				}
+			},topic), "Value for Name");
+		}
+	},
+	"When I run the path 'name' and the variables is registered in a deep parent scope": {
+		topic: function() {
+			return "name"
+		},
+		"I should get the value already set in the deep parent scope": function(topic){
+			assert.deepEqual(new PathCache().run({
+				_parent: {
+					_parent: {
+						"name": "Value for Name 2"
+					}
+				}
+			},topic), "Value for Name 2");
 		}
 	}
 }).export(module);
@@ -149,8 +174,7 @@ vows.describe('firejs Write Paths').addBatch({
 			}
 		},
 		"the variables bag should contain the variable assigned": function(res) {
-			assert.instanceOf(res.variables.x, Variable)
-			assert.equal(res.variables.x.get(), "Root Val")
+			assert.equal(res.variables.x, "Root Val")
 		},
 		"the path should remain compiled": function(res) {
 			assert.isTrue(res.pathCache.writeIsCompiled("x"), "writeIsCompiled should return true")
@@ -167,8 +191,7 @@ vows.describe('firejs Write Paths').addBatch({
 			}
 		},
 		"the variable should contain the assigned member": function(res) {
-			assert.instanceOf(res.variables.point, Variable)
-			assert.deepEqual(res.variables.point.get(), {
+			assert.deepEqual(res.variables.point, {
 				x: 534
 			})
 		}	,
@@ -183,8 +206,7 @@ vows.describe('firejs Write Paths').addBatch({
 					}
 				},
 				"the first and second assignment should remain in the object": function(res) {
-					assert.instanceOf(res.variables.point, Variable)
-					assert.deepEqual(res.variables.point.get(), {
+					assert.deepEqual(res.variables.point, {
 							x: 534,
 							y: 632
 					})
@@ -202,8 +224,7 @@ vows.describe('firejs Write Paths').addBatch({
 			}
 		},
 		"the variable should contain the assigned third part variable": function(res) {
-			assert.instanceOf(res.variables.rect, Variable)
-			assert.deepEqual(res.variables.rect.get(), {
+			assert.deepEqual(res.variables.rect, {
 				point1: {
 					x: 534
 				}
@@ -220,8 +241,7 @@ vows.describe('firejs Write Paths').addBatch({
 				}
 			},
 			"the first and second assignment should remain in the object": function(res) {
-				assert.instanceOf(res.variables.rect, Variable)
-				assert.deepEqual(res.variables.rect.get(), {
+				assert.deepEqual(res.variables.rect, {
 					point1: {
 						x: 534,
 						y: 632
@@ -233,30 +253,88 @@ vows.describe('firejs Write Paths').addBatch({
 	"When I write a variable using forceCreate": {
 		topic: function(){
 			var pathCache = new PathCache()
-			var originalVar = new Variable("Original Value")
 			var variables = {
-				rect: originalVar
+				_parent: {
+					rect: "Original Rect Value"
+				}
 			};
 			pathCache.runWrite(variables, "rect.point1.x" , 534, 
 				true // force create
 			);
 			return {
 				variables: variables,
-				pathCache: pathCache,
-				originalVar: originalVar
+				pathCache: pathCache
 			}
 		},
 		"the variable should contain the assigned third part variable": function(res) {
-			assert.instanceOf(res.variables.rect, Variable)
-			assert.deepEqual(res.variables.rect.get(), {
+			assert.deepEqual(res.variables.rect, {
 				point1: {
 					x: 534
 				}
 			})
 		},
-		"the original variable value should not be modified": function(res) {
-			assert.instanceOf(res.originalVar, Variable)
-			assert.equal(res.originalVar.get(), "Original Value")
+		"the original variable value in the parent scope should not be modified": function(res) {
+			assert.equal(res.variables._parent.rect, "Original Rect Value")
+		}
+	},
+	"When I write a variable without forceCreate with parent scope": {
+		topic: function(){
+			var pathCache = new PathCache()
+			var variables = {
+				_parent: {
+					rect: {}
+				}
+			};
+			pathCache.runWrite(variables, "rect.point1.x" , 534, 
+				false // don't force, use existing variable slot if available
+			);
+			return {
+				variables: variables,
+				pathCache: pathCache
+			}
+		},
+		"the variable in the current scope should not be defined": function(res) {
+			assert.isUndefined(res.variables.rect)
+		},
+		"the original variable value in the parent scope should contain the value": function(res) {
+			assert.deepEqual(res.variables._parent.rect, {
+				point1: {
+					x: 534
+				}
+			})
+		}
+	}
+	,
+	"When I write a variable without forceCreate with two level parent scope": {
+		topic: function(){
+			var pathCache = new PathCache()
+			var variables = {
+				_parent: {
+					_parent: {
+						rect: null
+					}
+				}
+			};
+			pathCache.runWrite(variables, "rect.point1.x" , 534, 
+				false // don't force, use existing variable slot if available
+			);
+			return {
+				variables: variables,
+				pathCache: pathCache
+			}
+		},
+		"the variable in the current scope should not be defined": function(res) {
+			assert.isUndefined(res.variables.rect)
+		},
+		"the original variable value in the parent scope should contain the value": function(res) {
+			assert.isUndefined(res.variables._parent.rect)
+		},
+		"the original variable value in the deep parent scope should contain the value": function(res) {
+			assert.deepEqual(res.variables._parent._parent.rect, {
+				point1: {
+					x: 534
+				}
+			})
 		}
 	}
 }).export(module);

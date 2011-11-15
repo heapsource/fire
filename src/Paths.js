@@ -1,4 +1,23 @@
-var Variable = require('./Variable')
+// Copyright (c) 2011 Firebase.co and Contributors - http://www.firebase.co
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 var StringBuffer = require('./StringBuffer')
 var vm = require('vm')
 var Iterator = require('./Iterator')
@@ -72,25 +91,45 @@ PathCache.prototype.compile = function(pathStr) {
 	var pathFileName = pathStr + ".path.js"
 	var ast = this.parse(pathStr)
 	var buffer = new StringBuffer()
-	
-	buffer.writeLine("_compiledFunction = function(variables, path){")
+	buffer.writeLine("//get: " + pathStr)
+	buffer.writeLine("_compiledFunction = function(variablesSeed, path){")
 	buffer.indent()
 	buffer.writeLine("var res = undefined;")
+	buffer.writeLine("var variables = undefined;")
 	var iterator = new Iterator(ast);
 	while(iterator.next()) {
 		var entry = iterator.current();
+		buffer.writeLine("//." + entry.key)
 		if(iterator.isFirst()) {
-			buffer.writeLine("var varObj = variables['" + entry.key +"'];")
-			buffer.writeLine("if(varObj !== undefined) {")
+			
+			buffer.writeLine("var currentVariables = variablesSeed")
+			buffer.writeLine("while(currentVariables)")
+			buffer.writeLine("{")
 			buffer.indent()
-			buffer.writeLine("res = varObj.get();")
+			buffer.writeLine("res = currentVariables['" + entry.key +"']")
+			buffer.writeLine("if(res !== undefined)")
+			buffer.writeLine("{")
+			buffer.indent()
+			buffer.writeLine("variables = currentVariables")
+			buffer.writeLine("break")
 			buffer.unindent()
 			buffer.writeLine("}")
-			buffer.writeLine("if(res === undefined || res === null) return res;")
+			
+			buffer.writeLine("currentVariables = currentVariables._parent")
+			buffer.unindent()
+			buffer.writeLine("} // while")
+			buffer.writeLine("if(!variables)")
+			buffer.writeLine("{")
+			buffer.indent()
+			buffer.writeLine("variables = variablesSeed")
+			buffer.writeLine("res = variables['" + entry.key +"'];")
+			buffer.unindent()
+			buffer.writeLine("}")
+			
 		} else if(entry.type == AstEntryType.Property) {
 			buffer.writeLine("res = res['" + entry.key +"'];")
-			buffer.writeLine("if(res === undefined || res === null) return res;")
 		}
+		buffer.writeLine("if(res === undefined || res === null) return res;")
 	}
 	buffer.writeLine("return res;")
 	buffer.unindent()
@@ -98,7 +137,8 @@ PathCache.prototype.compile = function(pathStr) {
 	var compilationResults = {
 		"_compiledFunction": null
 	}
-	vm.runInNewContext(buffer.toString(), compilationResults, pathFileName);
+	var sourceCode = buffer.toString()
+	vm.runInNewContext(sourceCode, compilationResults, pathFileName);
 	
 	return this._compiledPaths[pathStr] = compilationResults._compiledFunction
 }
@@ -127,36 +167,59 @@ PathCache.prototype.compileWrite = function(pathStr) {
 	var pathFileName = pathStr + ".writePath.js"
 	var ast = this.parse(pathStr)
 	var buffer = new StringBuffer()
-	
-	buffer.writeLine("_compiledFunction = function(variables, path, value, forceCreate){")
+	buffer.writeLine("//set: " + pathStr)
+	buffer.writeLine("_compiledFunction = function(variablesSeed, path, value, forceCreate){")
 	buffer.indent()
-	buffer.writeLine("var currentVal = undefined;")
+	buffer.writeLine("var variables = undefined;")
 	var iterator = new Iterator(ast);
 	while(iterator.next()) {
+		
 		var entry = iterator.current();
+		buffer.writeLine("//." + entry.key)
 		if(iterator.isFirst()) {
+		
+			buffer.writeLine("if(forceCreate) {")
+			buffer.indent()
+			buffer.writeLine("variables = variablesSeed")
+			buffer.unindent()
+			buffer.writeLine("}")
+			buffer.writeLine("else {")
+			buffer.indent()
+			buffer.writeLine("var currentVariables = variablesSeed")
+			buffer.writeLine("while(currentVariables)")
+			buffer.writeLine("{")
+			buffer.indent()
 			
-			buffer.writeLine("if(!forceCreate) {")
+			buffer.writeLine("if(currentVariables['" + entry.key +"'] !== undefined)")
+			buffer.writeLine("{")
 			buffer.indent()
-			buffer.writeLine("currentVal = variables['" + entry.key +"'];")
+			buffer.writeLine("variables = currentVariables")
+			buffer.writeLine("break")
 			buffer.unindent()
 			buffer.writeLine("}")
-			buffer.writeLine("if(!currentVal) {")
+			
+			buffer.writeLine("currentVariables = currentVariables._parent")
+			buffer.unindent()
+			buffer.writeLine("} // while")
+			
+			buffer.writeLine("if(!variables)")
+			buffer.writeLine("{")
 			buffer.indent()
-			buffer.writeLine("currentVal =  variables['" + entry.key +"'] = new Variable();")
+			buffer.writeLine("variables = variablesSeed")
 			buffer.unindent()
 			buffer.writeLine("}")
+			
+			buffer.unindent()
+			buffer.writeLine("} // else")
+			buffer.writeLine("var currentVal = variables['" + entry.key +"'];")
 			if(iterator.isLast()) {
-				buffer.writeLine("currentVal.set(value)");
+				buffer.writeLine("variables['" + entry.key +"'] = value");
 			} else {
-				buffer.writeLine("var varVal = currentVal.get()");
-				buffer.writeLine("if(!varVal) {");
+				buffer.writeLine("if(!currentVal) {");
 				buffer.indent()
-				buffer.writeLine("varVal = {};");
-				buffer.writeLine("currentVal.set(varVal);");
+				buffer.writeLine("currentVal = variables['" + entry.key +"'] = {}");
 				buffer.unindent()
 				buffer.writeLine("}");
-				buffer.writeLine("currentVal = varVal;");
 			}
 		} else if(entry.type == AstEntryType.Property) {
 			if(iterator.isLast()) {
@@ -175,10 +238,10 @@ PathCache.prototype.compileWrite = function(pathStr) {
 	buffer.unindent()
 	buffer.writeLine("}")
 	var compilationResults = {
-		"_compiledFunction": null,
-		Variable: Variable
+		"_compiledFunction": null
 	}
-	vm.runInNewContext(buffer.toString(), compilationResults, pathFileName);
+	var sourceCode = buffer.toString()
+	vm.runInNewContext(sourceCode, compilationResults, pathFileName);
 	
 	return this._compiledWritePaths[pathStr] = compilationResults._compiledFunction
 }

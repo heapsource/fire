@@ -152,9 +152,21 @@ Node.prototype.isPureValue = function() {
 	}
 	return true
 }
+function keyHasHint(propName) {
+	return propName.indexOf(HINT_START_SYMBOL) > -1
+}
 
+function getHint(propName) {
+	if(!keyHasHint(propName)) return undefined;
+	var hintEndIndex = propName.indexOf(HINT_END_SYMBOL)
+	if(hintEndIndex > 1) {
+		return propName.substring(propName.indexOf(HINT_START_SYMBOL) + 1,hintEndIndex)
+	}
+	return propName.substring(propName.indexOf(HINT_START_SYMBOL) + 1,propName.length)
+}
 module.exports.SPECIAL_KEY_SYMBOL = SPECIAL_KEY_SYMBOL
 module.exports.Tree = Tree
 module.exports.isSpecialKey = isSpecialKey
 module.exports.keyHasHint = keyHasHint
 module.exports.getExpressionNameFromSpecialKey = getExpressionNameFromSpecialKey
+module.exports.getHintFromSpecialKey = getHint

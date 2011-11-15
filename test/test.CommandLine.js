@@ -2,7 +2,6 @@ var vows = require('vows')
 var assert = require('assert')
 var PathCache = require('../src/Paths').PathCache
 var AstEntryType = require('../src/Paths').AstEntryType
-var Variable = require('../src/Variable')
 var exec  = require('child_process').exec
 var fire = require('../src/core.js')
 

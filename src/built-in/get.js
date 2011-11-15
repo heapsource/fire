@@ -21,22 +21,19 @@
 var Expression = require("../Expressions").Expression
 
 function Get() {
-
+	
 }
 
 Get.prototype = new Expression()
 Get.prototype.execute = function() {
 	var self = this
-	var rc = this._blockContext._resultCallback
-	var v = this._blockContext._variables
 	var val = undefined;
-	var hint = this._blockContext._hint
-	if(hint != undefined && hint != undefined && hint != null)
+	var hint = this.hint
+	if(hint && hint != '')
 	{
-		val = self.getParentVar(this._blockContext._hint)
-		rc(val)
+		this.end(this.getParentVar(hint))
 	} else {
-		this.skip()
+		this.bypass()
 	}
 }
 

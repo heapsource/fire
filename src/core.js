@@ -27,7 +27,6 @@ var fs = require('fs')
 var path = require('path')
 var RuntimeError = require('./RuntimeError')
 var Iterator = require('./Iterator')
-var Variable = require('./Variable')
 var Expression = require('./Expressions').Expression
 var setVarCore = require('./Expressions').setVarCore
 var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = require('./Expressions').TEST_PRINT_TRACE_ON_INTERNAL_ERROR
@@ -879,9 +878,15 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 	
 	expressionInstance._blockContext = _blockContext
 	
+	// new Expressions model
+	var localVarsKeys = Object.keys(localVariables)
+	for(var i = 0; i < localVarsKeys.length; i++) {
+		expressionInstance.vars[localVarsKeys[i]] = localVariables[localVarsKeys[i]]
+	}
 	expressionInstance.resultCallback = function(res, parent) {
 		_blockContext._resultCallback(res)
 	}
+	expressionInstance.runtime = this
 	expressionInstance.run() // run it
 };
 

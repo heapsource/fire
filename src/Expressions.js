@@ -1,5 +1,4 @@
 var RuntimeError = require('./RuntimeError')
-var Variable = require('./Variable')
 
 function Expression() {
 	this.vars = {
@@ -57,6 +56,7 @@ Expression.prototype.createInputExpression = null
 Expression.prototype.parent = null
 Expression.prototype.resultCallback = null
 Expression.prototype.inputExpression = null
+Expression.prototype.runtime = null
 Expression.prototype.onPrepareInput = function() {
 	
 }
@@ -74,6 +74,7 @@ Expression.prototype.run = function(parent) {
 	this.parent = parent
 	if(parent) {
 		this.vars._parent = parent.vars
+		this.runtime = parent.runtime
 	}
 	this.execute()
 }
@@ -90,14 +91,14 @@ Expression.prototype.runInput = function(context_block_overrides) {
 */
 /*
 * Run any expression input as a input expression. Used by @input
-*/
+
 Expression.prototype.runInputFunction = function(inputFunc, context_block_overrides) {
 	if(context_block_overrides !== undefined && context_block_overrides !== null) {
 		context_block_overrides._sameScope = true // don't copy the variables when running input expressions
 	}
 	this.runExp(inputFunc, context_block_overrides);
 }
-
+*/
 Expression.prototype.setError = function(errorInfo) {
 	this._blockContext._parentContext._errorInfo = errorInfo
 }
@@ -110,8 +111,8 @@ Expression.prototype.loopControl = function(payload) {
 	this._blockContext._loopCallback(payload)
 }
 
-Expression.prototype.skip = function() {
-	this._blockContext._resultCallback(this._blockContext._parentResult)
+Expression.prototype.bypass = function() {
+	this.end(this.parent ? this.parent.getCurrentResult() : undefined)
 }
 
 Expression.prototype.setVar = function(name, value) {
@@ -135,7 +136,7 @@ Expression.prototype.setParentVar = function(path, value) {
 }
 
 Expression.prototype.getParentVar = function(name) {
-	return this._blockContext._runtime.getPaths().run(this._blockContext._parentContext._variables, name)
+	return this.runtime.getPaths().run(this.vars, name)
 }
 
 Expression.prototype.getParentResult = function() {

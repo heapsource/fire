@@ -31,9 +31,11 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, executeOnParent) 
 	var self = this
 	if(iterator.next()) {
 		var expNode = iterator.current()
-		var expressionName = Ast.getExpressionNameFromSpecialKey(expNode.value)
+		var headerValue = expNode.value
+		var expressionName = Ast.getExpressionNameFromSpecialKey(headerValue)
 		this.buffer.writeLine("//" + expNode.value)
 		this.buffer.writeLine("var exp = new(Runtime.loadedExpressionsSyn." + self.expSynTable.syn(expressionName) + ")")
+		this.buffer.writeLine("exp.runtime = Runtime")
 		var expValNode = expNode.children[0]
 		if(expValNode.isPureValue()) {
 			this.buffer.writeLine("exp.input = " + JSON.stringify(expValNode.value) )
@@ -49,6 +51,10 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, executeOnParent) 
 			this.buffer.writeLine("return exp")
 			this.buffer.unindent()
 			this.buffer.writeLine("}")
+		}
+		var hintValue = Ast.getHintFromSpecialKey(headerValue)
+		if(hintValue) {
+			this.buffer.writeLine("exp.hint = " + JSON.stringify(hintValue) )
 		}
 		this.buffer.writeLine("exp.resultCallback = function(res, parent) {")
 		this.buffer.indent()
