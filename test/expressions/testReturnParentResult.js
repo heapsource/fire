@@ -4,7 +4,7 @@ function testReturnParentResult() {
 }
 testReturnParentResult.prototype = new Expression()
 testReturnParentResult.prototype.execute = function() {
-	this._blockContext._resultCallback(this._blockContext._parentResult)
+	this.bypass()
 }
 
 module.exports = {

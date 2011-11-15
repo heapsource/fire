@@ -10,6 +10,7 @@ var CompilationError = require('./CompilationError')
 function Compiler(runtime) {
 	this.runtime = runtime
 	this.buffer = new StringBuffer()
+	this.buffer.indentStep = 4
 	this.typeDefinitions = []
 }
 Compiler.prototype.outputFile = null
@@ -24,51 +25,55 @@ Compiler.prototype.load = function() {
 	console.warn("===")
 	console.warn(this.buffer.toString())
 	console.warn("===")
-	console.warn("Compiler.load")
-	console.warn("dictionary", this.dictionaryType)
 }
-Compiler.prototype.generateCodeBlockChain = function(iterator, executeOnParent) {
+var generateCodeBlockChainCOUNT = 0
+Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
+	generateCodeBlockChainCOUNT++
 	var self = this
 	if(iterator.next()) {
 		var expNode = iterator.current()
 		var headerValue = expNode.value
 		var expressionName = Ast.getExpressionNameFromSpecialKey(headerValue)
 		this.buffer.writeLine("//" + expNode.value)
-		this.buffer.writeLine("var exp = new(Runtime.loadedExpressionsSyn." + self.expSynTable.syn(expressionName) + ")")
-		this.buffer.writeLine("exp.runtime = Runtime")
+		var expVarName = "exp" + generateCodeBlockChainCOUNT
+		this.buffer.writeLine("var "+expVarName+" = new Runtime.loadedExpressionsSyn." + self.expSynTable.syn(expressionName) + "()")
+		this.buffer.writeLine(expVarName+".header = "+ JSON.stringify(headerValue))
+		this.buffer.writeLine(expVarName+".runtime = Runtime")
 		var expValNode = expNode.children[0]
 		if(expValNode.isPureValue()) {
-			this.buffer.writeLine("exp.input = " + JSON.stringify(expValNode.value) )
+			this.buffer.writeLine(expVarName+".input = " + JSON.stringify(expValNode.value) )
 		} else {
-			this.buffer.writeLine("exp.createInputExpression = function() {")
+			this.buffer.writeLine(expVarName+".createInputExpression = function() {")
 			this.buffer.indent()
-			this.buffer.writeLine("var exp = new Expression()")
-			this.buffer.writeLine("exp.execute = function() {")
+			this.buffer.writeLine("var inputExp = new Expression()")
+			//this.buffer.writeLine("inputExp.header = " + JSON.stringify(headerValue + " __instance " + generateCodeBlockChainCOUNT + " #input"))
+			this.buffer.writeLine("inputExp.execute = function() {")
 			this.buffer.indent()
 			this.generateAstNodeCode(expValNode)
 			this.buffer.unindent()
 			this.buffer.writeLine("}")
-			this.buffer.writeLine("return exp")
+			this.buffer.writeLine("return inputExp")
 			this.buffer.unindent()
 			this.buffer.writeLine("}")
 		}
 		var hintValue = Ast.getHintFromSpecialKey(headerValue)
 		if(hintValue) {
-			this.buffer.writeLine("exp.hint = " + JSON.stringify(hintValue) )
+			this.buffer.writeLine(expVarName+".hint = " + JSON.stringify(hintValue) )
 		}
-		this.buffer.writeLine("exp.resultCallback = function(res, parent) {")
+		var parentVarName = "parent" + generateCodeBlockChainCOUNT
+		this.buffer.writeLine(expVarName+".resultCallback = function(res, "+parentVarName+") {")
 		this.buffer.indent()
-		this.buffer.writeLine("parent.setCurrentResult(res)")
+		this.buffer.writeLine(parentVarName+".setCurrentResult(res)")
 		if(iterator.isLast()) {
-			this.buffer.writeLine("parent.finish()")
+			this.buffer.writeLine(parentVarName+".finish()")
 		} else {
 			this.generateCodeBlockChain(iterator, 
-				true // generate for execution by parent and not 'this'
+				parentVarName
 				)
 		}
 		this.buffer.unindent()
 		this.buffer.writeLine("}")
-		this.buffer.writeLine("exp.run(" + (executeOnParent ? "parent" : "this") + ")")
+		this.buffer.writeLine(expVarName+".run(" + runTargetName + ")")
 	}
 }
 Compiler.prototype.generateCodeHashChain = function(hashNode, executeOnParent) {
@@ -118,7 +123,7 @@ Compiler.prototype.generateCodeArrayChain = function(hashNode, executeOnParent) 
 	this.buffer.writeLine("var arrayResult = []")
 	this.buffer.writeLine(targetName + ".setCurrentResult(arrayResult)")
 	var iterator = new Iterator(hashNode.children)
-	this.generateCodeHashChainExpressions(iterator, targetName)
+	this.generateCodeArrayChainExpressions(iterator, targetName)
 }
 Compiler.prototype.generateCodeArrayChainExpressions = function(iterator, target) {
 	var self = this
@@ -159,7 +164,7 @@ Compiler.prototype.generateAstNodeCode = function(astNode) {
 	} else {
 		if(astNode.type == AstNodeType.block) {
 			var iterator = new Iterator(astNode.children)
-			this.generateCodeBlockChain(iterator)
+			this.generateCodeBlockChain(iterator, "this")
 		} 
 		else if(astNode.type == AstNodeType.hash) {
 			this.generateCodeHashChain(astNode)

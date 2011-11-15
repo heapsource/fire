@@ -2,6 +2,7 @@
 var StringBuffer = function() {
 	this.str = ""
 	this.indentLevel = 0;
+	this.indentStep = 2
 }
 StringBuffer.prototype.indent = function() {
 	this.indentLevel++
@@ -14,7 +15,7 @@ StringBuffer.prototype.unindent = function() {
 
 StringBuffer.prototype.createIndent = function() {
 	var s = ""
-	var max = this.indentLevel * 2;
+	var max = this.indentLevel * this.indentStep;
 	for(var i = 0;i < max; i++) {
 		s+=" "
 	}

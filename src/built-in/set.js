@@ -27,19 +27,16 @@ function Set() {
 Set.prototype = new Expression()
 Set.prototype.execute = function(){
 	var self = this
-	var hint = this._blockContext._hint
+	var hint = this.hint
 	var validHint = hint != undefined && hint != undefined && hint != null 
 	if(validHint) {
-		this.runInput({
-		_resultCallback: function(res) {
+		this.runInput(function(res) {
 			self.setParentVar(hint, res)
-			self.skip()
-		}
-	});
+			self.bypass()
+		});
 	} else {
-		self.skip()
+		this.bypass()
 	}
-	
 }
 
 module.exports = {

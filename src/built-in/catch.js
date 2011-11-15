@@ -21,28 +21,26 @@
 var Expression = require("../Expressions").Expression
 
 function Catch() {
-
+	
 }
 Catch.prototype = new Expression()
 Catch.prototype.execute = function() {
 	var self = this
-	var errInfo = this._blockContext._parentContext._errorInfo
+	var errInfo = this.getParentError()
 	var CurrentErrorVarName = this.hasHint() ? this.getHintValue() + 'CurrentError' : 'CurrentError'
 	
-	self.clearError()
+	this.clearParentError()
 	
-	if(errInfo != undefined) {
+	if(errInfo) {
 		// there is an error, run the input...
-		self.setVar(CurrentErrorVarName, errInfo) // let the input know about the error
-		this.runInput({
-			_resultCallback: function(res) {
-				// and return the values. any errors are bubbled up
-				self._blockContext._resultCallback(res)
-			}
+		this.setScopeVar(CurrentErrorVarName, errInfo) // let the input know about the error
+		this.runInput(function(res) {
+			// and return the values. any errors are bubbled up
+			self.end(res)
 		});
 	} else {
 		// No errors found, return the parent result inmediately
-		self.skip()
+		self.bypass()
 	}
 }
 

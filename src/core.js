@@ -886,6 +886,9 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 	expressionInstance.resultCallback = function(res, parent) {
 		_blockContext._resultCallback(res)
 	}
+	expressionInstance.errorCallback = function(err) {
+		_blockContext._errorCallback(err)
+	}
 	expressionInstance.runtime = this
 	expressionInstance.run() // run it
 };

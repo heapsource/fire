@@ -188,6 +188,7 @@ PathCache.prototype.compileWrite = function(pathStr) {
 			buffer.writeLine("var currentVariables = variablesSeed")
 			buffer.writeLine("while(currentVariables)")
 			buffer.writeLine("{")
+			//buffer.writeLine("console.warn(currentVariables)")
 			buffer.indent()
 			
 			buffer.writeLine("if(currentVariables['" + entry.key +"'] !== undefined)")
@@ -238,9 +239,11 @@ PathCache.prototype.compileWrite = function(pathStr) {
 	buffer.unindent()
 	buffer.writeLine("}")
 	var compilationResults = {
-		"_compiledFunction": null
+		"_compiledFunction": null,
+		console: console
 	}
 	var sourceCode = buffer.toString()
+	//console.log(sourceCode)
 	vm.runInNewContext(sourceCode, compilationResults, pathFileName);
 	
 	return this._compiledWritePaths[pathStr] = compilationResults._compiledFunction

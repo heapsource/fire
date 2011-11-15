@@ -2,9 +2,11 @@ var RuntimeError = require('./RuntimeError')
 
 function Expression() {
 	this.vars = {
-		result: undefined,
-		_parent: null
+		_parent: null,
+		_result: undefined,
+		_error: null
 	}
+	
 	this.isRoot = false
 	this.reset()
 }
@@ -15,7 +17,7 @@ Expression.prototype.reset = function() {
 	this.inputExpression = null
 	
 	// Unlink Variables
-	this.vars._parent = null
+	delete this.vars._parent
 }
 Expression.prototype.execute = function() {
 	console.trace()
@@ -34,10 +36,11 @@ Expression.prototype.end = function(res) {
 	}else {
 		var callback = this.resultCallback
 		var parent = this.parent
+		self.reset()
 		process.nextTick(function() {
 			callback(res, parent)
 		})
-		self.reset()
+		
 	}
 }
 Expression.prototype.setCurrentResult = function(res) {
@@ -55,26 +58,37 @@ Expression.prototype.input = undefined
 Expression.prototype.createInputExpression = null
 Expression.prototype.parent = null
 Expression.prototype.resultCallback = null
+Expression.prototype.errorCallback = null
 Expression.prototype.inputExpression = null
 Expression.prototype.runtime = null
 Expression.prototype.onPrepareInput = function() {
 	
 }
 Expression.prototype.runInput = function(onResult) {
+	var self = this
 	if(this.createInputExpression) {
 		this.inputExpression = this.createInputExpression()
-		this.inputExpression.resultCallback = onResult
+		this.inputExpression.resultCallback = function(res) {
+			onResult(res)
+		}
 		this.onPrepareInput()
-		this.inputExpression.run(this)
+		this.inputExpression.run(this.parent || this)
 	} else {
 		onResult(this.input)
 	}
 }
-Expression.prototype.run = function(parent) {
-	this.parent = parent
-	if(parent) {
-		this.vars._parent = parent.vars
-		this.runtime = parent.runtime
+
+Expression.prototype.run = function(callingParent) {
+	this.parent = callingParent
+	if(this.parent) {
+		this.vars._parent = this.parent.vars
+		this.runtime = this.parent.runtime
+		var self = this
+		if(!this.errorCallback) {
+			this.errorCallback = function(err) {
+				self.parent.bubbleUpError(err)
+			} 
+		}
 	}
 	this.execute()
 }
@@ -82,29 +96,37 @@ Expression.prototype.run = function(parent) {
 Expression.prototype.raiseError = function(err) {
 	//console.warn("raiseError:", err)
 	var errorInfo = new RuntimeError(this._blockContext, err)
-	this._blockContext._errorCallback(errorInfo)
+	this.bubbleUpError(errorInfo)
 }
-/*
-Expression.prototype.runInput = function(context_block_overrides) {
-	this.runInputFunction(this._blockContext._inputExpression, context_block_overrides)
-}
-*/
-/*
-* Run any expression input as a input expression. Used by @input
 
-Expression.prototype.runInputFunction = function(inputFunc, context_block_overrides) {
-	if(context_block_overrides !== undefined && context_block_overrides !== null) {
-		context_block_overrides._sameScope = true // don't copy the variables when running input expressions
+Expression.prototype.bubbleUpError = function(errorInfo) {
+	if(!this.errorCallback) {
+		throw "errorCallback not implemented"
+	}else {
+		this.errorCallback(errorInfo)
 	}
-	this.runExp(inputFunc, context_block_overrides);
 }
-*/
+Expression.prototype.getError = function() {
+	return this.vars._error
+}
 Expression.prototype.setError = function(errorInfo) {
-	this._blockContext._parentContext._errorInfo = errorInfo
+	this.vars._error = errorInfo
 }
 
 Expression.prototype.clearError = function() {
-	this._blockContext._parentContext._errorInfo = undefined
+	this.setError(null)
+}
+
+Expression.prototype.setParentError = function(errorInfo) {
+	this.parent.setError(errorInfo)
+}
+
+Expression.prototype.getParentError = function() {
+	return this.parent.getError()
+}
+
+Expression.prototype.clearParentError = function() {
+	this.parent.clearError()
 }
 
 Expression.prototype.loopControl = function(payload) {
@@ -112,15 +134,15 @@ Expression.prototype.loopControl = function(payload) {
 }
 
 Expression.prototype.bypass = function() {
-	this.end(this.parent ? this.parent.getCurrentResult() : undefined)
+	this.end(this.getParentResult())
 }
 
 Expression.prototype.setVar = function(name, value) {
-	setVarCore(this._blockContext._runtime, this._blockContext._variables, name, value)
+	setVarCore(this.runtime, this.vars, name, value)
 }
 
 Expression.prototype.setScopeVar = function(name, value) {
-	setVarCore(this._blockContext._runtime, this._blockContext._variables, name, value, true)
+	setVarCore(this.runtime, this.vars, name, value, true)
 }
 
 Expression.prototype.setParentScopeVar = function(name, value) {
@@ -132,31 +154,41 @@ Expression.prototype.getVar = function(name) {
 }
 
 Expression.prototype.setParentVar = function(path, value) {
-	setVarCore(this._blockContext._runtime, this._blockContext._parentContext._variables, path, value)
+	if(this.parent) {
+		setVarCore(this.runtime, this.parent.vars, path, value)
+	} else {
+		
+			console.trace()
+		throw "setParentVar can't be used in root expressions"
+	}
 }
 
 Expression.prototype.getParentVar = function(name) {
-	return this.runtime.getPaths().run(this.vars, name)
+	return this.runtime.getPaths().run(this.parent.vars, name)
 }
 
 Expression.prototype.getParentResult = function() {
-	return this._blockContext._parentContext._result
+	return this.parent ? this.parent.getCurrentResult() : undefined
 }
 
 Expression.prototype.setParentResult = function(val) {
-	this._blockContext._parentContext._result = val
+	if(this.parent) {
+		this.parent.setCurrentResult(val)	
+	} else {
+		throw "setParentResult can't be used in root expressions"
+	}
 }
 
 Expression.prototype.hasHint = function() {
-	return this._blockContext._hint !== undefined && this._blockContext._hint !== null && this._blockContext._hint !== ''
+	return this.hint
 }
 
 Expression.prototype.getHintValue = function() {
-	return this.hasHint() ? this._blockContext._hint : undefined
+	return this.hasHint() ? this.hint : undefined
 }
 
 Expression.prototype.getHintVariableValue = function() {
-	return this.hasHint() ? this.getParentVar(this._blockContext._hint) : undefined
+	return this.hasHint() ? this.getParentVar(this.hint) : undefined
 }
 
 Expression.prototype.setResult = function(res) {

@@ -29,7 +29,7 @@ Get.prototype.execute = function() {
 	var self = this
 	var val = undefined;
 	var hint = this.hint
-	if(hint && hint != '')
+	if(hint)
 	{
 		this.end(this.getParentVar(hint))
 	} else {
