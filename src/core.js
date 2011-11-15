@@ -877,7 +877,7 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 	}
 	
 	expressionInstance._blockContext = _blockContext
-	
+	expressionInstance.ensureInitialized()
 	// new Expressions model
 	var localVarsKeys = Object.keys(localVariables)
 	for(var i = 0; i < localVarsKeys.length; i++) {

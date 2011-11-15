@@ -1487,37 +1487,53 @@ vows.describe('firejs error handling').addBatch({
 		},
 		"when we register it": {
 			topic:function(runtime) {
-				runtime.registerWellKnownExpressionDefinition({
-					name:"testCatchCurrentError",
-					json: {
-						"@try": {
-							"@raiseError": "Houston, we have a problem!"
-						},
-						"@catch(nasa)": {
-							"@get(nasaCurrentError.error)": null
-						}
+				 return {
+					"@try": {
+						"@raiseError": "Houston, we have a problem!"
+					},
+					"@catch(nasa)": {
+						"@get(nasaCurrentError.error)": null
 					}
-				})
-				return runtime
+				}
 			},
 			"and execute it": {
-				topic: function(runtime) {
+				topic: function(topic) {
 					var self = this
-					var contextBase = {};
-					contextBase._resultCallback = function(res) {
-						self.callback(null, res)
-					}
-					contextBase._loopCallback = function() {};
-					contextBase._inputExpression  = function() {};
-					contextBase._variables = {};            
-					contextBase._errorCallback =  function(err) {
-						self.callback(err, null)
-					};
-					runtime.runExpressionByName("testCatchCurrentError", contextBase ,null)
+					var runtime = new Runtime()
+					runtime.registerWellKnownExpressionDefinition({
+						name: "Test",
+						json: topic
+					});
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						} else {
+							var contextBase = {};
+							var result = {
+								count: 0
+							}
+							contextBase._resultCallback = function(res) {
+								result.count++
+								result.result = res
+								self.callback(null, result)
+							}
+							contextBase._loopCallback = function() {
+								self.callback("_loopCallback reached", null)
+							};
+							contextBase._inputExpression  = function() {
+								self.callback("_inputExpression reached", null)
+							};
+							contextBase._variables = {};        
+							contextBase._errorCallback =  function(err) {
+								self.callback(err, result)
+							};
+							runtime.runExpressionByName("Test", contextBase ,null)
+						}
+					});
 				},
 				"it should return the error as the result of the expression": function(err, res) {
 					assert.isNull(err)
-					assert.equal(res, "Houston, we have a problem!")
+					assert.equal(res.result, "Houston, we have a problem!")
 				}
 			}
 		}

@@ -10,7 +10,7 @@ var CompilationError = require('./CompilationError')
 function Compiler(runtime) {
 	this.runtime = runtime
 	this.buffer = new StringBuffer()
-	this.buffer.indentStep = 4
+	//this.buffer.indentStep = 4
 	this.typeDefinitions = []
 }
 Compiler.prototype.outputFile = null
@@ -26,16 +26,14 @@ Compiler.prototype.load = function() {
 	console.warn(this.buffer.toString())
 	console.warn("===")
 }
-var generateCodeBlockChainCOUNT = 0
 Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
-	generateCodeBlockChainCOUNT++
 	var self = this
 	if(iterator.next()) {
 		var expNode = iterator.current()
 		var headerValue = expNode.value
 		var expressionName = Ast.getExpressionNameFromSpecialKey(headerValue)
 		this.buffer.writeLine("//" + expNode.value)
-		var expVarName = "exp" + generateCodeBlockChainCOUNT
+		var expVarName = "exp" // + generateCodeBlockChainCOUNT
 		this.buffer.writeLine("var "+expVarName+" = new Runtime.loadedExpressionsSyn." + self.expSynTable.syn(expressionName) + "()")
 		this.buffer.writeLine(expVarName+".header = "+ JSON.stringify(headerValue))
 		this.buffer.writeLine(expVarName+".runtime = Runtime")
@@ -46,6 +44,7 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
 			this.buffer.writeLine(expVarName+".createInputExpression = function() {")
 			this.buffer.indent()
 			this.buffer.writeLine("var inputExp = new Expression()")
+			this.buffer.writeLine("inputExp.isInput = true")
 			//this.buffer.writeLine("inputExp.header = " + JSON.stringify(headerValue + " __instance " + generateCodeBlockChainCOUNT + " #input"))
 			this.buffer.writeLine("inputExp.execute = function() {")
 			this.buffer.indent()
@@ -60,7 +59,7 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
 		if(hintValue) {
 			this.buffer.writeLine(expVarName+".hint = " + JSON.stringify(hintValue) )
 		}
-		var parentVarName = "parent" + generateCodeBlockChainCOUNT
+		var parentVarName = "parent"// + generateCodeBlockChainCOUNT
 		this.buffer.writeLine(expVarName+".resultCallback = function(res, "+parentVarName+") {")
 		this.buffer.indent()
 		this.buffer.writeLine(parentVarName+".setCurrentResult(res)")

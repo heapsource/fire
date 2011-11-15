@@ -1,20 +1,14 @@
 var RuntimeError = require('./RuntimeError')
 
 function Expression() {
-	this.vars = {
-		_parent: null,
-		_result: undefined,
-		_error: null
-	}
 	
-	this.isRoot = false
-	this.reset()
 }
 Expression.prototype.reset = function() {
 	this.createInputExpression = null
 	this.parent = null
 	this.resultCallback = null
 	this.inputExpression = null
+	this.errorCallback = null
 	
 	// Unlink Variables
 	delete this.vars._parent
@@ -61,9 +55,10 @@ Expression.prototype.resultCallback = null
 Expression.prototype.errorCallback = null
 Expression.prototype.inputExpression = null
 Expression.prototype.runtime = null
-Expression.prototype.onPrepareInput = function() {
-	
-}
+Expression.prototype.isInput = false
+Expression.prototype.initialized = false
+Expression.prototype.onPrepareInput = null
+
 Expression.prototype.runInput = function(onResult) {
 	var self = this
 	if(this.createInputExpression) {
@@ -71,15 +66,34 @@ Expression.prototype.runInput = function(onResult) {
 		this.inputExpression.resultCallback = function(res) {
 			onResult(res)
 		}
-		this.onPrepareInput()
-		this.inputExpression.run(this.parent || this)
+		if(this.onPrepareInput) {
+			this.onPrepareInput()
+		}
+		this.inputExpression.run(this)
 	} else {
 		onResult(this.input)
 	}
 }
 
+Expression.prototype.linkChildVars = function(childExpression) {
+	
+}
+Expression.prototype.ensureInitialized = function() {
+	if(!this.initialized) {
+		this.vars = {
+			_parent: null,
+			_result: undefined,
+			_error: null
+		}
+		this.isRoot = false
+		
+		this.initialized = true
+	}
+}
 Expression.prototype.run = function(callingParent) {
-	this.parent = callingParent
+	this.ensureInitialized()
+	
+	this.parent = callingParent || null
 	if(this.parent) {
 		this.vars._parent = this.parent.vars
 		this.runtime = this.parent.runtime
