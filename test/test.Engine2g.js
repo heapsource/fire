@@ -4292,3 +4292,1171 @@ vows.describe('firejs @input').addBatch({
 		}
 	},
 }).export(module);
+
+
+vows.describe('firejs file extension inference').addBatch({
+	"When I infer the expression name from a simple name file with the official script extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("some.fjson")
+		},
+		"the expression name should be the name of the file without the extension": function(expressionName) {
+			assert.equal(expressionName,"some")
+		}
+	},
+	"When I infer the expression name from a namespaced file name with the official script extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.fjson")
+		},
+		"the expression name should be the name of the file without the extension": function(expressionName) {
+			assert.equal(expressionName,"myApp.SomeFeature.SomeExpression")
+		}
+	},
+	"When I infer the expression name from a simple name file with the official custom expression extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("some.fjs")
+		},
+		"the expression name should be the name of the file without the extension": function(expressionName) {
+			assert.equal(expressionName,"some")
+		}
+	},
+	"When I infer the expression name from a namespaced file name with the official custom expression extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.fjs")
+		},
+		"the expression name should be the name of the file without the extension": function(expressionName) {
+			assert.equal(expressionName,"myApp.SomeFeature.SomeExpression")
+		}
+	},
+	"When I infer the expression name from a file name without the official script extension": {
+		topic: function() {
+			return jsonCode.inferExpressionNameByFileName("myApp.SomeFeature.SomeExpression.mp3")
+		},
+		"the expression name should be null": function(expressionName) {
+			assert.equal(expressionName,null)
+		}
+	}
+}).export(module)
+
+
+vows.describe('firejs @undefined').addBatch({
+	'Having a JSON code that returns @undefined at the end of the expression-block': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@return": 1,
+						"@undefined": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be undefined": function(err, res) {
+					assert.isUndefined(res)
+					assert.equal(res, undefined)
+				}
+			}
+		}
+	}
+}).export(module)
+
+vows.describe('firejs @raiseError').addBatch({
+	'Having a JSON code that raises an error using @raiseError': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@raiseError": "This is the error"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"it should return an error": function(err, res) {
+					assert.isNull(res)
+					assert.equal(err.error, "This is the error")
+				}
+			}
+		}
+	}
+}).export(module)
+
+vows.describe('firejs loadedModules').addBatch({
+	'Having a Runtime which loads two modules': {
+		topic: function() {
+			require.paths.unshift(path.join(__dirname,'loadedModules/node_modules')); // because we are testing in a different directory
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.loadFromManifestFile(path.join(__dirname,"loadedModules/ignition.manifest.json"))
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@loadedExpression1": null,
+						"@loadedExpression2": null
+					}
+				})
+				return runtime
+			},
+			"when I use getLoadedModules it should return the list of modules": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, {
+							res:res,
+							runtime:runtime
+						})
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"it should return an error": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res.res, "Loaded Expression Two Result")
+					assert.deepEqual(res.runtime.getModules(),[require("loadedModule1"),require("loadedModule2")])
+					assert.equal(res.runtime.getModules()[0].superName, "Super Module One")
+					assert.equal(res.runtime.getModules()[1].superName, "Super Module Two")
+				}
+			}
+		}
+	}
+}).export(module)
+
+
+vows.describe('firejs Runtime on("load") event').addBatch({
+	'When a Runtime loads from Manifest file': {
+			topic:function() {
+				var runtime = new Runtime()
+				var self = this
+				runtime.events.on("load", function(r) {
+					self.callback(null,{
+						runtime:runtime,
+						r:r
+					})
+				})
+				runtime.loadFromManifestFile(path.join(__dirname,"onLoadTest/ignition.manifest.json"))
+			},
+			"it should invoke the 'load' event": function(res) {
+				assert.equal(res.runtime, res.r, "expecting the event to send the runtime instance as the first argument") 
+			}
+	},
+	'When a Runtime loads from bootstrap': {
+			topic:function() {
+				var runtime = new Runtime()
+				var self = this
+				runtime.events.on("load", function(r) {
+					self.callback(null,{
+						runtime:runtime,
+						r:r
+					})
+				})
+				runtime.load()
+			},
+			"it should invoke the 'load' event": function(res) {
+				assert.equal(res.runtime, res.r, "expecting the event to send the runtime instance as the first argument") 
+			}
+	}
+}).export(module)
+
+
+
+vows.describe('firejs createVar').addBatch({
+	'Having a Expression that uses setScopeVar instead setVar': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			function testCreateVarImplementation() {
+
+			}
+			testCreateVarImplementation.prototype = new Expression()
+			testCreateVarImplementation.prototype.execute = function()
+			{
+				var self = this
+				//console.warn("Creating var")
+				self.setScopeVar("someContext", "String of the Created Variable Context")
+				//console.warn("var created and running input")
+				this.runInput(function(res) {
+						//console.warn('got the result')
+						self.end(res)
+					});
+			}
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"createVarTest",
+				implementation: testCreateVarImplementation
+			})
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@set(someContext)": "original context variable value",
+					"@return": {
+						"createdVarVal": {
+							"@createVarTest": {
+								"@get(someContext)": null
+							}
+						},
+						"originalVarVal": {
+							"@get(someContext)": null
+						}
+					}
+				}
+			})
+			return runtime
+		},
+			"when we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"should not override the outer variable": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res.originalVarVal,"original context variable value")
+				},
+				"should let the input of the caller expression see the value of the scope variable": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res.createdVarVal,"String of the Created Variable Context")
+				}
+			
+		}
+	},
+	'Having a Expression that uses @scopeSet instead @set': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@set(someContext)": "original context variable value",
+					"@return": {
+						"createdVarVal": {
+							"@scopeSet(someContext)": "String of the Created Variable Context",
+							"@get(someContext)": null
+						},
+						"originalVarVal": {
+							"@get(someContext)": null
+						}
+					}
+				}
+			})
+			return runtime
+		},
+			"when we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"should not override the outer variable": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res.originalVarVal,"original context variable value")
+				},
+				"should let the input of the caller expression see the value of the scope variable": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res.createdVarVal,"String of the Created Variable Context")
+				}
+			
+		}
+	}
+	,
+	'When I use @get over a variable called "point" after using @set to write a paths "point.x" and "point.y"': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@set(point.x)": 150,
+					"@set(point.y)": 120,
+					"@get(point)" :null
+				}
+			})
+			return runtime
+		},
+			"when we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be a structure with the member x and y": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res,{
+						x: 150,
+						y: 120
+					})
+				}
+			
+		}
+	}
+}).export(module)
+
+
+vows.describe('firejs @index').addBatch({
+	'When I use @index with no path': {
+		"and the last result is undefined":{
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@index": 2
+					}
+				})
+				return runtime
+			},
+				"when we execute": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should bypass the undefined value": function(err, res) {
+						assert.isNull(err)
+						assert.isUndefined(res)
+					}
+
+			}
+		},
+		"and the last result is null": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@return": null,
+						"@index": 2
+					}
+				})
+				return runtime
+			},
+				"when we execute": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should bypass the null value": function(err, res) {
+						assert.isNull(err)
+						assert.deepEqual(res,null)
+					}
+
+			}
+		},
+		"and the last result is an object": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@return": {
+							name: "Steve"
+						},
+						"@index": "name"
+					}
+				})
+				return runtime
+			},
+				"and the input the name of the property": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should return the value of the property": function(err, res) {
+						assert.isNull(err)
+						assert.equal(res, "Steve")
+					}
+
+			}
+		},
+		"and the last result is an Array": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@return": ["One", "Two"],
+						"@index": 1
+					}
+				})
+				return runtime
+			},
+			"and the input is the number of the index": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"it should return the value of the given index in the array": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res, "Two")
+				}
+			}
+		}
+	},
+	'When I use @index with a path': {
+		"and the variable path does not exists":{
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@index(something)": 2
+					}
+				})
+				return runtime
+			},
+				"when we execute": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should bypass the undefined value": function(err, res) {
+						assert.isNull(err)
+						assert.isUndefined(res)
+					}
+
+			}
+		},
+		"and the variable path is a null object": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@set(person)": null,
+						"@index(person)": "name"
+					}
+				})
+				return runtime
+			},
+				"when we execute": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should bypass the value": function(err, res) {
+						assert.isNull(err)
+						assert.isUndefined(res)
+					}
+
+			}
+		},
+		"and the variable path is an object": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@set(contact)": {
+							name: "Steve"
+						},
+						"@index(contact)": "name"
+					}
+				})
+				return runtime
+			},
+			"and the input the name of the property": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"it should return the value of the property": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res, "Steve")
+				}
+			}
+		},
+		"and the last result is an Array": {
+			topic: function() {
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@set(numbers)": ["One", "Two"],
+						"@index(numbers)": 1
+					}
+				})
+				return runtime
+			},
+			"and the input is the number of the index": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"it should return the value of the given index in the array": function(err, res) {
+					assert.isNull(err)
+					assert.equal(res, "Two")
+				}
+			}
+		}
+	}
+}).export(module)
+
+
+vows.describe('firejs - dependentModules').addBatch({
+	'When a firejs module loads a third firejs module': {
+		topic: function() {
+			var self = this
+			exec('bin/./firejs test/dependentModules/dependentModules.Main.fjson', function (error, stdout, stderr) {
+				self.callback(null, {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				})
+			});
+		},
+		"both modules should be automatically loaded only by referring one in the manifest": function(output){
+			assert.equal(output.stderr,'')
+			assert.isNotNull(output.stdout)
+			assert.isNull(output.error)
+			assert.equal(output.stdout, JSON.stringify("Expression Two Result"))
+		}
+	}
+}).export(module)
+
+vows.describe('firejs - invalid module registration').addBatch({
+	'When I try to register a module instance using loadModuleInstance and the module instance does not export expressions': function() {
+		var runtime = new Runtime()
+		try {
+			runtime.loadModuleInstance({}, "someInvalidModule")
+		}catch(err) {
+			assert.equal(err, "Module 'someInvalidModule' is not a fire.js module")
+		}
+	}
+}).export(module)
+
+function copyProcessEnv() {
+	var e = {}
+	Object.keys(process.env).forEach(function(k) {
+		e[k] = process.env[k]
+	});
+	return e
+}
+
+vows.describe('firejs - initializers').addBatch({
+	"The firejs module should expose InitializerError type": function() {
+		var moduleType = require('../src/core.js').InitializerError
+		assert.isNotNull(moduleType)
+		assert.equal(moduleType, require('../src/InitializerError.js'))
+	},
+	"When I run the app with NODE_ENV set as 'test' and one initializer prints a test message": {
+		topic: function() {
+			var self = this
+			var testEnv = copyProcessEnv()
+			testEnv.NODE_ENV = 'test'
+			exec('bin/./firejs test/initializersTest/initializersTest.Main.fjson',{
+				env: testEnv
+			}, function (error, stdout, stderr) {
+				self.callback(error, {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				})
+			});
+		},
+		"I should see the test message in the console": function(output){
+			assert.equal(output.stderr,'')
+			assert.isNotNull(output.stdout)
+			assert.isNull(output.error)
+			assert.equal(output.stdout, "Init in Testing Mode\n")
+		}
+	},
+	"When I run the app with no implicit and one initializer prints a test message": {
+		topic: function() {
+			var self = this
+			exec('bin/./firejs test/initializersTest/initializersTest.Main.fjson', function (error, stdout, stderr) {
+				self.callback(error, {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				})
+			});
+		},
+		"I should see the development message in the console": function(output){
+			assert.equal(output.stderr,'')
+			assert.isNotNull(output.stdout)
+			assert.isNull(output.error)
+			assert.equal(output.stdout, "Init in Development Mode\n")
+		}
+	}
+}).export(module)
+
+
+vows.describe('firejs - initial last result').addBatch({
+	'When I use a expression that initializes the last result of the input with certain value"': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			var testInitInputResult = function() {
+				
+			}
+			testInitInputResult.prototype = new Expression()
+			testInitInputResult.prototype.onPrepareInput = function() {
+				this.inputExpression.scopeBypass = true
+			}
+			testInitInputResult.prototype.execute = function() {
+				var self = this
+				this.setCurrentResult(this.getHintValue())
+				this.runInput(function(res) {
+						self.end(res)
+					})
+			}
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name: "testInitInputResult",
+				flags: ["hint"],
+				implementation: testInitInputResult
+			})
+			
+			var someBypasser = function() {
+				
+			}
+			someBypasser.prototype = new Expression()
+			someBypasser.prototype.execute = function() {
+				this.bypass()
+			}
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name: "someBypasser",
+				implementation: someBypasser
+			})
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@testInitInputResult(Initialized value)": {
+						"@someBypasser": null
+					}
+				}
+			})
+			return runtime
+		},
+			"and the expressions in the input bypass the result": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be the initialized value of the caller expression": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, "Initialized value")
+				}
+		
+		}
+	}
+}).export(module)
+
+
+vows.describe('firejs - @isEmpty').addBatch({
+	'When I use @isEmpty with a undefined hint': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@isEmpty(something)": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be true": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, true)
+				}
+		
+		}
+	},
+	'When I use @isEmpty with a hint with a string path': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@set(x)": "some val",
+					"@isEmpty(x)": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be false": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, false)
+				}
+		
+		}
+	}
+	,'When I use @isEmpty with no hint and the input is a string': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@isEmpty": "some val"
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be false": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, false)
+				}
+		
+		}
+	}
+}).export(module)
+
+
+vows.describe('firejs - @isNotEmpty').addBatch({
+	'When I use @isNotEmpty with a undefined hint': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@isNotEmpty(something)": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be false": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, false)
+				}
+		
+		}
+	},
+	'When I use @isNotEmpty with a hint with a string path': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@set(x)": 200,
+					"@isNotEmpty(x)": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be true": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, true)
+				}
+		
+		}
+	}
+	,'When I use @isNotEmpty with no hint and the input is a string': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@isNotEmpty": "some val"
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be true": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, true)
+				}
+		
+		}
+	}
+	,'When I use @isNotEmpty with no hint and the last result is an empty string': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@return": "",
+					"@isNotEmpty": null
+				}
+			})
+			return runtime
+		},
+			"and we execute": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function(err) {
+						self.callback(err, null)
+					};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"the result should be false": function(err, res) {
+					assert.isNull(err)
+					assert.deepEqual(res, false)
+				}
+		
+		}
+	}
+}).export(module)

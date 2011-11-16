@@ -193,7 +193,7 @@ Compiler.prototype.generateExpressionType = function(typeDefinition) {
 	var pureExpDefinition = {}
 	var expDefinitionKeys = Object.keys(expDefinition)
 	for(var i = 0; i < expDefinitionKeys.length; i++) {
-		var key = expDefinitionKeys[0]
+		var key = expDefinitionKeys[i]
 		if(key != 'json') {
 			pureExpDefinition[key] = expDefinition[key]	
 		}

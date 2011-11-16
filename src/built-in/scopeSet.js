@@ -27,17 +27,13 @@ function ScopeSet() {
 ScopeSet.prototype = new Expression()
 ScopeSet.prototype.execute = function(){
 	var self = this
-	var hint = this._blockContext._hint
-	var validHint = hint != undefined && hint != undefined && hint != null 
-	if(validHint) {
-		this.runInput({
-		_resultCallback: function(res) {
-			self.setParentScopeVar(hint, res)
-			self.skip()
-		}
-	});
+	if(this.hasHint()) {
+		this.runInput(function(res) {
+			self.setParentScopeVar(self.getHintValue(), res)
+			self.bypass()
+		});
 	} else {
-		self.skip()
+		self.bypass()
 	}
 	
 }

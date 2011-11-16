@@ -10,11 +10,9 @@ testExecAtFirstTime.prototype.execute = function() {
 	} else if(this.getParentVar("testExecAtSecondTimeCount") == 1) {
 		this.setParentVar("testExecAtSecondTimeCount", this.getParentVar("testExecAtSecondTimeCount") +1)
 		var self = this
-		this.runInput({
-			_resultCallback: function(res) {
+		this.runInput( function(res) {
 				self.bypass()
-			}
-		})
+			})
 	}else {
 		this.setParentVar("testExecAtSecondTimeCount", this.getParentVar("testExecAtSecondTimeCount") +1)
 		this.bypass()

@@ -706,7 +706,6 @@ Runtime.prototype.load = function(initializationCallback) {
 	})
 	// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
 	this.scanScriptsDirs()
-	
 	this._compile(function(compilationFinished) {
 		// STEP 1. Load Configurations from Manifest
 		// (Configurations must be loaded first so the ignition.init callback of all modules can work properly)
@@ -718,6 +717,7 @@ Runtime.prototype.load = function(initializationCallback) {
 		this.events.removeAllListeners('load')
 
 		var initializeExpressions = []
+		
 		this.loadedExpressionsMeta.names().forEach(function(expName) {
 			var expDef = this.loadedExpressionsMeta[expName]
 			if(expDef.initialize && expDef.initialize.indexOf(this.environmentName) != -1) {

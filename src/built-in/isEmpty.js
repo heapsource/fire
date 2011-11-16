@@ -27,7 +27,7 @@ function IsEmpty() {
 IsEmpty.prototype = new Expression()
 IsEmpty.prototype.isEmptyCore = function(val) {
 	var isEmpty = (val == undefined || val == null || val == '')
-	this.setResult(isEmpty)
+	this.end(isEmpty)
 }
 IsEmpty.prototype.execute = function() {
 	var self = this
@@ -35,11 +35,9 @@ IsEmpty.prototype.execute = function() {
 	if(this.hasHint()) {
 		this.isEmptyCore(this.getHintVariableValue())
 	} else {
-		this.runInput({
-			_resultCallback: function(res) {
+		this.runInput(function(res) {
 				self.isEmptyCore(res)
-			}
-		})
+			})
 	}
 }
 

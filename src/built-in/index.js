@@ -32,16 +32,14 @@ IndexExpression.prototype.execute = function() {
 	if(result)
 	{
 		if(typeof(result) === 'object') {
-			this.runInput({
-				_resultCallback: function(res) {
-					self.setResult(result[res])
-				}
-			})
+			this.runInput( function(res) {
+					self.end(result[res])
+				})
 		} else {
-			this.skip()
+			this.bypass()
 		}
 	} else {
-		this.skip()
+		this.bypass()
 	}
 }
 
