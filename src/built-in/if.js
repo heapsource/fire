@@ -31,15 +31,13 @@ If.prototype.execute = function() {
 	
 	if(met) {
 		// run the input...
-		this.runInput({
-			_resultCallback: function(res) {
+		this.runInput(function(res) {
 				// and return the values. any errors are bubbled up
-				self._blockContext._resultCallback(res)
-			}
-		});
+				self.end(res)
+			});
 	} else {
 		// Condition not met, return the parent result inmediately
-		self.skip()
+		self.bypass()
 	}
 }
 

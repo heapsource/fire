@@ -25,54 +25,49 @@ function Each() {
 	
 }
 Each.prototype = new Expression()
-Each.prototype.execute = function() {
-	var rc = this._blockContext._resultCallback
+Each.prototype.onPrepareInput = function() {
 	var self = this
-	var result = []
-
-	var callInput = null;
-	var varVal = null
-	varVal = this.getParentResult()
-	if(!(varVal instanceof Array)) {
-		this.setResult([])
+	this.inputExpression.scopeBypass = true
+	this.inputExpression.loopCallback = function(cmd) {
+		if(cmd == "break") {
+			self.end(self._result) // return the array
+		} else if(cmd == "continue") {
+			process.nextTick(function() {
+				self._iterate() // call the next iteration
+			})
+		} else {
+			throw "Invalid loop command " + cmd
+		}
+	}
+}
+Each.prototype._iterate = function() {
+	var self = this
+	if(!this._iterator.next()) {
+		self.end(this._result)
 		return
 	}
-	var itemVarName = this.hasHint() ? this.getHintValue() + 'CurrentItem' : 'CurrentItem'
-	var CurrentIndexVarName = this.hasHint() ? this.getHintValue() + 'CurrentIndex' : 'CurrentIndex'
-	var iterator = new Iterator(varVal)
-	var count = -1
-	callInput = function() {
-		if(!iterator.next()) {
-			rc(result)
-			return
-		}
-		count++
-		self.setVar(CurrentIndexVarName,count)
-		
-		self.setVar(itemVarName, iterator.current())
-		self.runInput({
-			_loopCallback: function(cmd) {
-				if(cmd == "break") {
-					process.nextTick(function() {
-						rc(result) // return the array
-					})
-				} else if(cmd == "continue") {
-					process.nextTick(function() {
-						callInput() // call the next iteration
-					})
-				} else {
-					throw "Invalid loop command " + cmd
-				}
-			},
-			_resultCallback: function(res) {
-				result.push(res)
-				process.nextTick(function() {
-					callInput() // call the next iteration
-				})
-			}
-		});
+	this._count++
+	this.setVar(this._CurrentIndexVarName, this._count)
+	this.setVar(this._itemVarName, this._iterator.current())
+	this.runInput(function(res) {
+		self._result.push(res)
+		process.nextTick(function() {
+			self._iterate() // call the next iteration
+		})
+	});
+}
+Each.prototype.execute = function() {
+	this._result = []
+	this._varVal = this.getParentResult()
+	if(!(this._varVal instanceof Array)) {
+		this.end(this._result)
+		return
 	}
-	callInput() // trigger the first iteration
+	this._itemVarName = this.hasHint() ? this.getHintValue() + 'CurrentItem' : 'CurrentItem'
+	this._CurrentIndexVarName = this.hasHint() ? this.getHintValue() + 'CurrentIndex' : 'CurrentIndex'
+	this._iterator = new Iterator(this._varVal)
+	this._count = -1
+	this._iterate(); // call the first iteration
 }
 
 module.exports = {

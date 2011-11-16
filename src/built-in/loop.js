@@ -24,41 +24,39 @@ function Loop() {
 
 }
 Loop.prototype = new Expression()
-Loop.prototype.execute = function() {
-	var rc = this._blockContext._resultCallback
-	var self = this
-	var result = []
-	var count = -1
-	var callInput = null;
-	var CurrentIndexVarName = this.hasHint() ? this.getHintValue() + 'CurrentIndex' : 'CurrentIndex'
-	
-	callInput = function() {
-		count++
-		self.setVar(CurrentIndexVarName,count)
-		self.runInput({
-			_loopCallback: function(cmd) {
-				if(cmd == "break") {
-					process.nextTick(function() {
-						rc(result) // return the array
-					})
-				} else if(cmd == "continue") {
-					process.nextTick(function() {
-						callInput() // call the next iteration
-					})
-				} else {
-					throw "Invalid loop command " + cmd
-				}
-			},
-			_resultCallback: function(res) {
-				result.push(res)
-				process.nextTick(function() {
-					callInput() // call the next iteration
-				})
-			}
-		});
-	}
-	callInput() // trigger the first iteration
 
+Loop.prototype.onPrepareInput = function() {
+	var self = this
+	this.inputExpression.scopeBypass = true
+	this.inputExpression.loopCallback = function(cmd) {
+		if(cmd == "break") {
+			self.end(self._result) // return the array
+		} else if(cmd == "continue") {
+			process.nextTick(function() {
+				self._iterate() // call the next iteration
+			})
+		} else {
+			throw "Invalid loop command " + cmd
+		}
+	}
+}
+Loop.prototype._iterate = function() {
+	var self = this
+	this._count++
+	this.setVar(this._CurrentIndexVarName,this._count)
+	this.runInput(function(res) {
+			self._result.push(res)
+			process.nextTick(function() {
+				self._iterate() // call the next iteration
+			})
+		});
+}
+Loop.prototype.execute = function() {
+	var self = this
+	this._result = []
+	this._count = -1
+	this._CurrentIndexVarName = this.hasHint() ? this.getHintValue() + 'CurrentIndex' : 'CurrentIndex'
+	this._iterate() // trigger the first iteration
 }
 
 module.exports = {

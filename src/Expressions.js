@@ -9,9 +9,12 @@ Expression.prototype.reset = function() {
 	this.resultCallback = null
 	this.inputExpression = null
 	this.errorCallback = null
+	this.loopCallback = null
 	
-	// Unlink Variables
-	delete this.vars._parent
+	// If we own the variables, then unlink the _parent
+	if(!this.scopeBypass) {
+		delete this.vars._parent
+	}
 }
 Expression.prototype.execute = function() {
 	console.trace()
@@ -53,10 +56,14 @@ Expression.prototype.createInputExpression = null
 Expression.prototype.parent = null
 Expression.prototype.resultCallback = null
 Expression.prototype.errorCallback = null
+Expression.prototype.loopCallback = null
 Expression.prototype.inputExpression = null
 Expression.prototype.runtime = null
 Expression.prototype.isInput = false
 Expression.prototype.initialized = false
+Expression.prototype.isRoot = false
+Expression.prototype.scopeBypass = false
+
 Expression.prototype.onPrepareInput = null
 
 Expression.prototype.runInput = function(onResult) {
@@ -80,13 +87,13 @@ Expression.prototype.linkChildVars = function(childExpression) {
 }
 Expression.prototype.ensureInitialized = function() {
 	if(!this.initialized) {
-		this.vars = {
-			_parent: null,
-			_result: undefined,
-			_error: null
+		if(!this.scopeBypass){
+			this.vars = {
+				_parent: null,
+				_result: undefined,
+				_error: null
+			}
 		}
-		this.isRoot = false
-		
 		this.initialized = true
 	}
 }
@@ -95,12 +102,21 @@ Expression.prototype.run = function(callingParent) {
 	
 	this.parent = callingParent || null
 	if(this.parent) {
-		this.vars._parent = this.parent.vars
+		if(this.scopeBypass) {
+			this.vars = this.parent.vars
+		} else {
+			this.vars._parent = this.parent.vars
+		}
 		this.runtime = this.parent.runtime
 		var self = this
 		if(!this.errorCallback) {
 			this.errorCallback = function(err) {
 				self.parent.bubbleUpError(err)
+			} 
+		}
+		if(!this.loopCallback) {
+			this.loopCallback = function(payload) {
+				self.parent.loopControl(payload)
 			} 
 		}
 	}
@@ -144,7 +160,11 @@ Expression.prototype.clearParentError = function() {
 }
 
 Expression.prototype.loopControl = function(payload) {
-	this._blockContext._loopCallback(payload)
+	if(!this.loopCallback) {
+		throw "loopCallback not implemented"
+	}else {
+		this.loopCallback(payload)
+	}
 }
 
 Expression.prototype.bypass = function() {
@@ -160,11 +180,11 @@ Expression.prototype.setScopeVar = function(name, value) {
 }
 
 Expression.prototype.setParentScopeVar = function(name, value) {
-	setVarCore(this._blockContext._runtime, this._blockContext._parentContext._variables, name, value, true)
+	this.parent.setScopeVar(name, value)
 }
 
 Expression.prototype.getVar = function(name) {
-	return this._blockContext._runtime.getPaths().run(this._blockContext._variables, name)
+	return this.runtime.getPaths().run(this.vars, name)
 }
 
 Expression.prototype.setParentVar = function(path, value) {

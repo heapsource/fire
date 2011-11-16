@@ -1539,3 +1539,672 @@ vows.describe('firejs error handling').addBatch({
 		}
 	}
 }).export(module);
+
+
+vows.describe('firejs loop control').addBatch({
+	'When an expression contains a loop control expression, the loopCallback should be called': {
+		topic: function() {
+			return  {
+					"@testDoLoopControl": null
+				}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testDoLoopControl.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+				
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.count, 0)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.loopCount, 1)
+			}
+		}
+	},
+	'When an expression block contains a loop control expression as the input': {
+		topic: function() {
+			return  {
+				"@return": {
+					"@return": 1,
+					"@return": {
+						"@set(x)": 26,
+						"@get(x)": null,
+						"@testDoLoopControl": null,
+						"@return": 51
+					}
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testDoLoopControl.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+				
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.loopCount, 1)
+			}
+		}
+	},
+	'When an expression array contains a loop control expression nested in the input': {
+		topic: function() {
+			return  {
+				"@return": {
+					"@return": 1,
+					"@return": [
+						{
+							"@set(x)": 26
+						},
+						{
+							"@get(x)": null
+						},
+						{
+							"@testDoLoopControl": null
+						},
+						{
+							"@return": 51
+						}
+					]
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testDoLoopControl.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.loopCount, 1)
+			}
+		}
+	},
+	'When an expression array contains a loop control expression nested two levels down in the input': {
+		topic: function() {
+			return  {
+				"@return": {
+					"@return": 1,
+					"@return": [
+						{
+							"@set(x)": 26
+						},
+						{
+							"@get(x)": null
+						}, {
+							"@return": {
+								x:500,
+								y:400
+							},
+							"@testDoLoopControl":null,
+							"@return": "something"
+						},
+						{
+							"@return": 51
+						}
+					]
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testDoLoopControl.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+				
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.loopCount, 1)
+			}
+		}
+	},
+	'When I have a @break at the first level': {
+		topic: function() {
+			return  {
+				"@break": null
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+				
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.loopCount, 1)
+			}
+		}
+	},
+	'When I have a @break at a second level': {
+		topic: function() {
+			return  {
+				"@return": {
+					"@break": null
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+			},
+			"the result callback should not be called at all":  function(expressionResult) {
+				assert.isUndefined(expressionResult.result)
+				assert.equal(expressionResult.count, 0)
+				
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.loopCount, 1)
+			}
+		}
+	},
+	'When I have a @loop at a second level and a expression that breaks at third time': {
+		topic: function() {
+			return  {
+				"@loop": {
+					"@testExecAtThirdTime":{
+						"@break": null	
+					},
+					"@return": "Item"
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExecAtThirdTime.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 0)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.loopCount, 0)
+			},
+			"the result should be an array with three items":  function(expressionResult) {
+				assert.deepEqual(expressionResult.result, ["Item", "Item", "Item"])
+			}
+		}
+	},
+	'When I have a @loop at a second level and a expression continue at second time': {
+		topic: function() {
+			return  {
+				"@loop": {
+					"@testIncrementedName(Item)": null,
+					"@testExecAtFirstTime":{
+						"@continue": null
+					},
+					"@testExecAtThirdTime": {
+						"@break": null
+					}
+				}
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExecAtFirstTime.js"))
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExecAtThirdTime.js"))
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testIncrementedName.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+				
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.breakCount, 0)
+			},
+			"the error callback should not be called at all":  function(expressionResult) {
+				assert.equal(expressionResult.errorCount, 0)
+			},
+			"the loop callback should be called once" : function(expressionResult) {
+				assert.equal(expressionResult.loopCount, 0)
+			},
+			"the result should be an array with two items":  function(expressionResult) {
+				assert.deepEqual(expressionResult.result, ["Item0", "Item1", "Item3"])
+			}
+		}
+	},
+	'Having a JSON code with a @loop expression that breaks at index 10': {
+		topic: function(){
+			return {
+				"@loop": {
+					"@equals": [{
+							"@get(CurrentIndex)": null
+						},
+						10
+					],
+					"@if": {
+						"@break": null
+					},
+					"@get(CurrentIndex)": null
+				}
+			}
+		},
+		"and execute it": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+			},
+			"the result should be an array with the index from 0 to 9": function(err, res) {
+				assert.deepEqual(res.result, [0,1,2,3,4,5,6,7,8,9])
+			}
+		}
+	},
+	'Having a JSON code with a @each expression that breaks at index 5': {
+		topic: function() {
+			return {
+				"@return": ['One', 'Two','Three', 'Four','Five','Six','Seven','Eight','Nine','Ten'],
+				"@each": {
+					"@equals": [{
+							"@get(CurrentIndex)": null
+						},
+						5
+					],
+					"@if": {
+						"@break": null
+					},
+					"@get(CurrentIndex)": null
+				}
+			}
+		},
+		"when we register it": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+			},
+			"the result should be an array with the index from 0 to 4": function(err, res) {
+				assert.deepEqual(res.result, [0,1,2,3,4])
+			}
+		}
+	}
+}).export(module);

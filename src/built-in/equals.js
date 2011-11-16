@@ -32,17 +32,15 @@ Equals.prototype.execute = function() {
 	if(this.hasHint() && this.getHintValue().indexOf(STRICT) != -1) {
 		strict = true
 	}
-	this.runInput({
-		_resultCallback: function(res) {
+	this.runInput(function(res) {
 			var values = extractComparableValues(res)
 			if(values.length < 2) {
-				self.setResult(undefined)
+				self.end(undefined)
 				return
 			}
 			var res = comparableAreEqual(values, strict)
-			self.setResult(res)
-		}
-	});
+			self.end(res)
+		});
 }
 
 module.exports = {

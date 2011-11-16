@@ -16,15 +16,16 @@ function Compiler(runtime) {
 Compiler.prototype.outputFile = null
 Compiler.prototype.expSynTable = null
 Compiler.prototype.load = function() {
-	var context = {
+	/*var context = {
 		Expression: Expression,
 		Runtime: this.runtime
-	}
-	vm.runInNewContext(this.buffer.toString(), context, this.outputFile)
-	this.dictionaryType = context.Dictionary
-	console.warn("===")
+	}*/
+	/*console.warn("===")
 	console.warn(this.buffer.toString())
-	console.warn("===")
+	console.warn("===")*/
+	var loadIntoRuntime = vm.runInThisContext(this.buffer.toString(), this.outputFile, true)
+	loadIntoRuntime(this.runtime, Expression)
+	
 }
 Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
 	var self = this
@@ -33,7 +34,7 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
 		var headerValue = expNode.value
 		var expressionName = Ast.getExpressionNameFromSpecialKey(headerValue)
 		this.buffer.writeLine("//" + expNode.value)
-		var expVarName = "exp" // + generateCodeBlockChainCOUNT
+		var expVarName = "exp"
 		this.buffer.writeLine("var "+expVarName+" = new Runtime.loadedExpressionsSyn." + self.expSynTable.syn(expressionName) + "()")
 		this.buffer.writeLine(expVarName+".header = "+ JSON.stringify(headerValue))
 		this.buffer.writeLine(expVarName+".runtime = Runtime")
@@ -45,7 +46,6 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
 			this.buffer.indent()
 			this.buffer.writeLine("var inputExp = new Expression()")
 			this.buffer.writeLine("inputExp.isInput = true")
-			//this.buffer.writeLine("inputExp.header = " + JSON.stringify(headerValue + " __instance " + generateCodeBlockChainCOUNT + " #input"))
 			this.buffer.writeLine("inputExp.execute = function() {")
 			this.buffer.indent()
 			this.generateAstNodeCode(expValNode)
@@ -59,7 +59,7 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
 		if(hintValue) {
 			this.buffer.writeLine(expVarName+".hint = " + JSON.stringify(hintValue) )
 		}
-		var parentVarName = "parent"// + generateCodeBlockChainCOUNT
+		var parentVarName = "parent"
 		this.buffer.writeLine(expVarName+".resultCallback = function(res, "+parentVarName+") {")
 		this.buffer.indent()
 		this.buffer.writeLine(parentVarName+".setCurrentResult(res)")
@@ -221,8 +221,10 @@ Compiler.prototype.compile = function(expressions, callback) {
 		});
 	}
 	var self = this
-	console.warn("Compiler.compile")
-	console.warn("compiling to ", this.outputFile)
+	
+	/*console.warn("Compiler.compile")
+	console.warn("compiling to ", this.outputFile)*/
+	this.buffer.writeLine("(function(Runtime, Expression){")
 	//this.buffer.writeLine("var List = {}")
 	this.iterator = new Iterator(this.typeDefinitions)
 	var continueNextExpression = function() {
@@ -234,6 +236,7 @@ Compiler.prototype.compile = function(expressions, callback) {
 					})
 				continueNextExpression()
 			} else {
+				self.buffer.writeLine("})")
 				fs.writeFileSync(self.outputFile, self.buffer.toString())
 				self.load()
 				callback(self.dictionaryType)
