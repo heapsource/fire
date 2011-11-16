@@ -5809,3 +5809,50 @@ vows.describe('firejs - @getModuleConfig').addBatch({
 		}
 	}
 }).export(module)
+
+
+vows.describe('firejs - @hint').addBatch({
+	'When I use @hint': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				flags: ["hint"],
+				json: {
+					"@scopeSet(passedHint)": {
+						"@hint": null
+					},
+					"@get(passedHint)": null
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,{
+						_hint: "Hint for the root expression"
+					})
+				})
+			},
+			"the result should be the hint passed to the root expression": function(err, res) {
+				assert.isNull(err)
+				assert.equal(res, "Hint for the root expression")
+			}
+		}
+	}
+}).export(module)

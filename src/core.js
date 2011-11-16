@@ -912,6 +912,7 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 		return exp
 	}
 	expressionInstance.runtime = this
+	expressionInstance.hint = _blockContext._hint
 	expressionInstance.run() // run it
 };
 

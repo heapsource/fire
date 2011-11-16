@@ -28,13 +28,13 @@ function HintExpression() {
 HintExpression.prototype = new Expression()
 HintExpression.prototype.execute = function() {
 	var self = this
-	var _rootExpressionContext = this.getRootBlockContext()
-	if(!_rootExpressionContext) {
-		// Crap! They are trying to call @hint from a custom implementation... shouldn't they be using getHintValue function?
-		throw "@hint can not be directly used by custom implementations. Only fire.js compiler is allowed to use it. You should be using the getHintValue function instead."
+	var rootParent = this.getRootParent()
+	if(!rootParent) {
+		// Crap! They are trying to call @hint from a custom implementation... shouldn't they be using getRootParent().getHintValue() function function?
+		throw "@hint can not be directly used by custom implementations. Only fire.js compiler is allowed to use it. You should be using the getRootParent().getHintValue() function instead."
 	}
 	//get the hint
-	this.setResult(_rootExpressionContext._hint)
+	this.end(rootParent.getHintValue())
 }
 
 module.exports = {
