@@ -26,10 +26,9 @@ function GetModuleConfigExpression() {
 }
 GetModuleConfigExpression.prototype = new Expression()
 GetModuleConfigExpression.prototype.execute = function() {
-	var self = this
 	var moduleName = this.getHintValue()
-	var moduleConfig = self._blockContext._runtime.getModuleConfiguration(moduleName)
-	this.setResult(moduleConfig)
+	var moduleConfig =  this.runtime.getModuleConfiguration(moduleName)
+	this.end(moduleConfig)
 }
 
 module.exports = {

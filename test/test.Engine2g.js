@@ -5768,3 +5768,44 @@ vows.describe('firejs - null json body on implementation').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe('firejs - @getModuleConfig').addBatch({
+	'When I use getModuleConfig with no input and a hint': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.setModuleConfiguration("moduleX", "Config for Module X")
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@getModuleConfig(moduleX)": null
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be the configuration for the current environment": function(err, res) {
+				assert.isNull(err)
+				assert.equal(res, "Config for Module X")
+			}
+		}
+	}
+}).export(module)
