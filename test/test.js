@@ -4293,6 +4293,20 @@ vows.describe('firejs @input').addBatch({
 	},
 }).export(module);
 
+vows.describe('firejs getWellKnownExpressions').addBatch({
+	"When I initialize a runtime":{
+		topic: function() {
+			return new Runtime()
+		},
+		"getWellKnownExpressions should return all the modules loaded": function(runtime){
+			assert.typeOf(runtime.getWellKnownExpressions(), 'object')
+			assert.include(runtime.getWellKnownExpressions().names(),'continue')
+			assert.include(runtime.getWellKnownExpressions().names(),'return')
+			assert.include(runtime.getWellKnownExpressions().names(),'get')
+			assert.include(runtime.getWellKnownExpressions().names(),'set')
+		}
+	}
+}).export(module);
 
 vows.describe('firejs file extension inference').addBatch({
 	"When I infer the expression name from a simple name file with the official script extension": {
@@ -5097,7 +5111,6 @@ vows.describe('firejs - initializers').addBatch({
 		}
 	}
 }).export(module)
-
 
 vows.describe('firejs - initial last result').addBatch({
 	'When I use a expression that initializes the last result of the input with certain value"': {
