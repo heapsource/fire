@@ -30,6 +30,7 @@ function isSpecialKey(propName) {
 }
 function isBlock(jsonObj) {
 	var keys = Object.keys(jsonObj)
+	if(keys.length == 0) return false
 	for(var i = 0; i < keys.length; i++) {
 		var propName = keys[i]
 		if(!isSpecialKey(propName)) {
@@ -67,14 +68,17 @@ Node.prototype.parse = function(value) {
 		else if(typeof(value) === "string") {
 			this.type = AstNodeType.string
 		}
+		else if(typeof(value) === "object" && (value instanceof Array)) {
+			this.type = AstNodeType.array
+		}
 		else if(typeof(value) === "object" && isBlock(value)) {
 			this.type = AstNodeType.block
 		}
-		else if(typeof(value) === "object" && !(value instanceof Array)) {
+		else if(typeof(value) === "object") {
 			this.type = AstNodeType.hash
 		}
-		else if(typeof(value) === "object" && (value instanceof Array)) {
-			this.type = AstNodeType.array
+		else if(typeof(value) === "boolean") {
+			this.type = AstNodeType.boolean
 		}
 		else {
 			throw "Failed to recognize JSON type for '" + value + "', typeof '" + typeof(value) + "'"

@@ -908,9 +908,12 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	if(hint === undefined) {
 		hint = undefined
 	}
-	var baseFunc = compileExpressionFuncFromJSON(jsonBlock, outputFileName === undefined? "test-in-memory.js" : outputFileName, outputFileName, hint)
+	//var baseFunc = compileExpressionFuncFromJSON(jsonBlock, outputFileName === undefined? "test-in-memory.js" : outputFileName, outputFileName, hint)
 	var runtime = new Runtime()
-	
+	runtime.registerWellKnownExpressionDefinition({
+		name: "_testOnly_runJSONObjectFromJSON",
+		json: jsonBlock
+	})
 	if(additionalExpressionsFiles !== undefined && additionalExpressionsFiles !== null) {
 		additionalExpressionsFiles.forEach(function(fileName) {
 			runtime.registerWellKnownExpressionFile(fileName)
@@ -938,7 +941,13 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 		_errorCallback: errorCallback
 	};
 	*/
-	runtime.runExpressionFunc(baseFunc, contextBase, null)
+	runtime.load(function(initErr) {
+		if(initErr) {
+			console.trace()
+			this.errorCallback("_testOnly_runJSONObjectFromJSON runtime init error:" + initErr)
+		}
+		runtime.runExpressionByName("_testOnly_runJSONObjectFromJSON", contextBase, null)
+	})
 }
 
 

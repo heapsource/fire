@@ -16,10 +16,6 @@ function Compiler(runtime) {
 Compiler.prototype.outputFile = null
 Compiler.prototype.expSynTable = null
 Compiler.prototype.load = function() {
-	/*var context = {
-		Expression: Expression,
-		Runtime: this.runtime
-	}*/
 	/*console.warn("===")
 	console.warn(this.buffer.toString())
 	console.warn("===")*/

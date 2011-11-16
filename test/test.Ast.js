@@ -99,7 +99,25 @@ vows.describe('AST - Parsing Root Literal Values').addBatch({
 		"the second node should have the value '1'":  function(ast) {
 			assert.equal(ast.getRootNode().children[1].value, 1)
 		}
-	}
+	},
+	"When I parse a literal value '[]' document": {
+		"the root node of the ast should be literal 'array' type":  function() {
+			var doc = []
+			var ast = new Tree()
+			ast.parse(doc)
+			assert.isNotNull(ast.getRootNode())
+			assert.equal(ast.getRootNode().type, AstNodeType.array)
+		}
+	},
+	"When I parse a literal value '{}' document": {
+		"the root node of the ast should be literal 'hash' type":  function() {
+			var doc = {}
+			var ast = new Tree()
+			ast.parse(doc)
+			assert.isNotNull(ast.getRootNode())
+			assert.equal(ast.getRootNode().type, AstNodeType.hash)
+		}
+	},
 }).export(module)
 
 vows.describe('AST - Parsing Arrays').addBatch({
@@ -257,3 +275,4 @@ vows.describe('AST - Mixed Keys Parsing').addBatch({
 		},
 	}
 }).export(module)
+

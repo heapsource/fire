@@ -2208,3 +2208,1220 @@ vows.describe('firejs loop control').addBatch({
 		}
 	}
 }).export(module);
+
+vows.describe('firejs @get paths').addBatch({
+	'When I use @get to get a nested member in a variable': {
+		topic: function() {
+			return  {
+				"@set(stuff)": {
+					number:"One"
+				},
+				"@get(stuff.number)": null
+			}
+		},
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function() {
+				}, function(result) {
+					cb(null, result)
+				})
+			},
+			"I should get the nested member variable": function(result) {
+				assert.equal(result,"One")
+			}
+		}, 
+	}
+}).export(module);
+
+vows.describe('firejs manifests').addBatch({
+	'Having a Runtime with no configuration': {
+		topic: function() {
+			require.paths.unshift(path.join(__dirname,'manifests/testModules/node_modules')); // because we are testing in a different directory
+			
+			return new Runtime()
+		},
+		"when I set up a runtime with a manifest with two modules ": {
+			topic:function(runtime) {
+				
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testModules/ignition.manifest.json"))
+				return runtime
+			},
+			"the expression expressionModule1 should be loaded": function(runtime) {
+				assert.isTrue(runtime.isExpressionLoaded("expressionModule1"))
+			},
+			"the expression expressionModule2 should be loaded": function(runtime) {
+				assert.isTrue(runtime.isExpressionLoaded("expressionModule2"))
+			},
+			"and once the modules are loaded": {
+				"we test the first": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("expressionModule1", contextBase ,null)
+					},
+					"it should work properly": function(err, res) {
+					 	assert.equal(res, "Hello World expressionModule1")
+					}
+				},
+				"we test the second": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("expressionModule2", contextBase ,null)
+					},
+					"it should work properly": function(err, res) {
+					 	assert.equal(res, "Hello World expressionModule2")
+					}
+				}
+			}
+		}
+	},
+	'when I set up a runtime with a manifest and missing configuration for a module': {
+		"the load from manifest should fail": function() {
+			require.paths.unshift(path.join(__dirname,'manifests/testConfigMissing/node_modules')); // because we are testing in a different directory
+			var runtime = new Runtime()
+			assert.throws(function() {
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"))
+				})
+		},
+		"the load from manifest should fail with message": function() {
+			require.paths.unshift(path.join(__dirname,'manifests/testConfigMissing/node_modules')); // because we are testing in a different directory
+			var runtime = new Runtime()
+			
+			try {
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"))
+			}catch(moduleErrorMsg) {
+				assert.equal(moduleErrorMsg,"database connection info is missing")
+			}
+		}
+	}
+}).export(module);
+
+
+vows.describe('firejs environments').addBatch({
+	'Having a Runtime running in production': {
+		topic: function() {
+			return tempChangeEnv("production", function() {
+				return new Runtime()
+			})
+		},
+		"when I query what is the environment of the runtime ": {
+			topic:function(runtime) {
+				return runtime.environmentName
+			},
+			"it should be production": function(env) {
+				assert.equal(env,"production")
+			}
+		}
+	},
+	'Having a Runtime running in development': {
+		topic: function() {
+			return tempChangeEnv("development", function() {
+				return new Runtime()
+			})
+		},
+		"when I query what is the environment of the runtime ": {
+			topic:function(runtime) {
+				return runtime.environmentName
+			},
+			"it should be production": function(env) {
+				assert.equal(env,"development")
+			}
+		}
+	},
+	'Having a Runtime running with no explicit enviroment': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when I query what is the environment of the runtime ": {
+			topic:function(runtime) {
+				return runtime.environmentName
+			},
+			"it should be development(the default environment)": function(env) {
+				assert.equal(env,jsonCode.DEFAULT_ENVIRONMENT)
+			}
+		}
+	}
+}).export(module);
+
+function tempChangeEnv(envName, call) {
+	var original = process.env.NODE_ENV
+	process.env.NODE_ENV = envName
+	var result = call()
+	if(original === undefined) {
+		delete process.env.NODE_ENV
+	}
+	return result
+}
+
+vows.describe('firejs configurations').addBatch({
+	'Working in a custom environment': {
+		topic: function() {
+			require.paths.unshift(path.join(__dirname,'manifests/testConfig/node_modules')); // because we are testing in a different directory
+			
+			return tempChangeEnv("customEnv1", function() {
+				return new Runtime()
+			})
+		},
+		"when I set up a runtime": {
+			topic:function(runtime) {
+				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfig/ignition.manifest.json"))
+				return runtime
+			},
+			"and once the modules are loaded": {
+				"and we run it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.runExpressionByName("module1", contextBase ,null)
+					},
+					"it should work with the configurations": function(err, res) {
+					 	assert.equal(res, "Hello World with configurations, server configuration host is 127.0.0.1 is and the environment is customEnv1")
+					}
+				}
+			}
+		}
+	}
+}).export(module);
+
+vows.describe('firejs JSON definition registration').addBatch({
+	'Having a JSON document with the definition of a firejs expression': {
+		topic: function() {
+			return new Runtime()
+		},
+		"then when we register ": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"customJsonExpression",
+					json: {
+						"@return": 500
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("customJsonExpression", contextBase ,null)
+						})
+					},
+					"it should return the value specified in the firejs JSON document given in the definition": function(err, res) {
+					 	assert.equal(res, 500)
+					}
+			}
+		}
+	}
+}).export(module);
+
+
+vows.describe('firejs @each built-in expression').addBatch({
+	'Having a JSON document with an @each expression with hint': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEach",
+					json: {
+						"@set(ids)": ['a552','a553','a554','a555'],
+						"@get(ids)": null,
+						"@each(somePrefix)": {
+							"id":{
+								"@get(somePrefixCurrentItem)": null
+							}
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEach", contextBase ,null)
+						})
+					},
+					"it should iterate the last value and return an array with converted documents from the input using the prefixed variable": function(err, res) {
+					 	assert.deepEqual(res, [{
+							"id": "a552"
+						},{
+							"id": "a553"
+						},
+						{
+							"id": "a554"
+						},
+						{
+							"id": "a555"
+						}])
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @each expression and no hint': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEach",
+					json: {
+						"@return": ['a552','a553','a554','a555'],
+						"@each": {
+							"id":{
+								"@get(CurrentItem)": null
+							}
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEach", contextBase ,null)
+						})
+					},
+					"it should iterate the last value in the block and return an array with converted documents from the input": function(err, res) {
+					 	assert.deepEqual(res, [{
+							"id": "a552"
+						},{
+							"id": "a553"
+						},
+						{
+							"id": "a554"
+						},
+						{
+							"id": "a555"
+						}])
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @each expression and the value is not an array': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEach",
+					json: {
+						"@return": 2,
+						"@each": {
+							"id":{
+								"@get(CurrentItem)": null
+							}
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEach", contextBase ,null)
+						})
+					},
+					"it should return an empty array": function(err, res) {
+					 	assert.deepEqual(res, [])
+					}
+			}
+		}
+	}
+}).export(module);
+
+
+
+vows.describe('firejs @if built-in expression').addBatch({
+	'Having a JSON document with an @if expression and there is no result in the block': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@if": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return undefined": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @if expression which previous statement is true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@return": true,
+						"@if": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"should return the input": function(err, res) {
+					 	assert.equal(res,"Got them!")
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @if expression with a path that doesn not exist': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@if(doesntExist)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"should return undefined": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @if expression with a path that returns false': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : false,
+						"@if(contactFound)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"should return false": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @if expression with a path that returns true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : true,
+						"@if(contactFound)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"should return false": function(err, res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	}
+}).export(module);
+
+
+vows.describe('firejs booleans').addBatch({
+	'Having a JSON document with a boolean value false': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testFalse",
+					json: {
+						"@return": false
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testFalse", contextBase ,null)
+						})
+					},
+					"it should return false": function(err, res) {
+					 	assert.strictEqual(res, false)
+					}
+			}
+		}
+	},
+	'Having a JSON document with a boolean value true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testTrue",
+					json: {
+						"@return": true
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testTrue", contextBase ,null)
+						})
+					},
+					"it should return true": function(err, res) {
+					 	assert.strictEqual(res, true)
+					}
+			}
+		}
+	}
+}).export(module);
+
+
+vows.describe('firejs @unless built-in expression').addBatch({
+	'Having a JSON document with an @unless expression and there is no result in the block': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@unless": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
+					},
+					"it should return the input": function(err, res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @unless expression which previous statement is true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@return": true,
+						"@unless": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
+					},
+					"should return true literal value": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @unless expression which previous statement a string': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@return": "Some String",
+						"@unless": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
+					},
+					"should return true literal value": function(err, res) {
+					 	assert.equal(res, "Some String")
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @unless expression with a path that doesn not exist': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@unless(doesntExist)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
+					},
+					"should return undefined": function(err, res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @unless expression with a path that returns false': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@set(contactFound)" : false,
+						"@unless(contactFound)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
+					},
+					"should return false": function(err, res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	},
+	'Having a JSON document with an @unless expression with a path that returns true': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testUnless",
+					json: {
+						"@set(contactFound)" : true,
+						"@unless(contactFound)": "Got them!"
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
+					},
+					"should return false": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	}
+}).export(module);
+
+
+
+vows.describe('firejs @equals').addBatch({
+	'Having a @equals expressions without at least two comparable values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": []
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
+					},
+					"it should should return undefined": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two identical values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": ['Same', 'Same']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
+					},
+					"it should should true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two different values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": ['Same', 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": [5, '5']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with three similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": [5, '5', 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with more than three similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals": [5, '5', 5, 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two similar values but not with the same type in strict mode': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals(strict)": [5, '5']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @equals expressions with two similar values and type in strict mode': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testEquals",
+					json: {
+						"@equals(strict)": [5, 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+}).export(module);
