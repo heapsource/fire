@@ -5460,3 +5460,57 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 		}
 	}
 }).export(module)
+
+
+vows.describe('firejs - @parentResult').addBatch({
+	'When I use @parentResult': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"consumeParentResult",
+				json: {
+					parentText: {
+						"@parentResult": null
+					}
+				}
+			})
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@return": "Text in the parent block",
+					"@consumeParentResult": null
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be returned value using the parentResult value": function(err, res) {
+				assert.isNull(err)
+				assert.deepEqual(res, {
+					parentText: "Text in the parent block"
+				})
+			}
+		}
+	}
+}).export(module)
