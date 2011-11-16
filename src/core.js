@@ -40,6 +40,7 @@ var ModuleInitializer = require('./ModuleInitializer.js')
 var nopt = require('nopt')
 var Compiler = require('./Compiler.js')
 var SynTable = require('./SynTable')
+var url = require('url')
 module.exports.Error = Error
 module.exports.Expression = Expression
 module.exports.Iterator = Iterator
@@ -526,6 +527,9 @@ Runtime.prototype.registerWellKnownExpressionFile = function(absoluteFilePath, a
 	if(attributes) {
 		mergeWith(definition, attributes)
 	}
+	if(!definition.sourceUri) {
+		definition.sourceUri = url.format({protocol: constants.FILE_EXPRESSION_URI_PROTOCOL, pathname: ("/" + absoluteFilePath)})
+	}
 	this.registerWellKnownExpressionDefinition(definition)
 	return definition
 }
@@ -538,6 +542,9 @@ Runtime.prototype.registerWellKnownJSONExpressionFile = function(absoluteFilePat
 	var definition = JSON.parse(jsonSourceCode)
 	if(attributes) {
 		mergeWith(definition, attributes)
+	}
+	if(!definition.sourceUri) {
+		definition.sourceUri = url.format({protocol: constants.FILE_EXPRESSION_URI_PROTOCOL, pathname: ("/" + absoluteFilePath)})
 	}
 	this.registerWellKnownExpressionDefinition(definition)
 	return definition
@@ -554,6 +561,10 @@ Runtime.prototype.registerForJSONCompilation = function(expressionDefinition) {
 	validateDefinitionHeader(expressionDefinition)
 	var name = expressionDefinition.name
 	this.JSONDefinitions[name] = expressionDefinition
+	
+	if(!expressionDefinition.sourceUri) {
+		expressionDefinition.sourceUri = url.format({protocol: constants.VIRTUAL_EXPRESSION_URI_PROTOCOL, pathname: ("/" + expressionDefinition.name + constants.DEFAULT_SCRIPT_EXTENSION)})
+	}
 }
 Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDefinition) {
 	validateDefinitionHeader(expressionDefinition)
@@ -570,6 +581,11 @@ Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDef
 	} else {
 		expressionDefinition.implementation = implementation
 		expressionDefinition.implementation.prototype.expressionName = expressionDefinition.name
+		
+		if(!expressionDefinition.sourceUri) {
+			expressionDefinition.sourceUri = url.format({protocol: constants.VIRTUAL_EXPRESSION_URI_PROTOCOL, pathname: ("/" + expressionDefinition.name + constants.DEFAULT_CUSTOM_SCRIPT_EXTENSION)})
+		}
+		
 		this.loadedExpressions[name] = implementation
 		this.loadedExpressionsSyn[this.expSynTable.syn(name)] = implementation
 		this.loadedExpressionsMeta[name] = expressionDefinition

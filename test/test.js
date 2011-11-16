@@ -116,20 +116,44 @@ vows.describe('firejs').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					cb(null, result)
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result should not be null" : function(expressionResult) {
-				assert.isNotNull(expressionResult)
+			"the result should not be null" : function(err, expressionResult) {
+				assert.isNotNull(expressionResult.result)
 			},
-			"the result should be 2" : function(expressionResult) {
-				assert.equal(expressionResult, 2);
+			"the result should be 2" : function(err, expressionResult) {
+				assert.equal(expressionResult.result, 2);
 			}
 		}
 	}
@@ -317,19 +341,38 @@ vows.describe('firejs').addBatch({
 		
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result should not be null" : function(expressionResult) {
 				assert.isNotNull(expressionResult.result)
@@ -347,157 +390,213 @@ vows.describe('firejs').addBatch({
 				assert.equal(expressionResult.count, 1)
 			}
 		}
-	},
-	"When I have a key a hint ' @set(x)' and I ask for the pure expression name": {
-		topic: function() {
-			return " @set(x)"
-		}
-		,"I should get 'set' without the symbol, whitespaces or hint": function(topic){
-			assert.equal(jsonCode._testOnly_getExpressionNameFromSpecialKey(topic), "set")
-		}
-	},
-	"When I have a key a hint ' @set(x)' and I ask for the hint": {
-		topic: function() {
-			return " @set(x)"
-		}
-		,"I should get 'x'": function(topic){
-			assert.equal(jsonCode._testOnly_getHint(topic), "x")
-		}
-	},
-	"When I have a key a hint ' @set(x' with no ending hint symbol and I ask for the hint": {
-		topic: function() {
-			return " @set(x"
-		}
-		,"I should get 'x'": function(topic){
-			assert.equal(jsonCode._testOnly_getHint(topic), "x")
-		}
-	},
-	'When I have a JSON document with a get expression and the hint is a variable that I setted in a higher expression': {
-		topic: function() {
-			return {
-				"name":{
-					"@get(passedVariable)": null
-				},
-			};    
-		},
-		"and I run it": {
-			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{"passedVariable":"This is my Variable"}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count 
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
-			},
-			"the result should not be null" : function(expressionResult) {
-				assert.isNotNull(expressionResult.result)
-			},
-			"the result should be an object with the variable value on it, the last result in the expression block" : function(expressionResult) {
-				assert.deepEqual(expressionResult.result, { 
-				"name":"This is my Variable",
-			});
-			},
-			"the result callback should be called only once":  function(expressionResult) {
-				assert.equal(expressionResult.count, 1)
+	}	,
+		"When I have a key a hint ' @set(x)' and I ask for the pure expression name": {
+			topic: function() {
+				return " @set(x)"
 			}
-		}
-	},
-	
-	'When I have nested up three nested expresions': {
-		topic: function() {
-			return {
-				" @return": {
+			,"I should get 'set' without the symbol, whitespaces or hint": function(topic){
+				assert.equal(jsonCode._testOnly_getExpressionNameFromSpecialKey(topic), "set")
+			}
+		},
+		"When I have a key a hint ' @set(x)' and I ask for the hint": {
+			topic: function() {
+				return " @set(x)"
+			}
+			,"I should get 'x'": function(topic){
+				assert.equal(jsonCode._testOnly_getHint(topic), "x")
+			}
+		},
+		"When I have a key a hint ' @set(x' with no ending hint symbol and I ask for the hint": {
+			topic: function() {
+				return " @set(x"
+			}
+			,"I should get 'x'": function(topic){
+				assert.equal(jsonCode._testOnly_getHint(topic), "x")
+			}
+		},
+		'When I have a JSON document with a get expression and the hint is a variable that I setted in a higher expression': {
+			topic: function() {
+				return {
+					"name":{
+						"@get(passedVariable)": null
+					},
+				};    
+			},
+			"and I run it": {
+				topic:function(topic) {
+					var self = this
+					var runtime = new Runtime()
+					runtime.registerWellKnownExpressionDefinition({
+						name: "Test",
+						json: topic
+					});
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						} else {
+							var contextBase = {};
+							var result = {
+								count: 0
+							}
+							contextBase._resultCallback = function(res) {
+								result.count++
+								result.result = res
+								self.callback(null, result)
+							}
+							contextBase._loopCallback = function() {
+								self.callback("_loopCallback reached", null)
+							};
+							contextBase._inputExpression  = function() {
+								self.callback("_inputExpression reached", null)
+							};
+							contextBase._variables = {"passedVariable":"This is my Variable"};        
+							contextBase._errorCallback =  function(err) {
+								self.callback(err, null)
+							};
+							runtime.runExpressionByName("Test", contextBase ,null)
+						}
+					});
+				},
+				"the result should not be null" : function(expressionResult) {
+					assert.isNotNull(expressionResult.result)
+				},
+				"the result should be an object with the variable value on it, the last result in the expression block" : function(err, expressionResult) {
+					assert.deepEqual(expressionResult.result, { 
+					"name":"This is my Variable",
+				});
+				},
+				"the result callback should be called only once":  function(err, expressionResult) {
+					assert.equal(expressionResult.count, 1)
+				}
+			}
+		},
+		'When I have nested up three nested expresions': {
+			topic: function() {
+				return {
 					" @return": {
 						" @return": {
-							name: "John"
+							" @return": {
+								name: "John"
+							}
 						}
 					}
-				}
-			};    
-		},
-		"and I run it": {
-			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
+				};    
 			},
-			"the result should not be null" : function(expressionResult) {
-				assert.isNotNull(expressionResult.result)
-			},
-			"the result should be the last nested value, the last result in the expression block" : function(expressionResult) {
-				assert.deepEqual(expressionResult.result, {
-							name: "John"
-						});
-			},
-			"the result callback should be called only once":  function(expressionResult) {
-				assert.equal(expressionResult.count, 1)
-			}
-		}
-	},
-	'When I have expressions inside an array': {
-		topic: function() {
-			return [
-				{
-					"@return": 1
+			"and I run it": {
+				topic:function(topic) {
+					var self = this
+					var runtime = new Runtime()
+					runtime.registerWellKnownExpressionDefinition({
+						name: "Test",
+						json: topic
+					});
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						} else {
+							var contextBase = {};
+							var result = {
+								count: 0
+							}
+							contextBase._resultCallback = function(res) {
+								result.count++
+								result.result = res
+								self.callback(null, result)
+							}
+							contextBase._loopCallback = function() {
+								self.callback("_loopCallback reached", null)
+							};
+							contextBase._inputExpression  = function() {
+								self.callback("_inputExpression reached", null)
+							};
+							contextBase._variables = {};        
+							contextBase._errorCallback =  function(err) {
+								self.callback(err, null)
+							};
+							runtime.runExpressionByName("Test", contextBase ,null)
+						}
+					});
 				},
-				{
-					"@return": {
+				"the result should not be null" : function(expressionResult) {
+					assert.isNotNull(expressionResult.result)
+				},
+				"the result should be the last nested value, the last result in the expression block" : function(err, expressionResult) {
+					assert.deepEqual(expressionResult.result, {
+								name: "John"
+							});
+				},
+				"the result callback should be called only once":  function(err, expressionResult) {
+					assert.equal(expressionResult.count, 1)
+				}
+			}
+		},
+		'When I have expressions inside an array': {
+			topic: function() {
+				return [
+					{
+						"@return": 1
+					},
+					{
+						"@return": {
+							x:64.2,
+							y: 934.1
+						}
+					}
+				]
+			},
+			"and I run it": {
+				topic:function(topic) {
+					var self = this
+					var runtime = new Runtime()
+					runtime.registerWellKnownExpressionDefinition({
+						name: "Test",
+						json: topic
+					});
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						} else {
+							var contextBase = {};
+							var result = {
+								count: 0
+							}
+							contextBase._resultCallback = function(res) {
+								result.count++
+								result.result = res
+								self.callback(null, result)
+							}
+							contextBase._loopCallback = function() {
+								self.callback("_loopCallback reached", null)
+							};
+							contextBase._inputExpression  = function() {
+								self.callback("_inputExpression reached", null)
+							};
+							contextBase._variables = {};        
+							contextBase._errorCallback =  function(err) {
+								self.callback(err, null)
+							};
+							runtime.runExpressionByName("Test", contextBase ,null)
+						}
+					});
+				},
+				"the result should not be null" : function(err, expressionResult) {
+					assert.isNotNull(expressionResult.result)
+				},
+				"the result should be the array with the result of all expressions as items, the last result in the expression block" : function(err, expressionResult) {
+					assert.deepEqual(expressionResult.result, [1,{
 						x:64.2,
 						y: 934.1
 					}
+						]);
+				},
+				"the result callback should be called only once":  function(err, expressionResult) {
+					assert.equal(expressionResult.count, 1)
 				}
-			]
-		},
-		"and I run it": {
-			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
-			},
-			"the result should not be null" : function(expressionResult) {
-				assert.isNotNull(expressionResult.result)
-			},
-			"the result should be the array with the result of all expressions as items, the last result in the expression block" : function(expressionResult) {
-				assert.deepEqual(expressionResult.result, [1,{
-					x:64.2,
-					y: 934.1
-				}
-					]);
-			},
-			"the result callback should be called only once":  function(expressionResult) {
-				assert.equal(expressionResult.count, 1)
 			}
 		}
-	}
-	
-}).export(module); 
+}).export(module)
+
 
 vows.describe('firejs variables scopes').addBatch({
 	'When I have a JSON document with a set expression, other expressions on the same level should see the variable': {
@@ -512,24 +611,43 @@ vows.describe('firejs variables scopes').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				jsonCode._testOnly_runJSONObject(topic,{passedVariable:"This is my Variable"}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					count++
-					cb(null, {
-						result:result,
-						count:count
-					})
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result should not be null" : function(expressionResult) {
+			"the result should not be null" : function(error, expressionResult) {
 				assert.isNotNull(expressionResult.result)
 			},
-			"the result should be an object with the variable value on it, the last result in the expression block" : function(expressionResult) {
+			"the result should be an object with the variable value on it, the last result in the expression block" : function(error, expressionResult) {
 				assert.deepEqual(expressionResult.result, {
 					x:22.3,
 					y:56.2
@@ -550,20 +668,44 @@ vows.describe('firejs variables scopes').addBatch({
 		},
 		"and I run it outter context should not see the value ": {
 			topic:function(topic) {
-				var cb = this.callback
-				jsonCode._testOnly_runJSONObject(topic,{passedVariable:"This is my Variable"}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					cb(null, result)
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result should be undefined" : function(expressionResult) {
-				assert.equal(expressionResult, undefined)
+			"the result should be undefined" : function(err, expressionResult) {
+				assert.equal(expressionResult.result, undefined)
 			},
-			"the result should be undefined, the value of an undefined variable" : function(expressionResult) {
-				assert.deepEqual(expressionResult, undefined);
+			"the result should be undefined, the value of an undefined variable" : function(err, expressionResult) {
+				assert.deepEqual(expressionResult.result, undefined);
 			}
 		}
 	},'When I have a @set expression in a outer scope of a previous statement ': {
@@ -582,17 +724,41 @@ vows.describe('firejs variables scopes').addBatch({
 		},
 		"and I run it inner context should see the value ": {
 			topic:function(topic) {
-				var cb = this.callback
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					cb(null, result)
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result should be the value of the most inner expression" : function(expressionResult) {
-				assert.equal(expressionResult, "Value")
+			"the result should be the value of the most inner expression" : function(err, expressionResult) {
+				assert.equal(expressionResult.result, "Value")
 			},
 		}
 	},
@@ -619,18 +785,98 @@ vows.describe('firejs variables scopes').addBatch({
 		},
 		"and I run it the outer context should see the value ": {
 			topic:function(topic) {
-				var cb = this.callback
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					//console.warn("break")
-					// break
-				}, function(result) {
-					cb(null, result)
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result should be the value of the most inner expression" : function(expressionResult) {
-				assert.equal(expressionResult, "Changed at deep levels")
+			"the result should be the value of the most inner expression" : function(err, expressionResult) {
+				assert.equal(expressionResult.result, "Changed at deep levels")
+			},
+		}
+	},
+	'zz When I have a @set expression in a outer scope and a fourth level @set modifies the value ': {
+		topic: function() {
+			return {
+				"@set(something)": "Value",
+				"@return": {
+					"@return": {
+						"@return": {
+							"@return": {
+								"@set(something)": "Changed at deep levels",
+								"@return": null
+							}
+						}
+					}
+				},
+				"@get(something)": null
+			};    
+		},
+		"and I run it the outer context should see the value ": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+			},
+			"the result should be the value of the most inner expression" : function(err, expressionResult) {
+				assert.equal(expressionResult.result, "Changed at deep levels")
 			},
 		}
 	},
@@ -647,18 +893,41 @@ vows.describe('firejs variables scopes').addBatch({
 		},
 		"and I run it the outer context should not see the value ": {
 			topic:function(topic) {
-				var cb = this.callback
-				jsonCode._testOnly_runJSONObject(topic,{"x":4000}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					//console.warn("break")
-					// break
-				}, function(result) {
-					cb(null, result)
-				},getTempTestOutputFileName('json2code.js'),"")
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result should be undefined" : function(expressionResult) {
-				assert.isUndefined(expressionResult)
+			"the result should be undefined" : function(err, expressionResult) {
+				assert.isUndefined(expressionResult.result)
 			},
 		}
 	},
@@ -674,40 +943,44 @@ vows.describe('firejs _result tests').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var errorCount = 0
-				var tResult = undefined
-				var testReturnParentResultPath = path.join(__dirname, "expressions/testReturnParentResult.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				}, [testReturnParentResultPath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testReturnParentResult.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result callback should be called only once":  function(expressionResult) {
+			"the result callback should be called only once":  function(err, expressionResult) {
 				assert.equal(expressionResult.count, 1)
 			},
-			"the error callback should not be called at all":  function(expressionResult) {
-				assert.equal(expressionResult.errorCount, 0)
-			},
-			"the second expression should be able to reach the last result of the container block, the parent result" : function(expressionResult) {
+			"the second expression should be able to reach the last result of the container block, the parent result" : function(err, expressionResult) {
 				assert.equal(expressionResult.result, "Super Result on the same level") // check expressions/testExpThatRaisesError.js
 			}
 		}
@@ -720,41 +993,45 @@ vows.describe('firejs _result tests').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var errorCount = 0
-				var tResult = undefined
-				var testReturnParentResultPath = path.join(__dirname, "expressions/testReturnParentResult.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				}, [testReturnParentResultPath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testReturnParentResult.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result callback should be called only once":  function(expressionResult) {
 				assert.equal(expressionResult.count, 1)
 			},
-			"the error callback should not be called at all":  function(expressionResult) {
-				assert.equal(expressionResult.errorCount, 0)
-			},
 			"the result should be undefined since there is no results in the expression block yet" : function(expressionResult) {
-				assert.equal(expressionResult.result, undefined) // check expressions/testExpThatRaisesError.js
+				assert.isUndefined(expressionResult.result)
 			}
 		}
 	},
@@ -769,45 +1046,50 @@ vows.describe('firejs _result tests').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var errorCount = 0
-				var tResult = undefined
-				var testReturnParentResultPath = path.join(__dirname, "expressions/testReturnParentResult.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				}, [testReturnParentResultPath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testReturnParentResult.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, null)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result callback should be called only once":  function(expressionResult) {
 				assert.equal(expressionResult.count, 1)
 			},
-			"the error callback should not be called at all":  function(expressionResult) {
-				assert.equal(expressionResult.errorCount, 0)
-			},
 			"the result should be undefined since there is no results in the expression block yet" : function(expressionResult) {
-				assert.equal(expressionResult.result, undefined) // check expressions/testExpThatRaisesError.js
+				assert.isUndefined(expressionResult.result) 
 			}
 		}
 	}
 }).export(module);
+
 
 vows.describe('firejs error handling').addBatch({
 	'When a nested expression raises an error and is not handled by any of the nested expressions': {
@@ -821,45 +1103,48 @@ vows.describe('firejs error handling').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var errorCount = 0
-				var tResult = undefined
-				var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[testExpThatRaisesErrorFilePath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExpThatRaisesError.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result callback should not be called at all":  function(expressionResult) {
+			"the result callback should not be called at all":  function(err, expressionResult) {
 				assert.equal(expressionResult.count, 0)
 			},
-			"the error callback should be called only once":  function(expressionResult) {
-				assert.equal(expressionResult.errorCount, 1)
-			},
-			"the result should be undefined" : function(expressionResult) {
+			"the result should be undefined" : function(err, expressionResult) {
 				assert.equal(expressionResult.result, undefined)
-			}
-			,
-			"the result callback not be undefined" : function(expressionResult) {
-				assert.equal(expressionResult.errorInfo.error, "Help!!!... Chuck Norris is in da house!") // check expressions/testExpThatRaisesError.js
+			},
+			"the result callback not be undefined" : function(err, expressionResult) {
+				assert.equal(err.error, "Help!!!... Chuck Norris is in da house!") // check expressions/testExpThatRaisesError.js
 			}
 		}
 	},
@@ -876,40 +1161,44 @@ vows.describe('firejs error handling').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var errorCount = 0
-				var tResult = undefined
-				var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[testExpThatRaisesErrorFilePath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExpThatRaisesError.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result callback should be called only once":  function(expressionResult) {
+			"the result callback should be called only once":  function(err, expressionResult) {
 				assert.equal(expressionResult.count, 1)
 			},
-			"the error callback should not be called at all":  function(expressionResult) {
-				assert.equal(expressionResult.errorCount, 0)
-			},
-			"the result should be the error" : function(expressionResult) {
+			"the result should be the error" : function(err, expressionResult) {
 				assert.equal(expressionResult.result, "Help!!!... Chuck Norris is in da house!") // check expressions/testExpThatRaisesError.js
 			}
 		}
@@ -924,41 +1213,47 @@ vows.describe('firejs error handling').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var errorCount = 0
-				var tResult = undefined
-				//var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				})
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result callback should be called only once":  function(expressionResult) {
+			"the result callback should be called only once":  function(err, expressionResult) {
 				assert.equal(expressionResult.count, 1)
 			},
-			"the error callback should not be called at all":  function(expressionResult) {
-				assert.equal(expressionResult.errorCount, 0)
+			"the error callback should not be called at all":  function(err, expressionResult) {
+				assert.isNull(err)
 			},
-			"the result should be the input of the @try expression" : function(expressionResult) {
-				assert.equal(expressionResult.result, "I'm not an error :)") // check expressions/testExpThatRaisesError.js
+			"the result should be the input of the @try expression" : function(err, expressionResult) {
+				assert.equal(expressionResult.result, "I'm not an error :)")
 			}
 		}
 	},
@@ -973,41 +1268,48 @@ vows.describe('firejs error handling').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var errorCount = 0
-				var tResult = undefined
-				var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[testExpThatRaisesErrorFilePath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExpThatRaisesError.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result callback should be called only once":  function(expressionResult) {
+			"the result callback should be called only once":  function(err, expressionResult) {
 				assert.equal(expressionResult.count, 1)
 			},
-			"the error callback should not be called at all":  function(expressionResult) {
-				assert.equal(expressionResult.errorCount, 0)
+			"the error callback should not be called at all":  function(err, expressionResult) {
+				assert.isNull(err)
 			},
-			"the result should be the input of the @catch expression" : function(expressionResult) {
-				assert.equal(expressionResult.result, "We got an error here!") // check expressions/testExpThatRaisesError.js
+			"the result should be the input of the @catch expression" : function(err, expressionResult) {
+				assert.equal(expressionResult.result, "We got an error here!")
 			}
 		}
 	},
@@ -1023,40 +1325,47 @@ vows.describe('firejs error handling').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var errorCount = 0
-				var tResult = undefined
-				var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					// break
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[testExpThatRaisesErrorFilePath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExpThatRaisesError.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result callback should be called only once":  function(expressionResult) {
+			"the result callback should be called only once":  function(err, expressionResult) {
 				assert.equal(expressionResult.count, 1)
 			},
-			"the error callback should not be called at all":  function(expressionResult) {
-				assert.equal(expressionResult.errorCount, 0)
+			"the error callback should not be called at all":  function(err, expressionResult) {
+				assert.isNull(err)
 			},
-			"the result should be the input of the first catch as the first @catch clears the error and the second never hits" : function(expressionResult) {
+			"the result should be the input of the first catch as the first @catch clears the error and the second never hits" : function(err, expressionResult) {
 				assert.equal(expressionResult.result, "First Error catch, yay!") // check expressions/testExpThatRaisesError.js
 			}
 		}
@@ -1073,84 +1382,103 @@ vows.describe('firejs error handling').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var errorCount = 0
-				var tResult = undefined
-				var testExpThatRaisesErrorFilePath = path.join(__dirname, "expressions/testExpThatRaisesError.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					console.warn("break here")
-					// break
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[testExpThatRaisesErrorFilePath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExpThatRaisesError.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							self.callback("_loopCallback reached", null)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							self.callback(err, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
-			"the result callback should be called only once":  function(expressionResult) {
+			"the result callback should be called only once":  function(err, expressionResult) {
 				assert.equal(expressionResult.count, 1)
 			},
-			"the error callback should not be called at all":  function(expressionResult) {
-				assert.equal(expressionResult.errorCount, 0)
+			"the error callback should not be called at all":  function(err, expressionResult) {
+				assert.isNull(err)
 			},
-			"the result should be undefined" : function(expressionResult) {
+			"the result should be undefined" : function(err, expressionResult) {
 				assert.equal(expressionResult.result, undefined)
 			}
 		}
 	},
 	'Having a JSON code that catches errors using @catch providing a variable called CurrentError': {
-		topic: function() {
-			return new Runtime()
-		},
-		"when we register it": {
-			topic:function(runtime) {
-				runtime.registerWellKnownExpressionDefinition({
-					name:"testCatchCurrentError",
-					json: {
-						"@try": {
-							"@raiseError": "Houston, we have a problem!"
-						},
-						"@catch": {
-							"@get(CurrentError.error)": null
-						}
+
+			topic:function() {
+				return {
+					"@try": {
+						"@raiseError": "Houston, we have a problem!"
+					},
+					"@catch": {
+						"@get(CurrentError.error)": null
 					}
-				})
-				return runtime
+				}
 			},
 			"and execute it": {
-				topic: function(runtime) {
+				topic: function(topic) {
 					var self = this
-					var contextBase = {};
-					contextBase._resultCallback = function(res) {
-						self.callback(null, res)
-					}
-					contextBase._loopCallback = function() {};
-					contextBase._inputExpression  = function() {};
-					contextBase._variables = {};            
-					contextBase._errorCallback =  function(err) {
-						self.callback(err, null)
-					};
-					runtime.runExpressionByName("testCatchCurrentError", contextBase ,null)
+					var runtime = new Runtime()
+					runtime.registerWellKnownExpressionDefinition({
+						name: "Test",
+						json: topic
+					});
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						} else {
+							var contextBase = {};
+							var result = {
+								count: 0
+							}
+							contextBase._resultCallback = function(res) {
+								result.count++
+								result.result = res
+								self.callback(null, result)
+							}
+							contextBase._loopCallback = function() {
+								self.callback("_loopCallback reached", null)
+							};
+							contextBase._inputExpression  = function() {
+								self.callback("_inputExpression reached", null)
+							};
+							contextBase._variables = {};        
+							contextBase._errorCallback =  function(err) {
+								self.callback(err, result)
+							};
+							runtime.runExpressionByName("Test", contextBase ,null)
+						}
+					});
 				},
 				"it should return the error as the result of the expression": function(err, res) {
 					assert.isNull(err)
-					assert.equal(res, "Houston, we have a problem!")
+					assert.equal(res.result, "Houston, we have a problem!")
 				}
-			}
+			
 		}
 	},
 	"Having a JSON code that catches errors using a @catch called 'nasa' providing a variable called nasaCurrentError": {
@@ -1159,42 +1487,59 @@ vows.describe('firejs error handling').addBatch({
 		},
 		"when we register it": {
 			topic:function(runtime) {
-				runtime.registerWellKnownExpressionDefinition({
-					name:"testCatchCurrentError",
-					json: {
-						"@try": {
-							"@raiseError": "Houston, we have a problem!"
-						},
-						"@catch(nasa)": {
-							"@get(nasaCurrentError.error)": null
-						}
+				 return {
+					"@try": {
+						"@raiseError": "Houston, we have a problem!"
+					},
+					"@catch(nasa)": {
+						"@get(nasaCurrentError.error)": null
 					}
-				})
-				return runtime
+				}
 			},
 			"and execute it": {
-				topic: function(runtime) {
+				topic: function(topic) {
 					var self = this
-					var contextBase = {};
-					contextBase._resultCallback = function(res) {
-						self.callback(null, res)
-					}
-					contextBase._loopCallback = function() {};
-					contextBase._inputExpression  = function() {};
-					contextBase._variables = {};            
-					contextBase._errorCallback =  function(err) {
-						self.callback(err, null)
-					};
-					runtime.runExpressionByName("testCatchCurrentError", contextBase ,null)
+					var runtime = new Runtime()
+					runtime.registerWellKnownExpressionDefinition({
+						name: "Test",
+						json: topic
+					});
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						} else {
+							var contextBase = {};
+							var result = {
+								count: 0
+							}
+							contextBase._resultCallback = function(res) {
+								result.count++
+								result.result = res
+								self.callback(null, result)
+							}
+							contextBase._loopCallback = function() {
+								self.callback("_loopCallback reached", null)
+							};
+							contextBase._inputExpression  = function() {
+								self.callback("_inputExpression reached", null)
+							};
+							contextBase._variables = {};        
+							contextBase._errorCallback =  function(err) {
+								self.callback(err, result)
+							};
+							runtime.runExpressionByName("Test", contextBase ,null)
+						}
+					});
 				},
 				"it should return the error as the result of the expression": function(err, res) {
 					assert.isNull(err)
-					assert.equal(res, "Houston, we have a problem!")
+					assert.equal(res.result, "Houston, we have a problem!")
 				}
 			}
 		}
 	}
 }).export(module);
+
 
 vows.describe('firejs loop control').addBatch({
 	'When an expression contains a loop control expression, the loopCallback should be called': {
@@ -1205,41 +1550,45 @@ vows.describe('firejs loop control').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var breakCount = 0
-				var tResult = undefined
-				var errorCount = 0
-				var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					breakCount++ // loop
-					cb(null, {
-						result: tResult,
-						count: count,
-						breakCount: breakCount,
-						errorCount: errorCount
-					})
-				}, function(result) {
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[expPath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testDoLoopControl.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+				
 			},
 			"the result callback should not be called at all":  function(expressionResult) {
 				assert.equal(expressionResult.count, 0)
@@ -1248,7 +1597,7 @@ vows.describe('firejs loop control').addBatch({
 				assert.equal(expressionResult.errorCount, 0)
 			},
 			"the loop callback should be called once" : function(expressionResult) {
-				assert.equal(expressionResult.breakCount, 1)
+				assert.equal(expressionResult.loopCount, 1)
 			}
 		}
 	},
@@ -1268,42 +1617,44 @@ vows.describe('firejs loop control').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var breakCount = 0
-				var tResult = undefined
-				var errorCount = 0
-				var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					breakCount++ // loop
-					cb(null, {
-						result: tResult,
-						count: count,
-						breakCount: breakCount,
-						errorCount: errorCount
-					})
-				}, function(result) {
-					
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[expPath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testDoLoopControl.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result callback should not be called at all":  function(expressionResult) {
 				assert.isUndefined(expressionResult.result)
@@ -1314,7 +1665,7 @@ vows.describe('firejs loop control').addBatch({
 				assert.equal(expressionResult.errorCount, 0)
 			},
 			"the loop callback should be called once" : function(expressionResult) {
-				assert.equal(expressionResult.breakCount, 1)
+				assert.equal(expressionResult.loopCount, 1)
 			}
 		}
 	},
@@ -1342,53 +1693,54 @@ vows.describe('firejs loop control').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var breakCount = 0
-				var tResult = undefined
-				var errorCount = 0
-				var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					breakCount++ // loop
-					cb(null, {
-						result: tResult,
-						count: count,
-						breakCount: breakCount,
-						errorCount: errorCount
-					})
-				}, function(result) {
-					
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[expPath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testDoLoopControl.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result callback should not be called at all":  function(expressionResult) {
 				assert.isUndefined(expressionResult.result)
 				assert.equal(expressionResult.count, 0)
-				
 			},
 			"the error callback should not be called at all":  function(expressionResult) {
 				assert.equal(expressionResult.errorCount, 0)
 			},
 			"the loop callback should be called once" : function(expressionResult) {
-				assert.equal(expressionResult.breakCount, 1)
+				assert.equal(expressionResult.loopCount, 1)
 			}
 		}
 	},
@@ -1420,42 +1772,44 @@ vows.describe('firejs loop control').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var breakCount = 0
-				var tResult = undefined
-				var errorCount = 0
-				var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					breakCount++ // loop
-					cb(null, {
-						result: tResult,
-						count: count,
-						breakCount: breakCount,
-						errorCount: errorCount
-					})
-				}, function(result) {
-					
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[expPath])
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testDoLoopControl.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result callback should not be called at all":  function(expressionResult) {
 				assert.isUndefined(expressionResult.result)
@@ -1466,7 +1820,7 @@ vows.describe('firejs loop control').addBatch({
 				assert.equal(expressionResult.errorCount, 0)
 			},
 			"the loop callback should be called once" : function(expressionResult) {
-				assert.equal(expressionResult.breakCount, 1)
+				assert.equal(expressionResult.loopCount, 1)
 			}
 		}
 	},
@@ -1478,42 +1832,43 @@ vows.describe('firejs loop control').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var breakCount = 0
-				var tResult = undefined
-				var errorCount = 0
-				//var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					breakCount++ // loop
-					cb(null, {
-						result: tResult,
-						count: count,
-						breakCount: breakCount,
-						errorCount: errorCount
-					})
-				}, function(result) {
-					
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				})
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result callback should not be called at all":  function(expressionResult) {
 				assert.isUndefined(expressionResult.result)
@@ -1524,11 +1879,10 @@ vows.describe('firejs loop control').addBatch({
 				assert.equal(expressionResult.errorCount, 0)
 			},
 			"the loop callback should be called once" : function(expressionResult) {
-				assert.equal(expressionResult.breakCount, 1)
+				assert.equal(expressionResult.loopCount, 1)
 			}
 		}
 	},
-	
 	'When I have a @break at a second level': {
 		topic: function() {
 			return  {
@@ -1539,42 +1893,43 @@ vows.describe('firejs loop control').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var breakCount = 0
-				var tResult = undefined
-				var errorCount = 0
-				//var expPath = path.join(__dirname, "expressions/testDoLoopControl.js")
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					breakCount++ // loop
-					cb(null, {
-						result: tResult,
-						count: count,
-						breakCount: breakCount,
-						errorCount: errorCount
-					})
-				}, function(result) {
-					
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				})
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the result callback should not be called at all":  function(expressionResult) {
 				assert.isUndefined(expressionResult.result)
@@ -1585,7 +1940,7 @@ vows.describe('firejs loop control').addBatch({
 				assert.equal(expressionResult.errorCount, 0)
 			},
 			"the loop callback should be called once" : function(expressionResult) {
-				assert.equal(expressionResult.breakCount, 1)
+				assert.equal(expressionResult.loopCount, 1)
 			}
 		}
 	},
@@ -1602,41 +1957,45 @@ vows.describe('firejs loop control').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var breakCount = 0
-				var tResult = undefined
-				var errorCount = 0
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					breakCount++ // loop
-					cb(null, {
-						result: tResult,
-						count: count,
-						breakCount: breakCount,
-						errorCount: errorCount
-					})
-				}, function(result) {
-					
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[path.join(__dirname, "expressions/testExecAtThirdTime.js")])
+				
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExecAtThirdTime.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
 			},
 			"the loop callback should be called once" : function(expressionResult) {
 				assert.equal(expressionResult.breakCount, 0)
@@ -1645,7 +2004,7 @@ vows.describe('firejs loop control').addBatch({
 				assert.equal(expressionResult.errorCount, 0)
 			},
 			"the loop callback should be called once" : function(expressionResult) {
-				assert.equal(expressionResult.breakCount, 0)
+				assert.equal(expressionResult.loopCount, 0)
 			},
 			"the result should be an array with three items":  function(expressionResult) {
 				assert.deepEqual(expressionResult.result, ["Item", "Item", "Item"])
@@ -1668,41 +2027,48 @@ vows.describe('firejs loop control').addBatch({
 		},
 		"and I run it": {
 			topic:function(topic) {
-				var cb = this.callback
-				var count = 0;
-				var breakCount = 0
-				var tResult = undefined
-				var errorCount = 0
-				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
-					sendInput("Lots of Crap")
-				}, function(){
-					breakCount++ // loop
-					cb(null, {
-						result: tResult,
-						count: count,
-						breakCount: breakCount,
-						errorCount: errorCount
-					})
-				}, function(result) {
-					
-					tResult = result
-					count++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount:errorCount
-					})
-				},getTempTestOutputFileName('json2code.js'),"", function(errorInfo){
-					errorCount++
-					cb(null, {
-						result:tResult,
-						count:count,
-						breakCount: breakCount,
-						errorCount: errorCount,
-						errorInfo: errorInfo
-					})
-				},[path.join(__dirname, "expressions/testExecAtFirstTime.js"), path.join(__dirname, "expressions/testExecAtThirdTime.js"),path.join(__dirname, "expressions/testIncrementedName.js")])
+				
+				var self = this
+				var runtime = new Runtime()
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExecAtFirstTime.js"))
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testExecAtThirdTime.js"))
+				runtime.registerWellKnownExpressionFile(path.join(__dirname, "expressions/testIncrementedName.js"))
+				runtime.registerWellKnownExpressionDefinition({
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
+						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
+					}
+				});
+				
 			},
 			"the loop callback should be called once" : function(expressionResult) {
 				assert.equal(expressionResult.breakCount, 0)
@@ -1711,7 +2077,7 @@ vows.describe('firejs loop control').addBatch({
 				assert.equal(expressionResult.errorCount, 0)
 			},
 			"the loop callback should be called once" : function(expressionResult) {
-				assert.equal(expressionResult.breakCount, 0)
+				assert.equal(expressionResult.loopCount, 0)
 			},
 			"the result should be an array with two items":  function(expressionResult) {
 				assert.deepEqual(expressionResult.result, ["Item0", "Item1", "Item3"])
@@ -1719,182 +2085,130 @@ vows.describe('firejs loop control').addBatch({
 		}
 	},
 	'Having a JSON code with a @loop expression that breaks at index 10': {
-		topic: function() {
-			return new Runtime()
-		},
-		"when we register it": {
-			topic:function(runtime) {
-				runtime.registerWellKnownExpressionDefinition({
-					name:"testCurrentIndexLoop",
-					json: {
-						"@loop": {
-							"@equals": [{
-									"@get(CurrentIndex)": null
-								},
-								10
-							],
-							"@if": {
-								"@break": null
-							},
+		topic: function(){
+			return {
+				"@loop": {
+					"@equals": [{
 							"@get(CurrentIndex)": null
-						}
-					}
-				})
-				return runtime
-			},
-			"and execute it": {
-				topic: function(runtime) {
-					var self = this
-					var contextBase = {};
-					contextBase._resultCallback = function(res) {
-						self.callback(null, res)
-					}
-					contextBase._loopCallback = function() {};
-					contextBase._inputExpression  = function() {};
-					contextBase._variables = {};            
-					contextBase._errorCallback =  function() {};
-					runtime.runExpressionByName("testCurrentIndexLoop", contextBase ,null)
-				},
-				"the result should be an array with the index from 0 to 9": function(err, res) {
-					assert.deepEqual(res, [0,1,2,3,4,5,6,7,8,9])
+						},
+						10
+					],
+					"@if": {
+						"@break": null
+					},
+					"@get(CurrentIndex)": null
 				}
 			}
-		}
-	}
-	,'Having a JSON code with a prefixed @loop expression that breaks at index 10': {
-		topic: function() {
-			return new Runtime()
 		},
-		"when we register it": {
-			topic:function(runtime) {
+		"and execute it": {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testCurrentIndexLoop",
-					json: {
-						"@loop(counted)": {
-							"@equals": [{
-									"@get(countedCurrentIndex)": null
-								},
-								10
-							],
-							"@if": {
-								"@break": null
-							},
-							"@get(countedCurrentIndex)": null
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
 						}
-					}
-				})
-				return runtime
-			},
-			"and execute it": {
-				topic: function(runtime) {
-					var self = this
-					var contextBase = {};
-					contextBase._resultCallback = function(res) {
-						self.callback(null, res)
-					}
-					contextBase._loopCallback = function() {};
-					contextBase._inputExpression  = function() {};
-					contextBase._variables = {};            
-					contextBase._errorCallback =  function() {};
-					runtime.runExpressionByName("testCurrentIndexLoop", contextBase ,null)
-				},
-				"the result should be an array with the index from 0 to 9": function(err, res) {
-					assert.deepEqual(res, [0,1,2,3,4,5,6,7,8,9])
-				}
-			}
-		}
-	}
-	,
-	'Having a JSON code with a @each expression that breaks at index 5': {
-		topic: function() {
-			return new Runtime()
-		},
-		"when we register it": {
-			topic:function(runtime) {
-				runtime.registerWellKnownExpressionDefinition({
-					name:"testCurrentIndexLoop",
-					json: {
-						"@return": ['One', 'Two','Three', 'Four','Five','Six','Seven','Eight','Nine','Ten'],
-						"@each": {
-							"@equals": [{
-									"@get(CurrentIndex)": null
-								},
-								5
-							],
-							"@if": {
-								"@break": null
-							},
-							"@get(CurrentIndex)": null
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
 						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
 					}
-				})
-				return runtime
+				});
 			},
-			"and execute it": {
-				topic: function(runtime) {
-					var self = this
-					var contextBase = {};
-					contextBase._resultCallback = function(res) {
-						self.callback(null, res)
-					}
-					contextBase._loopCallback = function() {};
-					contextBase._inputExpression  = function() {};
-					contextBase._variables = {};            
-					contextBase._errorCallback =  function() {};
-					runtime.runExpressionByName("testCurrentIndexLoop", contextBase ,null)
-				},
-				"the result should be an array with the index from 0 to 4": function(err, res) {
-					assert.deepEqual(res, [0,1,2,3,4])
-				}
+			"the result should be an array with the index from 0 to 9": function(err, res) {
+				assert.deepEqual(res.result, [0,1,2,3,4,5,6,7,8,9])
 			}
 		}
 	},
-	'Having a JSON code with a prefixed @each expression that breaks at index 5': {
+	'Having a JSON code with a @each expression that breaks at index 5': {
 		topic: function() {
-			return new Runtime()
+			return {
+				"@return": ['One', 'Two','Three', 'Four','Five','Six','Seven','Eight','Nine','Ten'],
+				"@each": {
+					"@equals": [{
+							"@get(CurrentIndex)": null
+						},
+						5
+					],
+					"@if": {
+						"@break": null
+					},
+					"@get(CurrentIndex)": null
+				}
+			}
 		},
 		"when we register it": {
-			topic:function(runtime) {
+			topic:function(topic) {
+				var self = this
+				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testCurrentIndexLoop",
-					json: {
-						"@return": ['One', 'Two','Three', 'Four','Five','Six','Seven','Eight','Nine','Ten'],
-						"@each(numbers)": {
-							"@equals": [{
-									"@get(numbersCurrentIndex)": null
-								},
-								5
-							],
-							"@if": {
-								"@break": null
-							},
-							"@get(numbersCurrentIndex)": null
+					name: "Test",
+					json: topic
+				});
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					} else {
+						var contextBase = {};
+						var result = {
+							count: 0,
+							loopCount: 0,
+							errorCount: 0
 						}
+						contextBase._resultCallback = function(res) {
+							result.count++
+							result.result = res
+							self.callback(null, result)
+						}
+						contextBase._loopCallback = function() {
+							result.loopCount++
+							self.callback(null, result)
+						};
+						contextBase._inputExpression  = function() {
+							self.callback("_inputExpression reached", null)
+						};
+						contextBase._variables = {};        
+						contextBase._errorCallback =  function(err) {
+							result.errorCount++
+							result.errorInfo = err
+							self.callback(null, result)
+						};
+						runtime.runExpressionByName("Test", contextBase ,null)
 					}
-				})
-				return runtime
+				});
 			},
-			"and execute it": {
-				topic: function(runtime) {
-					var self = this
-					var contextBase = {};
-					contextBase._resultCallback = function(res) {
-						self.callback(null, res)
-					}
-					contextBase._loopCallback = function() {};
-					contextBase._inputExpression  = function() {};
-					contextBase._variables = {};            
-					contextBase._errorCallback =  function() {};
-					runtime.runExpressionByName("testCurrentIndexLoop", contextBase ,null)
-				},
-				"the result should be an array with the index from 0 to 4": function(err, res) {
-					assert.deepEqual(res, [0,1,2,3,4])
-				}
+			"the result should be an array with the index from 0 to 4": function(err, res) {
+				assert.deepEqual(res.result, [0,1,2,3,4])
 			}
 		}
 	}
 }).export(module);
- 
+
 vows.describe('firejs @get paths').addBatch({
 	'When I use @get to get a nested member in a variable': {
 		topic: function() {
@@ -1902,7 +2216,7 @@ vows.describe('firejs @get paths').addBatch({
 				"@set(stuff)": {
 					number:"One"
 				},
-				"@get(stuff.number)": undefined
+				"@get(stuff.number)": null
 			}
 		},
 		"and I run it": {
@@ -1999,6 +2313,7 @@ vows.describe('firejs manifests').addBatch({
 		}
 	}
 }).export(module);
+
 
 vows.describe('firejs environments').addBatch({
 	'Having a Runtime running in production': {
@@ -2119,7 +2434,12 @@ vows.describe('firejs JSON definition registration').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("customJsonExpression", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("customJsonExpression", contextBase ,null)
+						})
 					},
 					"it should return the value specified in the firejs JSON document given in the definition": function(err, res) {
 					 	assert.equal(res, 500)
@@ -2128,6 +2448,7 @@ vows.describe('firejs JSON definition registration').addBatch({
 		}
 	}
 }).export(module);
+
 
 vows.describe('firejs @each built-in expression').addBatch({
 	'Having a JSON document with an @each expression with hint': {
@@ -2161,7 +2482,12 @@ vows.describe('firejs @each built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEach", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEach", contextBase ,null)
+						})
 					},
 					"it should iterate the last value and return an array with converted documents from the input using the prefixed variable": function(err, res) {
 					 	assert.deepEqual(res, [{
@@ -2209,7 +2535,12 @@ vows.describe('firejs @each built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEach", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEach", contextBase ,null)
+						})
 					},
 					"it should iterate the last value in the block and return an array with converted documents from the input": function(err, res) {
 					 	assert.deepEqual(res, [{
@@ -2257,7 +2588,12 @@ vows.describe('firejs @each built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEach", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEach", contextBase ,null)
+						})
 					},
 					"it should return an empty array": function(err, res) {
 					 	assert.deepEqual(res, [])
@@ -2266,6 +2602,7 @@ vows.describe('firejs @each built-in expression').addBatch({
 		}
 	}
 }).export(module);
+
 
 
 vows.describe('firejs @if built-in expression').addBatch({
@@ -2294,7 +2631,12 @@ vows.describe('firejs @if built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIf", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
 					},
 					"it should return undefined": function(err, res) {
 					 	assert.isUndefined(res)
@@ -2328,7 +2670,12 @@ vows.describe('firejs @if built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIf", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
 					},
 					"should return the input": function(err, res) {
 					 	assert.equal(res,"Got them!")
@@ -2361,7 +2708,12 @@ vows.describe('firejs @if built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIf", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
 					},
 					"should return undefined": function(err, res) {
 					 	assert.isUndefined(res)
@@ -2395,7 +2747,12 @@ vows.describe('firejs @if built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIf", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
 					},
 					"should return false": function(err, res) {
 					 	assert.isUndefined(res)
@@ -2429,7 +2786,12 @@ vows.describe('firejs @if built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIf", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testIf", contextBase ,null)
+						})
 					},
 					"should return false": function(err, res) {
 					 	assert.equal(res, "Got them!")
@@ -2438,7 +2800,6 @@ vows.describe('firejs @if built-in expression').addBatch({
 		}
 	}
 }).export(module);
-
 
 
 vows.describe('firejs booleans').addBatch({
@@ -2467,7 +2828,12 @@ vows.describe('firejs booleans').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testFalse", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testFalse", contextBase ,null)
+						})
 					},
 					"it should return false": function(err, res) {
 					 	assert.strictEqual(res, false)
@@ -2500,7 +2866,12 @@ vows.describe('firejs booleans').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testTrue", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testTrue", contextBase ,null)
+						})
 					},
 					"it should return true": function(err, res) {
 					 	assert.strictEqual(res, true)
@@ -2509,6 +2880,7 @@ vows.describe('firejs booleans').addBatch({
 		}
 	}
 }).export(module);
+
 
 vows.describe('firejs @unless built-in expression').addBatch({
 	'Having a JSON document with an @unless expression and there is no result in the block': {
@@ -2536,7 +2908,12 @@ vows.describe('firejs @unless built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testUnless", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
 					},
 					"it should return the input": function(err, res) {
 					 	assert.equal(res, "Got them!")
@@ -2570,7 +2947,12 @@ vows.describe('firejs @unless built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testUnless", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
 					},
 					"should return true literal value": function(err, res) {
 					 	assert.isTrue(res)
@@ -2604,7 +2986,12 @@ vows.describe('firejs @unless built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testUnless", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
 					},
 					"should return true literal value": function(err, res) {
 					 	assert.equal(res, "Some String")
@@ -2637,7 +3024,12 @@ vows.describe('firejs @unless built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testUnless", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
 					},
 					"should return undefined": function(err, res) {
 					 	assert.equal(res, "Got them!")
@@ -2671,7 +3063,12 @@ vows.describe('firejs @unless built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testUnless", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
 					},
 					"should return false": function(err, res) {
 					 	assert.equal(res, "Got them!")
@@ -2705,7 +3102,12 @@ vows.describe('firejs @unless built-in expression').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testUnless", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testUnless", contextBase ,null)
+						})
 					},
 					"should return false": function(err, res) {
 					 	assert.isUndefined(res)
@@ -2714,6 +3116,7 @@ vows.describe('firejs @unless built-in expression').addBatch({
 		}
 	}
 }).export(module);
+
 
 
 vows.describe('firejs @equals').addBatch({
@@ -2742,7 +3145,12 @@ vows.describe('firejs @equals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
 					},
 					"it should should return undefined": function(err, res) {
 					 	assert.isUndefined(res)
@@ -2775,7 +3183,12 @@ vows.describe('firejs @equals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
 					},
 					"it should should true": function(err, res) {
 					 	assert.isTrue(res)
@@ -2808,7 +3221,12 @@ vows.describe('firejs @equals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
 					},
 					"it should return false": function(err, res) {
 					 	assert.isFalse(res)
@@ -2841,7 +3259,12 @@ vows.describe('firejs @equals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
 					},
 					"it should return true": function(err, res) {
 					 	assert.isTrue(res)
@@ -2874,7 +3297,12 @@ vows.describe('firejs @equals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
 					},
 					"it should return true": function(err, res) {
 					 	assert.isTrue(res)
@@ -2907,7 +3335,12 @@ vows.describe('firejs @equals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
 					},
 					"it should return true": function(err, res) {
 					 	assert.isTrue(res)
@@ -2940,7 +3373,12 @@ vows.describe('firejs @equals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("testEquals", contextBase ,null)
+						})
 					},
 					"it should return false": function(err, res) {
 					 	assert.isFalse(res)
@@ -2955,7 +3393,7 @@ vows.describe('firejs @equals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testEquals",
+					name:"MainTest",
 					json: {
 						"@equals(strict)": [5, 5]
 					}
@@ -2973,7 +3411,12 @@ vows.describe('firejs @equals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("MainTest", contextBase ,null)
+						})
 					},
 					"it should return true": function(err, res) {
 					 	assert.isTrue(res)
@@ -2983,9 +3426,6 @@ vows.describe('firejs @equals').addBatch({
 	},
 }).export(module);
 
-
-
-
 vows.describe('firejs @notEquals').addBatch({
 	'Having a @notEquals expressions without at least two comparable values': {
 		topic: function() {
@@ -2994,7 +3434,7 @@ vows.describe('firejs @notEquals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testNotEquals",
+					name:"TestMain",
 					json: {
 						"@notEquals": []
 					}
@@ -3012,7 +3452,12 @@ vows.describe('firejs @notEquals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should should return undefined": function(err, res) {
 					 	assert.isUndefined(res)
@@ -3027,7 +3472,7 @@ vows.describe('firejs @notEquals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testNotEquals",
+					name:"TestMain",
 					json: {
 						"@notEquals": ['Same', 'Same']
 					}
@@ -3045,7 +3490,12 @@ vows.describe('firejs @notEquals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should should false": function(err, res) {
 					 	assert.isFalse(res)
@@ -3060,7 +3510,7 @@ vows.describe('firejs @notEquals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testNotEquals",
+					name:"TestMain",
 					json: {
 						"@notEquals": ['Same', 5]
 					}
@@ -3078,7 +3528,12 @@ vows.describe('firejs @notEquals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should return true": function(err, res) {
 					 	assert.isTrue(res)
@@ -3093,7 +3548,7 @@ vows.describe('firejs @notEquals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testNotEquals",
+					name:"TestMain",
 					json: {
 						"@notEquals": [5, '5']
 					}
@@ -3111,7 +3566,12 @@ vows.describe('firejs @notEquals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should return false": function(err, res) {
 					 	assert.isFalse(res)
@@ -3126,7 +3586,7 @@ vows.describe('firejs @notEquals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testNotEquals",
+					name:"TestMain",
 					json: {
 						"@notEquals": [5, '5', 5]
 					}
@@ -3144,7 +3604,12 @@ vows.describe('firejs @notEquals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should return false": function(err, res) {
 					 	assert.isFalse(res)
@@ -3159,7 +3624,7 @@ vows.describe('firejs @notEquals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testNotEquals",
+					name:"TestMain",
 					json: {
 						"@notEquals": [5, '5', 5, 5]
 					}
@@ -3177,7 +3642,12 @@ vows.describe('firejs @notEquals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should return false": function(err, res) {
 					 	assert.isFalse(res)
@@ -3192,7 +3662,7 @@ vows.describe('firejs @notEquals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testNotEquals",
+					name:"TestMain",
 					json: {
 						"@notEquals(strict)": [5, '5']
 					}
@@ -3210,7 +3680,12 @@ vows.describe('firejs @notEquals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should return true": function(err, res) {
 					 	assert.isTrue(res)
@@ -3225,7 +3700,7 @@ vows.describe('firejs @notEquals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testNotEquals",
+					name:"TestMain",
 					json: {
 						"@notEquals(strict)": [5, 5]
 					}
@@ -3243,7 +3718,12 @@ vows.describe('firejs @notEquals').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testNotEquals", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should return false": function(err, res) {
 					 	assert.isFalse(res)
@@ -3253,6 +3733,7 @@ vows.describe('firejs @notEquals').addBatch({
 	},
 }).export(module);
 
+
 vows.describe('firejs @increment').addBatch({
 	'Having a @increment expression without a hint': {
 		topic: function() {
@@ -3261,7 +3742,7 @@ vows.describe('firejs @increment').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIncrement",
+					name:"TestMain",
 					json: {
 						"@increment": 1
 					}
@@ -3285,7 +3766,12 @@ vows.describe('firejs @increment').addBatch({
 								err:err
 							})
 						};
-						runtime.runExpressionByName("testIncrement", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should return an error": function(err, res) {
 					 	assert.isUndefined(res.res)
@@ -3301,7 +3787,7 @@ vows.describe('firejs @increment').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIncrement",
+					name:"TestMain",
 					json: {
 						"@increment(x)": 1,
 						"@get(x)": null
@@ -3320,7 +3806,12 @@ vows.describe('firejs @increment').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIncrement", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should bypass and set NaN in the variable": function(err, res) {
 					 	assert.isNaN(res)
@@ -3335,10 +3826,10 @@ vows.describe('firejs @increment').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIncrement",
+					name:"TestMain",
 					json: {
 						"@set(x)": 426.1,
-						"@increment(x)": undefined,
+						"@increment(x)": null,
 						"@get(x)": null
 					}
 				})
@@ -3355,7 +3846,12 @@ vows.describe('firejs @increment').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIncrement", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should should return NaN": function(err, res) {
 					 	assert.isNaN(res)
@@ -3370,7 +3866,7 @@ vows.describe('firejs @increment').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIncrement",
+					name:"TestMain",
 					json: {
 						"@set(x)": 425,
 						"@increment(x)": 25,
@@ -3390,7 +3886,12 @@ vows.describe('firejs @increment').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testIncrement", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should should return the sum": function(err, res) {
 					 	assert.equal(res,450)
@@ -3409,7 +3910,7 @@ vows.describe('firejs @decrement').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testDecrement",
+					name:"TestMain",
 					json: {
 						"@decrement": 1
 					}
@@ -3433,7 +3934,12 @@ vows.describe('firejs @decrement').addBatch({
 								err:err
 							})
 						};
-						runtime.runExpressionByName("testDecrement", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should return an error": function(err, res) {
 					 	assert.isUndefined(res.res)
@@ -3449,7 +3955,7 @@ vows.describe('firejs @decrement').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testDecrement",
+					name:"TestMain",
 					json: {
 						"@decrement(x)": 1,
 						"@get(x)": null
@@ -3468,7 +3974,12 @@ vows.describe('firejs @decrement').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testDecrement", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should bypass and set NaN in the variable": function(err, res) {
 					 	assert.isNaN(res)
@@ -3483,10 +3994,10 @@ vows.describe('firejs @decrement').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testDecrement",
+					name:"TestMain",
 					json: {
 						"@set(x)": 426.1,
-						"@decrement(x)": undefined,
+						"@decrement(x)": null,
 						"@get(x)": null
 					}
 				})
@@ -3503,7 +4014,12 @@ vows.describe('firejs @decrement').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testDecrement", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should should return NaN": function(err, res) {
 					 	assert.isNaN(res)
@@ -3518,7 +4034,7 @@ vows.describe('firejs @decrement').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testDecrement",
+					name:"TestMain",
 					json: {
 						"@set(x)": 425,
 						"@decrement(x)": 25,
@@ -3538,7 +4054,12 @@ vows.describe('firejs @decrement').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("testDecrement", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should should return the subtraction": function(err, res) {
 					 	assert.equal(res,400)
@@ -3547,6 +4068,7 @@ vows.describe('firejs @decrement').addBatch({
 		}
 	}
 }).export(module);
+
 
 vows.describe('firejs async execution').addBatch({
 	'When I have a JSON doc that creates a regular object based on async expression keys': {
@@ -3679,6 +4201,7 @@ vows.describe('firejs async execution').addBatch({
 
 }).export(module);
 
+
 vows.describe('firejs @input').addBatch({
 	'Having a JSON code that returns the input using a @input at first level': {
 		topic: function() {
@@ -3687,7 +4210,7 @@ vows.describe('firejs @input').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testInput",
+					name:"TestMain",
 					json: {
 						"@return": {
 							"@input": null
@@ -3709,7 +4232,12 @@ vows.describe('firejs @input').addBatch({
 					};
 					contextBase._variables = {};            
 					contextBase._errorCallback =  function() {};
-					runtime.runExpressionByName("testInput", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"it should return the input callback": function(err, res) {
 					assert.equal(res,"super input Result")
@@ -3724,7 +4252,7 @@ vows.describe('firejs @input').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testInput",
+					name:"TestMain",
 					json: {
 						"@return": {
 							"@return": {
@@ -3750,7 +4278,12 @@ vows.describe('firejs @input').addBatch({
 					};
 					contextBase._variables = {};            
 					contextBase._errorCallback =  function() {};
-					runtime.runExpressionByName("testInput", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"it should return the input callback": function(err, res) {
 					assert.equal(res,"super input Result")
@@ -3760,20 +4293,6 @@ vows.describe('firejs @input').addBatch({
 	},
 }).export(module);
 
-vows.describe('firejs getWellKnownExpressions').addBatch({
-	"When I initialize a runtime":{
-		topic: function() {
-			return new Runtime()
-		},
-		"getWellKnownExpressions should return all the modules loaded": function(runtime){
-			assert.typeOf(runtime.getWellKnownExpressions(), 'object')
-			assert.include(runtime.getWellKnownExpressions().names(),'continue')
-			assert.include(runtime.getWellKnownExpressions().names(),'return')
-			assert.include(runtime.getWellKnownExpressions().names(),'get')
-			assert.include(runtime.getWellKnownExpressions().names(),'set')
-		}
-	}
-}).export(module);
 
 vows.describe('firejs file extension inference').addBatch({
 	"When I infer the expression name from a simple name file with the official script extension": {
@@ -3818,6 +4337,7 @@ vows.describe('firejs file extension inference').addBatch({
 	}
 }).export(module)
 
+
 vows.describe('firejs @undefined').addBatch({
 	'Having a JSON code that returns @undefined at the end of the expression-block': {
 		topic: function() {
@@ -3826,7 +4346,7 @@ vows.describe('firejs @undefined').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testUndefined",
+					name:"TestMain",
 					json: {
 						"@return": 1,
 						"@undefined": null
@@ -3845,7 +4365,12 @@ vows.describe('firejs @undefined').addBatch({
 					contextBase._inputExpression  = function() {};
 					contextBase._variables = {};            
 					contextBase._errorCallback =  function() {};
-					runtime.runExpressionByName("testUndefined", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be undefined": function(err, res) {
 					assert.isUndefined(res)
@@ -3864,7 +4389,7 @@ vows.describe('firejs @raiseError').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testRaiseError",
+					name:"TestMain",
 					json: {
 						"@raiseError": "This is the error"
 					}
@@ -3884,7 +4409,12 @@ vows.describe('firejs @raiseError').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testRaiseError", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"it should return an error": function(err, res) {
 					assert.isNull(res)
@@ -3905,7 +4435,7 @@ vows.describe('firejs loadedModules').addBatch({
 			topic:function(runtime) {
 				runtime.loadFromManifestFile(path.join(__dirname,"loadedModules/ignition.manifest.json"))
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testLoadedModules",
+					name:"TestMain",
 					json: {
 						"@loadedExpression1": null,
 						"@loadedExpression2": null
@@ -3929,7 +4459,12 @@ vows.describe('firejs loadedModules').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testLoadedModules", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"it should return an error": function(err, res) {
 					assert.isNull(err)
@@ -3942,6 +4477,7 @@ vows.describe('firejs loadedModules').addBatch({
 		}
 	}
 }).export(module)
+
 
 vows.describe('firejs Runtime on("load") event').addBatch({
 	'When a Runtime loads from Manifest file': {
@@ -3995,12 +4531,10 @@ vows.describe('firejs createVar').addBatch({
 				//console.warn("Creating var")
 				self.setScopeVar("someContext", "String of the Created Variable Context")
 				//console.warn("var created and running input")
-				this.runInput({
-					_resultCallback: function(res) {
+				this.runInput(function(res) {
 						//console.warn('got the result')
-						self.setResult(res)
-					}
-				});
+						self.end(res)
+					});
 			}
 			
 			runtime.registerWellKnownExpressionDefinition({
@@ -4009,7 +4543,7 @@ vows.describe('firejs createVar').addBatch({
 			})
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testCreateVar",
+				name:"TestMain",
 				json: {
 					"@set(someContext)": "original context variable value",
 					"@return": {
@@ -4039,7 +4573,12 @@ vows.describe('firejs createVar').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testCreateVar", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"should not override the outer variable": function(err, res) {
 					assert.isNull(err)
@@ -4058,7 +4597,7 @@ vows.describe('firejs createVar').addBatch({
 			
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testScopeSetVar",
+				name:"TestMain",
 				json: {
 					"@set(someContext)": "original context variable value",
 					"@return": {
@@ -4087,7 +4626,12 @@ vows.describe('firejs createVar').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testScopeSetVar", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"should not override the outer variable": function(err, res) {
 					assert.isNull(err)
@@ -4105,7 +4649,7 @@ vows.describe('firejs createVar').addBatch({
 		topic: function() {
 			var runtime = new Runtime()
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testWritePath",
+				name:"TestMain",
 				json: {
 					"@set(point.x)": 150,
 					"@set(point.y)": 120,
@@ -4127,7 +4671,12 @@ vows.describe('firejs createVar').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testWritePath", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be a structure with the member x and y": function(err, res) {
 					assert.isNull(err)
@@ -4141,13 +4690,14 @@ vows.describe('firejs createVar').addBatch({
 	}
 }).export(module)
 
+
 vows.describe('firejs @index').addBatch({
 	'When I use @index with no path': {
 		"and the last result is undefined":{
 			topic: function() {
 				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIndex",
+					name:"TestMain",
 					json: {
 						"@index": 2
 					}
@@ -4167,7 +4717,12 @@ vows.describe('firejs @index').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("testIndex", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should bypass the undefined value": function(err, res) {
 						assert.isNull(err)
@@ -4180,7 +4735,7 @@ vows.describe('firejs @index').addBatch({
 			topic: function() {
 				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIndex",
+					name:"TestMain",
 					json: {
 						"@return": null,
 						"@index": 2
@@ -4201,7 +4756,12 @@ vows.describe('firejs @index').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("testIndex", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should bypass the null value": function(err, res) {
 						assert.isNull(err)
@@ -4214,7 +4774,7 @@ vows.describe('firejs @index').addBatch({
 			topic: function() {
 				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIndex",
+					name:"TestMain",
 					json: {
 						"@return": {
 							name: "Steve"
@@ -4237,7 +4797,12 @@ vows.describe('firejs @index').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("testIndex", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should return the value of the property": function(err, res) {
 						assert.isNull(err)
@@ -4250,7 +4815,7 @@ vows.describe('firejs @index').addBatch({
 			topic: function() {
 				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIndex",
+					name:"TestMain",
 					json: {
 						"@return": ["One", "Two"],
 						"@index": 1
@@ -4271,7 +4836,12 @@ vows.describe('firejs @index').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIndex", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"it should return the value of the given index in the array": function(err, res) {
 					assert.isNull(err)
@@ -4285,7 +4855,7 @@ vows.describe('firejs @index').addBatch({
 			topic: function() {
 				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIndex",
+					name:"TestMain",
 					json: {
 						"@index(something)": 2
 					}
@@ -4305,7 +4875,12 @@ vows.describe('firejs @index').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("testIndex", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should bypass the undefined value": function(err, res) {
 						assert.isNull(err)
@@ -4318,7 +4893,7 @@ vows.describe('firejs @index').addBatch({
 			topic: function() {
 				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIndex",
+					name:"TestMain",
 					json: {
 						"@set(person)": null,
 						"@index(person)": "name"
@@ -4339,7 +4914,12 @@ vows.describe('firejs @index').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("testIndex", contextBase ,null)
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
 					},
 					"it should bypass the value": function(err, res) {
 						assert.isNull(err)
@@ -4352,7 +4932,7 @@ vows.describe('firejs @index').addBatch({
 			topic: function() {
 				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIndex",
+					name:"TestMain",
 					json: {
 						"@set(contact)": {
 							name: "Steve"
@@ -4375,7 +4955,12 @@ vows.describe('firejs @index').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIndex", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"it should return the value of the property": function(err, res) {
 					assert.isNull(err)
@@ -4387,7 +4972,7 @@ vows.describe('firejs @index').addBatch({
 			topic: function() {
 				var runtime = new Runtime()
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testIndex",
+					name:"TestMain",
 					json: {
 						"@set(numbers)": ["One", "Two"],
 						"@index(numbers)": 1
@@ -4408,7 +4993,12 @@ vows.describe('firejs @index').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIndex", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"it should return the value of the given index in the array": function(err, res) {
 					assert.isNull(err)
@@ -4418,6 +5008,7 @@ vows.describe('firejs @index').addBatch({
 		}
 	}
 }).export(module)
+
 
 vows.describe('firejs - dependentModules').addBatch({
 	'When a firejs module loads a third firejs module': {
@@ -4517,14 +5108,15 @@ vows.describe('firejs - initial last result').addBatch({
 				
 			}
 			testInitInputResult.prototype = new Expression()
+			testInitInputResult.prototype.onPrepareInput = function() {
+				this.inputExpression.scopeBypass = true
+			}
 			testInitInputResult.prototype.execute = function() {
 				var self = this
-				this.runInput({
-					_resultCallback: function(res) {
-						self.setResult(res)
-					},
-					_initialResult: self.getHintValue()
-				})
+				this.setCurrentResult(this.getHintValue())
+				this.runInput(function(res) {
+						self.end(res)
+					})
 			}
 			
 			runtime.registerWellKnownExpressionDefinition({
@@ -4538,7 +5130,7 @@ vows.describe('firejs - initial last result').addBatch({
 			}
 			someBypasser.prototype = new Expression()
 			someBypasser.prototype.execute = function() {
-				this.skip()
+				this.bypass()
 			}
 			
 			runtime.registerWellKnownExpressionDefinition({
@@ -4547,7 +5139,7 @@ vows.describe('firejs - initial last result').addBatch({
 			})
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testWritePath",
+				name:"TestMain",
 				json: {
 					"@testInitInputResult(Initialized value)": {
 						"@someBypasser": null
@@ -4569,7 +5161,12 @@ vows.describe('firejs - initial last result').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testWritePath", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be the initialized value of the caller expression": function(err, res) {
 					assert.isNull(err)
@@ -4587,7 +5184,7 @@ vows.describe('firejs - @isEmpty').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testIsEmpty",
+				name:"TestMain",
 				json: {
 					"@isEmpty(something)": null
 				}
@@ -4607,7 +5204,12 @@ vows.describe('firejs - @isEmpty').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be true": function(err, res) {
 					assert.isNull(err)
@@ -4621,7 +5223,7 @@ vows.describe('firejs - @isEmpty').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testIsEmpty",
+				name:"TestMain",
 				json: {
 					"@set(x)": "some val",
 					"@isEmpty(x)": null
@@ -4642,7 +5244,12 @@ vows.describe('firejs - @isEmpty').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be false": function(err, res) {
 					assert.isNull(err)
@@ -4656,7 +5263,7 @@ vows.describe('firejs - @isEmpty').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testIsEmpty",
+				name:"TestMain",
 				json: {
 					"@isEmpty": "some val"
 				}
@@ -4676,7 +5283,12 @@ vows.describe('firejs - @isEmpty').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be false": function(err, res) {
 					assert.isNull(err)
@@ -4694,7 +5306,7 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testIsEmpty",
+				name:"TestMain",
 				json: {
 					"@isNotEmpty(something)": null
 				}
@@ -4714,7 +5326,12 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be false": function(err, res) {
 					assert.isNull(err)
@@ -4728,7 +5345,7 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testIsEmpty",
+				name:"TestMain",
 				json: {
 					"@set(x)": 200,
 					"@isNotEmpty(x)": null
@@ -4749,7 +5366,12 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be true": function(err, res) {
 					assert.isNull(err)
@@ -4763,7 +5385,7 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testIsEmpty",
+				name:"TestMain",
 				json: {
 					"@isNotEmpty": "some val"
 				}
@@ -4783,7 +5405,12 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be true": function(err, res) {
 					assert.isNull(err)
@@ -4797,7 +5424,7 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testIsEmpty",
+				name:"TestMain",
 				json: {
 					"@return": "",
 					"@isNotEmpty": null
@@ -4818,7 +5445,12 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("testIsEmpty", contextBase ,null)
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
 				},
 				"the result should be false": function(err, res) {
 					assert.isNull(err)
@@ -4828,6 +5460,7 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 		}
 	}
 }).export(module)
+
 
 vows.describe('firejs - @parentResult').addBatch({
 	'When I use @parentResult': {
@@ -4844,7 +5477,7 @@ vows.describe('firejs - @parentResult').addBatch({
 			})
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testParentResult",
+				name:"TestMain",
 				json: {
 					"@return": "Text in the parent block",
 					"@consumeParentResult": null
@@ -4865,7 +5498,12 @@ vows.describe('firejs - @parentResult').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testParentResult", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"the result should be returned value using the parentResult value": function(err, res) {
 				assert.isNull(err)
@@ -4877,13 +5515,14 @@ vows.describe('firejs - @parentResult').addBatch({
 	}
 }).export(module)
 
+
 vows.describe('firejs - @test').addBatch({
 	'When I use @test with no hint and a matching string as the input': {
 		topic: function() {
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testTestRegExp",
+				name:"TestMain",
 				json: {
 					"@return": "abc",
 					"@test": "abc"
@@ -4904,7 +5543,12 @@ vows.describe('firejs - @test').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testTestRegExp", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"it should match the last result": function(err, res) {
 				assert.isNull(err)
@@ -4917,7 +5561,7 @@ vows.describe('firejs - @test').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testTestRegExp",
+				name:"TestMain",
 				json: {
 					"@return": "abcd",
 					"@test": {
@@ -4940,7 +5584,12 @@ vows.describe('firejs - @test').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testTestRegExp", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"it should match the last result": function(err, res) {
 				assert.isNull(err)
@@ -4953,7 +5602,7 @@ vows.describe('firejs - @test').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testTestRegExp",
+				name:"TestMain",
 				json: {
 					"@return": "abcd",
 					"@test": {
@@ -4977,7 +5626,12 @@ vows.describe('firejs - @test').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testTestRegExp", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"it should match the last result": function(err, res) {
 				assert.isNull(err)
@@ -4990,7 +5644,7 @@ vows.describe('firejs - @test').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testTestRegExp",
+				name:"TestMain",
 				json: {
 					"@set(chars)": "abcd",
 					"@test(chars)": {
@@ -5014,7 +5668,12 @@ vows.describe('firejs - @test').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testTestRegExp", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"it should match the hint path": function(err, res) {
 				assert.isNull(err)
@@ -5027,7 +5686,7 @@ vows.describe('firejs - @test').addBatch({
 			var runtime = new Runtime()
 			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testTestRegExp",
+				name:"TestMain",
 				json: {
 					"@set(chars)": "another",
 					"@test(chars)": {
@@ -5051,7 +5710,12 @@ vows.describe('firejs - @test').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testTestRegExp", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"it should not match the hint path": function(err, res) {
 				assert.isNull(err)
@@ -5065,10 +5729,15 @@ vows.describe('firejs - null json body on implementation').addBatch({
 	'When I register an expression with null body': {
 		topic: function() {
 			var runtime = new Runtime()
-			
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testNullBody",
+				name:"ReturnsNull",
 				json: null
+			})
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@ReturnsNull": null
+				}
 			})
 			return runtime
 		},
@@ -5085,7 +5754,12 @@ vows.describe('firejs - null json body on implementation').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testNullBody", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"the result should be null": function(err, res) {
 				assert.isNull(err)
@@ -5101,7 +5775,7 @@ vows.describe('firejs - @getModuleConfig').addBatch({
 			var runtime = new Runtime()
 			runtime.setModuleConfiguration("moduleX", "Config for Module X")
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testGetModuleConfig",
+				name:"TestMain",
 				json: {
 					"@getModuleConfig(moduleX)": null
 				}
@@ -5121,7 +5795,12 @@ vows.describe('firejs - @getModuleConfig').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testGetModuleConfig", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"the result should be the configuration for the current environment": function(err, res) {
 				assert.isNull(err)
@@ -5131,12 +5810,13 @@ vows.describe('firejs - @getModuleConfig').addBatch({
 	}
 }).export(module)
 
+
 vows.describe('firejs - @hint').addBatch({
 	'When I use @hint': {
 		topic: function() {
 			var runtime = new Runtime()
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testHintExpression",
+				name:"TestMain",
 				flags: ["hint"],
 				json: {
 					"@scopeSet(passedHint)": {
@@ -5160,8 +5840,13 @@ vows.describe('firejs - @hint').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testHintExpression", contextBase ,{
-					_hint: "Hint for the root expression"
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,{
+						_hint: "Hint for the root expression"
+					})
 				})
 			},
 			"the result should be the hint passed to the root expression": function(err, res) {
@@ -5178,7 +5863,7 @@ vows.describe('firejs - @concat').addBatch({
 		topic: function() {
 			var runtime = new Runtime()
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testConcatExpression",
+				name:"TestMain",
 				json: {
 					"@concat": [
 						null,
@@ -5201,7 +5886,12 @@ vows.describe('firejs - @concat').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testConcatExpression", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"the result should be null": function(err, res) {
 				assert.isNull(err)
@@ -5213,7 +5903,7 @@ vows.describe('firejs - @concat').addBatch({
 		topic: function() {
 			var runtime = new Runtime()
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testConcatExpression",
+				name:"TestMain",
 				json: {
 					"@concat": [
 						[100,200],
@@ -5236,7 +5926,12 @@ vows.describe('firejs - @concat').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testConcatExpression", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"the result should be an array with the non-array value at the end of the original array": function(err, res) {
 				assert.isNull(err)
@@ -5248,7 +5943,7 @@ vows.describe('firejs - @concat').addBatch({
 		topic: function() {
 			var runtime = new Runtime()
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testConcatExpression",
+				name:"TestMain",
 				json: {
 					"@concat": [
 						[100,200],
@@ -5271,7 +5966,12 @@ vows.describe('firejs - @concat').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testConcatExpression", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"the result should be an array with the items of all given arrays": function(err, res) {
 				assert.isNull(err)
@@ -5283,7 +5983,7 @@ vows.describe('firejs - @concat').addBatch({
 		topic: function() {
 			var runtime = new Runtime()
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testConcatExpression",
+				name:"TestMain",
 				json: {
 					"@concat": [
 						[100,200],
@@ -5308,7 +6008,12 @@ vows.describe('firejs - @concat').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testConcatExpression", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"the result should be an array with the items of all given arrays": function(err, res) {
 				assert.isNull(err)
@@ -5320,7 +6025,7 @@ vows.describe('firejs - @concat').addBatch({
 		topic: function() {
 			var runtime = new Runtime()
 			runtime.registerWellKnownExpressionDefinition({
-				name:"testConcatExpression",
+				name:"TestMain",
 				json: {
 					"@concat": [
 						"Lorem",
@@ -5344,7 +6049,12 @@ vows.describe('firejs - @concat').addBatch({
 				contextBase._errorCallback =  function(err) {
 					self.callback(err, null)
 				};
-				runtime.runExpressionByName("testConcatExpression", contextBase ,null)
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
 			},
 			"the result should be a concatenated array": function(err, res) {
 				assert.isNull(err)

@@ -4,3 +4,5 @@ module.exports.DEFAULT_EXPRESSION_EXTENSIONS = [module.exports.DEFAULT_SCRIPT_EX
 module.exports.DEFAULT_MANIFEST_FILE_NAME = "ignition.manifest.json"
 module.exports.DEFAULT_ENVIRONMENT = "development"
 module.exports.INITIALIZERS_DIR_NAME = "initializers"
+module.exports.VIRTUAL_EXPRESSION_URI_PROTOCOL = "virtual"
+module.exports.FILE_EXPRESSION_URI_PROTOCOL = "fs"
