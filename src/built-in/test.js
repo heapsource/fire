@@ -28,17 +28,15 @@ Test.prototype = new Expression()
 Test.prototype.execute = function() {
 	var self = this
 	var operand = this.hasHint() ? this.getHintVariableValue() : this.getParentResult();
-	this.runInput({
-		_resultCallback: function(res) {
+	this.runInput(function(res) {
 			if(typeof(res) == 'string') {
-				self.setResult(new RegExp(res).test(operand))
+				self.end(new RegExp(res).test(operand))
 			} else if(typeof(res) == 'object') {
-				self.setResult(new RegExp(res.expression, res.modifiers).test(operand))
+				self.end(new RegExp(res.expression, res.modifiers).test(operand))
 			} else {
-				self.setResult(false)
+				self.end(false)
 			}
-		}
-	})
+		})
 }
 module.exports = {
 	name:"test",

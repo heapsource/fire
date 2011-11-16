@@ -5514,3 +5514,213 @@ vows.describe('firejs - @parentResult').addBatch({
 		}
 	}
 }).export(module)
+
+
+vows.describe('firejs - @test').addBatch({
+	'When I use @test with no hint and a matching string as the input': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@return": "abc",
+					"@test": "abc"
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"it should match the last result": function(err, res) {
+				assert.isNull(err)
+				assert.equal(res, true)
+			}
+		}
+	},
+	'When I use @test with no hint and a matching object as the input': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@return": "abcd",
+					"@test": {
+						"expression": "abcd"
+					}
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"it should match the last result": function(err, res) {
+				assert.isNull(err)
+				assert.equal(res, true)
+			}
+		}
+	},
+	'When I use @test with no hint and a matching object and modifiers as the input': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@return": "abcd",
+					"@test": {
+						"expression": "abcD",
+						"modifiers": "i"
+					}
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"it should match the last result": function(err, res) {
+				assert.isNull(err)
+				assert.equal(res, true)
+			}
+		}
+	},
+	'When I use @test with hint path and a matching object and modifiers as the input': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@set(chars)": "abcd",
+					"@test(chars)": {
+						"expression": "abcD",
+						"modifiers": "i"
+					}
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"it should match the hint path": function(err, res) {
+				assert.isNull(err)
+				assert.equal(res, true)
+			}
+		}
+	},
+	'When I use @test with hint path and a unmatching object and modifiers as the input': {
+		topic: function() {
+			var runtime = new Runtime()
+			
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@set(chars)": "another",
+					"@test(chars)": {
+						"expression": "abcD",
+						"modifiers": "i"
+					}
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"it should not match the hint path": function(err, res) {
+				assert.isNull(err)
+				assert.equal(res, false)
+			}
+		}
+	}
+}).export(module)
