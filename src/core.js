@@ -892,6 +892,20 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 	expressionInstance.loopCallback = function(payload) {
 		_blockContext._loopCallback(payload)
 	}
+	expressionInstance.createInputExpression = function() {
+		var exp = new Expression()
+		exp.execute = function() {
+			var self = this
+			var pseudoExp = {
+				setResult: function(res) {
+					self.end(res)
+				},
+				execute: _blockContext._inputExpression
+			}
+			pseudoExp.execute()
+		}
+		return exp
+	}
 	expressionInstance.runtime = this
 	expressionInstance.run() // run it
 };

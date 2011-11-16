@@ -10,19 +10,16 @@ testTickedReturn.prototype.execute = function() {
 	var self = this
 	
 	process.nextTick(function() {
-		self.runInput({
-			_resultCallback: function(res) {
+		self.runInput( function(res) {
 				process.nextTick(function() {
 					var interval = 0
 					//console.warn("testTickedReturn ", self.returnName, " will wait ", self.getHintValue())
 					interval = setInterval(function() {
 						//console.warn("setting result for testTickedReturn ", self.returnName)
-						self.setResult(res)
+						self.end(res)
 						clearInterval(interval)
 					},parseInt(self.getHintValue()));
-					
 				});
-			}
 		})
 	})
 }

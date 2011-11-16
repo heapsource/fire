@@ -33,21 +33,19 @@ Increment.prototype.execute = function() {
 	
 	if(isNaN(value) || value === undefined || value === null) {
 		this.setParentVar(this.getHintValue(), NaN)
-		this.skip()
+		this.bypass()
 	} else {
 		// run the input...
-		this.runInput({
-			_resultCallback: function(res) {
+		this.runInput(function(res) {
 				if(isNaN(res) || res === undefined || res === null) {
 					self.setParentVar(self.getHintValue(), NaN)
-					self.skip()
+					self.bypass()
 				} else {
 					var res = value + res
 					self.setParentVar(self.getHintValue(), res)
-					self.skip()
+					self.bypass()
 				}
-			}
-		});
+			});
 	}
 }
 

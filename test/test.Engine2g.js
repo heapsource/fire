@@ -3393,7 +3393,7 @@ vows.describe('firejs @equals').addBatch({
 		"when we register it": {
 			topic:function(runtime) {
 				runtime.registerWellKnownExpressionDefinition({
-					name:"testEquals",
+					name:"MainTest",
 					json: {
 						"@equals(strict)": [5, 5]
 					}
@@ -3415,12 +3415,879 @@ vows.describe('firejs @equals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEquals", contextBase ,null)
+							runtime.runExpressionByName("MainTest", contextBase ,null)
 						})
 					},
 					"it should return true": function(err, res) {
 					 	assert.isTrue(res)
 					}
+			}
+		}
+	},
+}).export(module);
+
+vows.describe('firejs @notEquals').addBatch({
+	'Having a @notEquals expressions without at least two comparable values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@notEquals": []
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should should return undefined": function(err, res) {
+					 	assert.isUndefined(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two identical values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@notEquals": ['Same', 'Same']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should should false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two different values': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@notEquals": ['Same', 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@notEquals": [5, '5']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with three similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@notEquals": [5, '5', 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with more than three similar values but not with the same type': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@notEquals": [5, '5', 5, 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two similar values but not with the same type in strict mode': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@notEquals(strict)": [5, '5']
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should return true": function(err, res) {
+					 	assert.isTrue(res)
+					}
+			}
+		}
+	},
+	'Having a @notEquals expressions with two similar values and type in strict mode': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@notEquals(strict)": [5, 5]
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should return false": function(err, res) {
+					 	assert.isFalse(res)
+					}
+			}
+		}
+	},
+}).export(module);
+
+
+vows.describe('firejs @increment').addBatch({
+	'Having a @increment expression without a hint': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@increment": 1
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, {
+								res:res
+							})
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(null, {
+								err:err
+							})
+						};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should return an error": function(err, res) {
+					 	assert.isUndefined(res.res)
+						assert.equal(res.err.error,"Expression 'increment' requires a hint")
+					}
+			}
+		}
+	},
+	'Having a @increment expression using an undefined variable': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@increment(x)": 1,
+						"@get(x)": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should bypass and set NaN in the variable": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @increment expression using a undefined input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@set(x)": 426.1,
+						"@increment(x)": null,
+						"@get(x)": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @increment expression using number variable and input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@set(x)": 425,
+						"@increment(x)": 25,
+						"@get(x)": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should should return the sum": function(err, res) {
+					 	assert.equal(res,450)
+					}
+			}
+		}
+	}
+}).export(module);
+
+
+vows.describe('firejs @decrement').addBatch({
+	'Having a @decrement expression without a hint': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@decrement": 1
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, {
+								res:res
+							})
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function(err) {
+							self.callback(null, {
+								err:err
+							})
+						};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should return an error": function(err, res) {
+					 	assert.isUndefined(res.res)
+						assert.equal(res.err.error,"Expression 'decrement' requires a hint")
+					}
+			}
+		}
+	},
+	'Having a @decrement expression using an undefined variable': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@decrement(x)": 1,
+						"@get(x)": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should bypass and set NaN in the variable": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @decrement expression using a undefined input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@set(x)": 426.1,
+						"@decrement(x)": null,
+						"@get(x)": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should should return NaN": function(err, res) {
+					 	assert.isNaN(res)
+					}
+			}
+		}
+	},
+	'Having a @decrement expression using number variable and input': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@set(x)": 425,
+						"@decrement(x)": 25,
+						"@get(x)": null
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime.runExpressionByName("TestMain", contextBase ,null)
+						})
+					},
+					"it should should return the subtraction": function(err, res) {
+					 	assert.equal(res,400)
+					}
+			}
+		}
+	}
+}).export(module);
+
+
+vows.describe('firejs async execution').addBatch({
+	'When I have a JSON doc that creates a regular object based on async expression keys': {
+		topic: function() {
+			return {
+				"enlistedPersons": {
+					"@testTickedReturn(1000)": [1,2,3,4]
+				},
+				"disabledPersons": {
+					"@testTickedReturn(200)": [5,6,7,8,9]
+				}
+			};    
+		},
+		
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var testtickedReturnPath = path.join(__dirname, "expressions/tickedReturn.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(err) {
+					throw err
+				},[testtickedReturnPath])
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be an object with the result of all the async expresion keys" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, {
+					"enlistedPersons": [1,2,3,4],
+					"disabledPersons": [5,6,7,8,9]
+				});
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
+	},
+	'When I have a JSON doc that creates a regular array based on async expressions': {
+		topic: function() {
+			return [
+				{
+					"@testTickedReturn(1000)": [1,2,3,4]
+				},
+				50000
+				,
+				{
+					"@testTickedReturn(200)": [5,6,7,8,9]
+				},40000
+			];    
+		},
+		
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var testtickedReturnPath = path.join(__dirname, "expressions/tickedReturn.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(err) {
+					throw err
+				},[testtickedReturnPath])
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be an array with the results in the right order" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, [[1,2,3,4],50000,[5,6,7,8,9],40000]);
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
+	},
+	'When I have a JSON doc that returns values async': {
+		topic: function() {
+			return {
+					"@testTickedReturn(1000)": "First Expression",
+					"@testTickedReturn(200)": "Last Expression"
+			};    
+		},
+		
+		"and I run it": {
+			topic:function(topic) {
+				var cb = this.callback
+				var count = 0;
+				var testtickedReturnPath = path.join(__dirname, "expressions/tickedReturn.js")
+				jsonCode._testOnly_runJSONObject(topic,{}, function(sendInput) {
+					sendInput("Lots of Crap")
+				}, function(){
+					// break
+				}, function(result) {
+					count++
+					cb(null, {
+						result:result,
+						count:count
+					})
+				},getTempTestOutputFileName('json2code.js'),"", function(err) {
+					throw err
+				},[testtickedReturnPath])
+			},
+			"the result should not be null" : function(expressionResult) {
+				assert.isNotNull(expressionResult.result)
+			},
+			"the result should be the last value" : function(expressionResult) {
+				assert.deepEqual(expressionResult.result, "Last Expression");
+			},
+			"the result callback should be called only once":  function(expressionResult) {
+				assert.equal(expressionResult.count, 1)
+			}
+		}
+	}
+
+}).export(module);
+
+
+vows.describe('firejs @input').addBatch({
+	'Having a JSON code that returns the input using a @input at first level': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@return": {
+							"@input": null
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {
+						this.setResult("super input Result")
+					};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"it should return the input callback": function(err, res) {
+					assert.equal(res,"super input Result")
+				}
+			}
+		}
+	},
+	'Having a JSON code that returns the input using a @input at third level': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"TestMain",
+					json: {
+						"@return": {
+							"@return": {
+								"@return": {
+									"@input": null
+								}
+							}
+						}
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+				topic: function(runtime) {
+					var self = this
+					var contextBase = {};
+					contextBase._resultCallback = function(res) {
+						self.callback(null, res)
+					}
+					contextBase._loopCallback = function() {};
+					contextBase._inputExpression  = function() {
+						this.setResult("super input Result")
+					};
+					contextBase._variables = {};            
+					contextBase._errorCallback =  function() {};
+					runtime.load(function(initError) {
+						if(initError) {
+							self.callback(initError, null)
+						}
+						runtime.runExpressionByName("TestMain", contextBase ,null)
+					})
+				},
+				"it should return the input callback": function(err, res) {
+					assert.equal(res,"super input Result")
+				}
 			}
 		}
 	},

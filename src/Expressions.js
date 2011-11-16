@@ -67,24 +67,25 @@ Expression.prototype.scopeBypass = false
 Expression.prototype.onPrepareInput = null
 
 Expression.prototype.runInput = function(onResult) {
+	this.runInputFromTarget(this, onResult)
+}
+
+Expression.prototype.runInputFromTarget = function(target, onResult) {
 	var self = this
-	if(this.createInputExpression) {
-		this.inputExpression = this.createInputExpression()
-		this.inputExpression.resultCallback = function(res) {
-			onResult(res)
+	if(target.createInputExpression) {
+		target.inputExpression = target.createInputExpression()
+		target.inputExpression.resultCallback = function(res, parent) {
+			onResult(res, parent)
 		}
-		if(this.onPrepareInput) {
-			this.onPrepareInput()
+		if(target.onPrepareInput) {
+			target.onPrepareInput()
 		}
-		this.inputExpression.run(this)
+		target.inputExpression.run(this)
 	} else {
-		onResult(this.input)
+		onResult(target.input)
 	}
 }
 
-Expression.prototype.linkChildVars = function(childExpression) {
-	
-}
 Expression.prototype.ensureInitialized = function() {
 	if(!this.initialized) {
 		if(!this.scopeBypass){
@@ -225,28 +226,20 @@ Expression.prototype.getHintVariableValue = function() {
 	return this.hasHint() ? this.getParentVar(this.hint) : undefined
 }
 
-Expression.prototype.setResult = function(res) {
-	this._blockContext._resultCallback(res)
-}
-
 Expression.prototype.getExpressionName = function() {
 	return !this.expressionName ? "<Anonymous>" : this.expressionName
 }
 
-Expression.prototype.getRootBlockContext = function() {
+Expression.prototype.getRootParent = function() {
 	var _rootExpressionContext = null
-	var currentBlockScope = this._blockContext._parentContext
-	while(true) {
-		if(!currentBlockScope) {
-			break;
+	var currentParent = this
+	while(currentParent) {
+		if(currentParent.isRoot) {
+			return currentParent
 		}
-		if(currentBlockScope._rootExpression) {
-			_rootExpressionContext = currentBlockScope
-			break
-		}
-		currentBlockScope = currentBlockScope._parentContext
+		currentParent = currentParent.parent
 	}
-	return _rootExpressionContext
+	return null
 }
 
 Expression.prototype.requireHint = function() {
