@@ -28,8 +28,7 @@ function ConcatExpression() {
 ConcatExpression.prototype = new Expression()
 ConcatExpression.prototype.execute = function() {
 	var self = this
-	this.runInput({
-		_resultCallback: function(res) {
+	this.runInput(function(res) {
 			var values = extractComparableValues(res)
 			var len = values.length
 			var result = null
@@ -51,9 +50,8 @@ ConcatExpression.prototype.execute = function() {
 					}
 				}
 			}
-			self.setResult(result)
-		}
-	});
+			self.end(result)
+		});
 }
 
 module.exports = {

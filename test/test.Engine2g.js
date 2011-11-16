@@ -5856,3 +5856,210 @@ vows.describe('firejs - @hint').addBatch({
 		}
 	}
 }).export(module)
+
+
+vows.describe('firejs - @concat').addBatch({
+	'When I use @concat to concatenate a null with a non-null value': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@concat": [
+						null,
+						1
+					]
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be null": function(err, res) {
+				assert.isNull(err)
+				assert.isNull(res)
+			}
+		}
+	},
+	'When I use @concat to concatenate an array with with a non-array value': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@concat": [
+						[100,200],
+						null
+					]
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be an array with the non-array value at the end of the original array": function(err, res) {
+				assert.isNull(err)
+				assert.deepEqual(res, [100, 200, null])
+			}
+		}
+	}
+	,'When I use @concat to concatenate an array with with another array': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@concat": [
+						[100,200],
+						[{x:402, name: "Chuck"}, "Lorem Ipsum"]
+					]
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be an array with the items of all given arrays": function(err, res) {
+				assert.isNull(err)
+				assert.deepEqual(res, [100, 200, {x:402, name: "Chuck"}, "Lorem Ipsum"])
+			}
+		}
+	}
+	,'When I use @concat to concatenate an array with with more than one array': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@concat": [
+						[100,200],
+						[{x:402, name: "Chuck"}, "Lorem Ipsum"],
+						2,
+						["Fries"]
+					]
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be an array with the items of all given arrays": function(err, res) {
+				assert.isNull(err)
+				assert.deepEqual(res, [100, 200, {x:402, name: "Chuck"}, "Lorem Ipsum", 2, "Fries"])
+			}
+		}
+	}
+	,'When I use @concat to concatenate strings': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@concat": [
+						"Lorem",
+						" ",
+						"Ipsum"
+					]
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be a concatenated array": function(err, res) {
+				assert.isNull(err)
+				assert.deepEqual(res, "Lorem Ipsum")
+			}
+		}
+	}
+}).export(module)
