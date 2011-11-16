@@ -445,6 +445,7 @@ function Runtime() {
 		modules: []
 	}
 	this.baseDir = '.'
+	this.JSONDefinitions = new FireCollection()
 }
 
 /*
@@ -541,32 +542,38 @@ Runtime.prototype.registerWellKnownJSONExpressionFile = function(absoluteFilePat
 	this.registerWellKnownExpressionDefinition(definition)
 	return definition
 }
-
-Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDefinition) {
+function validateDefinitionHeader(expressionDefinition) {
 	if(expressionDefinition === undefined || expressionDefinition === null) {
 		throwInternalError("expression definition is required")
 	}
-	var name = expressionDefinition.name
-	if(name === undefined || name === null) {
+	if(!expressionDefinition.name) {
 		throwInternalError("expression definition doesn't have any name")
 	}
+}
+Runtime.prototype.registerForJSONCompilation = function(expressionDefinition) {
+	validateDefinitionHeader(expressionDefinition)
+	var name = expressionDefinition.name
+	this.JSONDefinitions[name] = expressionDefinition
+}
+Runtime.prototype.registerWellKnownExpressionDefinition = function(expressionDefinition) {
+	validateDefinitionHeader(expressionDefinition)
+	var name = expressionDefinition.name
 	var implementation = expressionDefinition.implementation
-	if(implementation=== undefined) {
-		if(expressionDefinition.json === undefined) {
-			throwInternalError("expression definition requires either an implementation or a json block")
-		}
-		var implementationFunc = compileExpressionFuncFromJSON(expressionDefinition.json, name + ".implementation.js")
+	if(!implementation) {
+		this.registerForJSONCompilation(expressionDefinition)
+		/*var implementationFunc = compileExpressionFuncFromJSON(expressionDefinition.json, name + ".implementation.js")
 		
 		var expressionClass = function() {};
 		expressionClass.prototype = new Expression()
 		expressionClass.prototype.execute = implementationFunc
-		implementation = expressionClass;
+		implementation = expressionClass;*/
+	} else {
+		expressionDefinition.implementation = implementation
+		expressionDefinition.implementation.prototype.expressionName = expressionDefinition.name
+		this.loadedExpressions[name] = implementation
+		this.loadedExpressionsSyn[this.expSynTable.syn(name)] = implementation
+		this.loadedExpressionsMeta[name] = expressionDefinition
 	}
-	expressionDefinition.implementation = implementation
-	expressionDefinition.implementation.prototype.expressionName = expressionDefinition.name
-	this.loadedExpressions[name] = implementation
-	this.loadedExpressionsSyn[this.expSynTable.syn(name)] = implementation
-	this.loadedExpressionsMeta[name] = expressionDefinition
 }
 
 Runtime.prototype.isExpressionLoaded = function(name) {
@@ -674,12 +681,10 @@ Runtime.prototype._compile = function(finished) {
 	compiler.expSynTable = this.expSynTable
 	compiler.outputFile = "/tmp/" + process.pid + ".js"
 	var toCompile = []
-	var expressions = this.loadedExpressionsMeta.toArray()
+	var expressions = this.JSONDefinitions.toArray()
 	for(var i = 0; i < expressions.length; i++) {
 		var exp = expressions[i]
-		if(exp.json) {
-			toCompile.push(exp)
-		}
+		toCompile.push(exp)
 	}
 	
 	compiler.compile(toCompile, function() {

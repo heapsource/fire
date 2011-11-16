@@ -5724,3 +5724,47 @@ vows.describe('firejs - @test').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe('firejs - null json body on implementation').addBatch({
+	'When I register an expression with null body': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"ReturnsNull",
+				json: null
+			})
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@ReturnsNull": null
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime.runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be null": function(err, res) {
+				assert.isNull(err)
+				assert.isNull(res)
+			}
+		}
+	}
+}).export(module)
