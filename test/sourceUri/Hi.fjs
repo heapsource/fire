@@ -1,0 +1,9 @@
+var fire = require('../../src/core.js')
+
+function Hi(){};
+Hi.prototype = new fire.Expression()
+
+module.exports = {
+	name:"Hi",
+	implementation: Hi
+}
