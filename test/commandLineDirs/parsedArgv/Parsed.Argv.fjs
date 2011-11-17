@@ -5,7 +5,7 @@ function ParsedMain() {
 }
 ParsedMain.prototype = new fire.Expression()
 ParsedMain.prototype.execute = function() {
-	this.setResult(process.parsedArgv.argv.cooked)
+	this.end(process.parsedArgv.argv.cooked)
 }
 module.exports = {
 	name: "Parsed.Argv",

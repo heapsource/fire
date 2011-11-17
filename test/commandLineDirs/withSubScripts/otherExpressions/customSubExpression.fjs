@@ -5,7 +5,7 @@ function customSubExpression() {
 }
 customSubExpression.prototype = new fire.Expression()
 customSubExpression.prototype.execute = function() {
-	this.setResult("customSubExpression")
+	this.end("customSubExpression")
 }
 
 module.exports = {

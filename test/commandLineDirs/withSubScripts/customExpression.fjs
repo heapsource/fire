@@ -5,7 +5,7 @@ function customExpression() {
 }
 customExpression.prototype = new fire.Expression()
 customExpression.prototype.execute = function() {
-	this.setResult("customExpression")
+	this.end("customExpression")
 }
 
 module.exports = {
