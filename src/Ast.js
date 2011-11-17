@@ -18,6 +18,7 @@ Tree.prototype.getRootNode = function() {
 
 function Node() {
 	this.children = []
+	this.parent = null
 }
 Node.prototype.type = null
 function trimString(str) {
@@ -135,7 +136,37 @@ Node.prototype.parseChildren = function() {
 	}
 }
 
+Node.prototype.getPathPart = function() {
+	if(this.type == AstNodeType.block) {
+		return "{@}"
+	} else if(this.type == AstNodeType.hash) {
+		return "{}"
+	} else if(this.type == AstNodeType.array) {
+		return "[]"
+	}
+	else if(this.type == AstNodeType.expression) {
+		return this.value
+	}
+	else if(this.type == AstNodeType.property) {
+		return this.value
+	}
+	return JSON.stringify(this.value)
+}
+Node.prototype.getPath = function() {
+	var path = ''
+	var currentNode = this
+	while(currentNode) {
+		if(path.length > 0){
+			path = "/" + path
+		}
+		path = currentNode.getPathPart() + path
+		currentNode = currentNode.parent
+	
+	}
+	return path
+}
 Node.prototype.addChild = function(node) {
+	node.parent = this
 	this.children.push(node)
 }
 

@@ -276,3 +276,117 @@ vows.describe('AST - Mixed Keys Parsing').addBatch({
 	}
 }).export(module)
 
+vows.describe('AST - Node Paths').addBatch({
+	"When I parse a literal value 'null' document": {
+		"the root node of the ast should have the path part 'null'":  function() {
+			var doc = null
+			var ast = new Tree()
+			ast.parse(doc)
+			assert.isNotNull(ast.getRootNode())
+			assert.strictEqual(ast.getRootNode().getPathPart(), 'null')
+		}
+	},
+	"When I parse a literal value '240' document": {
+		"the root node of the ast should have the path part '240'":  function() {
+			var doc = 240
+			var ast = new Tree()
+			ast.parse(doc)
+			assert.isNotNull(ast.getRootNode())
+			assert.strictEqual(ast.getRootNode().getPathPart(), '240')
+		}
+	},
+	"When I parse a literal value '\"Some Cool Text\"' document": {
+		"the root node of the ast should have the path part '\"Some Cool Text\"'":  function() {
+			var doc = "Some Cool Text"
+			var ast = new Tree()
+			ast.parse(doc)
+			assert.isNotNull(ast.getRootNode())
+			assert.equal(ast.getRootNode().getPathPart(), "\"Some Cool Text\"")
+		}
+	},
+	"When I parse a literal value '{x:10}' document": {
+		topic: function() {
+			var doc = {x:10, name:"Chuck"}
+			var ast = new Tree()
+			ast.parse(doc)
+			return ast
+		},
+		"the root node of the ast should have the path part '{}'":  function(ast) {
+			assert.isNotNull(ast.getRootNode())
+			assert.equal(ast.getRootNode().getPathPart(), "{}")
+		},
+		"the first sub-node should have the path path 'x'": function(ast) {
+			assert.equal(ast.getRootNode().children[0].getPathPart(), 'x')
+		},
+		"the second sub-node should have the path path 'name'": function(ast) {
+			assert.equal(ast.getRootNode().children[1].getPathPart(), 'name')
+		}
+	},
+	"When I parse a literal value '[2,3]' document": {
+		topic: function() {
+			var doc = [2,3]
+			var ast = new Tree()
+			ast.parse(doc)
+			return ast
+		},
+		"the root node of the ast should have the path part '[]'":  function(ast) {
+			assert.isNotNull(ast.getRootNode())
+			assert.equal(ast.getRootNode().getPathPart(), "[]")
+		},
+		"the first sub-node should have the path path '0'": function(ast) {
+			assert.equal(ast.getRootNode().children[0].getPathPart(), "0")
+		},
+		"the second sub-node should have the path path '1'": function(ast) {
+			assert.equal(ast.getRootNode().children[1].getPathPart(), "1")
+		}
+	},
+	"When I parse a block value '{\"@return\": null, \"@get(my.variable)\": null}' document": {
+		topic: function() {
+			var doc = {"@return": null, "@get(my.variable)": null}
+			var ast = new Tree()
+			ast.parse(doc)
+			return ast
+		},
+		"the root node of the ast should have the path part '{@}'":  function(ast) {
+			assert.isNotNull(ast.getRootNode())
+			assert.equal(ast.getRootNode().getPathPart(), "{@}")
+		},
+		"the first sub-node should have the path path '@return'": function(ast) {
+			assert.equal(ast.getRootNode().children[0].getPathPart(), "@return")
+		},
+		"the second sub-node should have the path path '@get(my.variable)'": function(ast) {
+			assert.equal(ast.getRootNode().children[1].getPathPart(), "@get(my.variable)")
+		}
+	},
+	"When I parse a full document": {
+		topic: function() {
+			var doc = {
+				"myProp": {
+					"@return": [
+						{
+							"@set(some.var)": {
+								"tags": [
+									"simple"
+								]
+							}
+						}
+					]
+				}
+			}
+			var ast = new Tree()
+			ast.parse(doc)
+			return ast
+		},
+		"the path of the deepest child should be the path plus all the parent path parts without leading or trailing separator":  function(ast) {
+			assert.isNotNull(ast.getRootNode())
+			assert.equal(ast.getRootNode().children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].getPath(), 
+			'{}/myProp/{@}/@return/[]/0/{@}/@set(some.var)/{}/tags/[]/0/"simple"')
+		},
+		"the path of the root should be the path part of the root node":  function(ast) {
+			assert.isNotNull(ast.getRootNode())
+			assert.equal(ast.getRootNode().getPath(), 
+			'{}')
+		},
+	}
+}).export(module)
+
