@@ -1,10 +1,11 @@
-function CompilationError(sourceName, path, message, code) {
-	this.sourceName = sourceName
-	this.path = path
-	this.message = message
+function CompilationError(sourceUri, path, message, code) {
+	this.sourceUri = sourceUri || null
+	this.path = path || null
+	this.message = message || null
+	this.code = code || null
 }
 CompilationError.prototype.toString = function() {
-	
+	return "#CompilationError"
 }
 
 module.exports = CompilationError

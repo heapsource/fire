@@ -41,9 +41,11 @@ var nopt = require('nopt')
 var Compiler = require('./Compiler.js')
 var SynTable = require('./SynTable')
 var url = require('url')
+var CompilationError = require('./CompilationError.js')
 module.exports.Error = Error
 module.exports.Expression = Expression
 module.exports.Iterator = Iterator
+module.exports.CompilationError = CompilationError
 
 var constants = require('./constants.js')
 
@@ -449,6 +451,10 @@ function Runtime() {
 	this.JSONDefinitions = new FireCollection()
 }
 
+Runtime.prototype.getExpressionDefinition = function(name) {
+	return this.loadedExpressionsMeta[name] || this.JSONDefinitions[name]
+}
+
 /*
  * Returns the expression definitions objects for all expressions registered and loaded.
  */
@@ -703,9 +709,8 @@ Runtime.prototype._compile = function(finished) {
 		toCompile.push(exp)
 	}
 	
-	compiler.compile(toCompile, function() {
-		
-		finished.call(self)
+	compiler.compile(toCompile, function(compilationError) {
+		finished.call(self, compilationError)
 	})
 }
 /*
@@ -727,31 +732,35 @@ Runtime.prototype.load = function(initializationCallback) {
 	})
 	// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
 	this.scanScriptsDirs()
-	this._compile(function(compilationFinished) {
-		// STEP 1. Load Configurations from Manifest
-		// (Configurations must be loaded first so the ignition.init callback of all modules can work properly)
-		var configurations = this.mergedManifest.environments;
-		if(configurations) {
-			self.configurations = configurations[self.environmentName]
-		}
-		this.events.emit('load', this)
-		this.events.removeAllListeners('load')
-
-		var initializeExpressions = []
-		
-		this.loadedExpressionsMeta.names().forEach(function(expName) {
-			var expDef = this.loadedExpressionsMeta[expName]
-			if(expDef.initialize && expDef.initialize.indexOf(this.environmentName) != -1) {
-				// it's a initializer for the current environment
-				initializeExpressions.push(expDef)
+	this._compile(function(compilationError) {
+		if(compilationError) {
+			initializationCallback(compilationError)
+		} else {
+			// STEP 1. Load Configurations from Manifest
+			// (Configurations must be loaded first so the ignition.init callback of all modules can work properly)
+			var configurations = this.mergedManifest.environments;
+			if(configurations) {
+				self.configurations = configurations[self.environmentName]
 			}
-		}, this)
-		if(initializationCallback) {
-			if(initializeExpressions.length > 0) {
-				var initIterator = new Iterator(initializeExpressions)
-				this._runNextInitializer(initIterator, initializationCallback)
-			} else {
-				initializationCallback(null)
+			this.events.emit('load', this)
+			this.events.removeAllListeners('load')
+
+			var initializeExpressions = []
+		
+			this.loadedExpressionsMeta.names().forEach(function(expName) {
+				var expDef = this.loadedExpressionsMeta[expName]
+				if(expDef.initialize && expDef.initialize.indexOf(this.environmentName) != -1) {
+					// it's a initializer for the current environment
+					initializeExpressions.push(expDef)
+				}
+			}, this)
+			if(initializationCallback) {
+				if(initializeExpressions.length > 0) {
+					var initIterator = new Iterator(initializeExpressions)
+					this._runNextInitializer(initIterator, initializationCallback)
+				} else {
+					initializationCallback(null)
+				}
 			}
 		}
 	})

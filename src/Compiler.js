@@ -12,6 +12,7 @@ function Compiler(runtime) {
 	this.buffer = new StringBuffer()
 	//this.buffer.indentStep = 4
 	this.typeDefinitions = []
+	this.currentlyCompiledRootExpression = null
 }
 Compiler.prototype.outputFile = null
 Compiler.prototype.expSynTable = null
@@ -29,10 +30,18 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
 		var expNode = iterator.current()
 		var headerValue = expNode.value
 		var expressionName = Ast.getExpressionNameFromSpecialKey(headerValue)
+		var hintValue = Ast.getHintFromSpecialKey(headerValue)
+		
+		var expDefinition = this.runtime.getExpressionDefinition(expressionName)
+		var supportHints = expDefinition.flags && expDefinition.flags.indexOf("hint") != -1
+		if(!supportHints &&  hintValue) {
+			throw new CompilationError(self.currentlyCompiledRootExpression.sourceUri, expNode.getPath(), "Expression '" + expressionName + "' does not support hints",  'UnsupportedHint')
+		}
+		
 		this.buffer.writeLine("//" + expNode.value)
 		var expVarName = "exp"
 		this.buffer.writeLine("var "+expVarName+" = new Runtime.loadedExpressionsSyn." + self.expSynTable.syn(expressionName) + "()")
-		this.buffer.writeLine(expVarName+".header = "+ JSON.stringify(headerValue))
+		//this.buffer.writeLine(expVarName+".header = "+ JSON.stringify(headerValue))
 		this.buffer.writeLine(expVarName+".runtime = Runtime")
 		var expValNode = expNode.children[0]
 		if(expValNode.isPureValue()) {
@@ -51,7 +60,7 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
 			this.buffer.unindent()
 			this.buffer.writeLine("}")
 		}
-		var hintValue = Ast.getHintFromSpecialKey(headerValue)
+		
 		if(hintValue) {
 			this.buffer.writeLine(expVarName+".hint = " + JSON.stringify(hintValue) )
 		}
@@ -175,6 +184,7 @@ Compiler.prototype.generateAstNodeCode = function(astNode) {
 }
 Compiler.prototype.generateExpressionType = function(typeDefinition) {
 	var expDefinition = typeDefinition.definition
+	this.currentlyCompiledRootExpression = expDefinition
 	var expSynName = this.expSynTable.syn(expDefinition.name)
 	this.buffer.writeLine("//" + expDefinition.name)
 	this.buffer.writeLine("function " + expSynName + "(){};")
@@ -227,15 +237,19 @@ Compiler.prototype.compile = function(expressions, callback) {
 		process.nextTick(function() {
 			if(self.iterator.next()) {
 				var typeDefinition = self.iterator.current()
-				self.generateExpressionType(typeDefinition, {
-						isRoot: true
-					})
-				continueNextExpression()
+				try {
+					self.generateExpressionType(typeDefinition, {
+							isRoot: true
+						})
+					continueNextExpression()
+				} catch(err) {
+					callback(err)
+				}
 			} else {
 				self.buffer.writeLine("})")
 				fs.writeFileSync(self.outputFile, self.buffer.toString())
 				self.load()
-				callback(self.dictionaryType)
+				callback()
 			}
 		});
 	};

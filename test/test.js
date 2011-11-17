@@ -4,6 +4,7 @@ var jsonCode = require('../src/core.js')
 var Runtime = jsonCode.Runtime
 var Expression = jsonCode.Expression
 var exec  = require('child_process').exec
+var CompilationError = require('../src/CompilationError.js')
 jsonCode.exportTestOnlyFunctions();
 
 var fs = require('fs'),
@@ -6074,5 +6075,11 @@ vows.describe('firejs - @concat').addBatch({
 				assert.deepEqual(res, "Lorem Ipsum")
 			}
 		}
+	}
+}).export(module)
+
+vows.describe('firejs - Compilation Errors').addBatch({
+	"Firejs module should export the type CompilationError": function() {
+		assert.equal(jsonCode.CompilationError, CompilationError)
 	}
 }).export(module)
