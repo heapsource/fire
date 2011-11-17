@@ -46,7 +46,7 @@ vows.describe('firejs').addBatch({
 					contextBase._errorCallback =  function(err) {
 						self.callback(err, null)
 					};
-					runtime.runExpressionByName("NoSpecialKeysTest", contextBase ,null)
+					runtime._testOnly_runExpressionByName("NoSpecialKeysTest", contextBase ,null)
 				}
 			});
 		},
@@ -123,7 +123,7 @@ vows.describe('firejs').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -173,7 +173,7 @@ vows.describe('firejs').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -228,7 +228,7 @@ vows.describe('firejs').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -284,7 +284,7 @@ vows.describe('firejs').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -348,7 +348,7 @@ vows.describe('firejs').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -432,7 +432,7 @@ vows.describe('firejs').addBatch({
 							contextBase._errorCallback =  function(err) {
 								self.callback(err, null)
 							};
-							runtime.runExpressionByName("Test", contextBase ,null)
+							runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 						}
 					});
 				},
@@ -492,7 +492,7 @@ vows.describe('firejs').addBatch({
 							contextBase._errorCallback =  function(err) {
 								self.callback(err, null)
 							};
-							runtime.runExpressionByName("Test", contextBase ,null)
+							runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 						}
 					});
 				},
@@ -554,7 +554,7 @@ vows.describe('firejs').addBatch({
 							contextBase._errorCallback =  function(err) {
 								self.callback(err, null)
 							};
-							runtime.runExpressionByName("Test", contextBase ,null)
+							runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 						}
 					});
 				},
@@ -618,7 +618,7 @@ vows.describe('firejs variables scopes').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -675,7 +675,7 @@ vows.describe('firejs variables scopes').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -731,7 +731,7 @@ vows.describe('firejs variables scopes').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -792,7 +792,7 @@ vows.describe('firejs variables scopes').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -849,7 +849,7 @@ vows.describe('firejs variables scopes').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -900,7 +900,7 @@ vows.describe('firejs variables scopes').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -951,7 +951,7 @@ vows.describe('firejs _result tests').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1001,7 +1001,7 @@ vows.describe('firejs _result tests').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1054,7 +1054,7 @@ vows.describe('firejs _result tests').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, null)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1111,7 +1111,7 @@ vows.describe('firejs error handling').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1169,7 +1169,7 @@ vows.describe('firejs error handling').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1220,7 +1220,7 @@ vows.describe('firejs error handling').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1276,7 +1276,7 @@ vows.describe('firejs error handling').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1333,7 +1333,7 @@ vows.describe('firejs error handling').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1390,7 +1390,7 @@ vows.describe('firejs error handling').addBatch({
 						contextBase._errorCallback =  function(err) {
 							self.callback(err, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1448,7 +1448,7 @@ vows.describe('firejs error handling').addBatch({
 							contextBase._errorCallback =  function(err) {
 								self.callback(err, result)
 							};
-							runtime.runExpressionByName("Test", contextBase ,null)
+							runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 						}
 					});
 				},
@@ -1505,7 +1505,7 @@ vows.describe('firejs error handling').addBatch({
 							contextBase._errorCallback =  function(err) {
 								self.callback(err, result)
 							};
-							runtime.runExpressionByName("Test", contextBase ,null)
+							runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 						}
 					});
 				},
@@ -1563,7 +1563,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 				
@@ -1630,7 +1630,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1706,7 +1706,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1785,7 +1785,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1844,7 +1844,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1905,7 +1905,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -1971,7 +1971,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -2043,7 +2043,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 				
@@ -2114,7 +2114,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -2176,7 +2176,7 @@ vows.describe('firejs loop control').addBatch({
 							result.errorInfo = err
 							self.callback(null, result)
 						};
-						runtime.runExpressionByName("Test", contextBase ,null)
+						runtime._testOnly_runExpressionByName("Test", contextBase ,null)
 					}
 				});
 			},
@@ -2245,7 +2245,7 @@ vows.describe('firejs manifests').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("expressionModule1", contextBase ,null)
+						runtime._testOnly_runExpressionByName("expressionModule1", contextBase ,null)
 					},
 					"it should work properly": function(err, res) {
 					 	assert.equal(res, "Hello World expressionModule1")
@@ -2262,7 +2262,7 @@ vows.describe('firejs manifests').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("expressionModule2", contextBase ,null)
+						runtime._testOnly_runExpressionByName("expressionModule2", contextBase ,null)
 					},
 					"it should work properly": function(err, res) {
 					 	assert.equal(res, "Hello World expressionModule2")
@@ -2375,7 +2375,7 @@ vows.describe('firejs configurations').addBatch({
 						contextBase._inputExpression  = function() {};
 						contextBase._variables = {};            
 						contextBase._errorCallback =  function() {};
-						runtime.runExpressionByName("module1", contextBase ,null)
+						runtime._testOnly_runExpressionByName("module1", contextBase ,null)
 					},
 					"it should work with the configurations": function(err, res) {
 					 	assert.equal(res, "Hello World with configurations, server configuration host is 127.0.0.1 is and the environment is customEnv1")
@@ -2416,7 +2416,7 @@ vows.describe('firejs JSON definition registration').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("customJsonExpression", contextBase ,null)
+							runtime._testOnly_runExpressionByName("customJsonExpression", contextBase ,null)
 						})
 					},
 					"it should return the value specified in the firejs JSON document given in the definition": function(err, res) {
@@ -2464,7 +2464,7 @@ vows.describe('firejs @each built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEach", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEach", contextBase ,null)
 						})
 					},
 					"it should iterate the last value and return an array with converted documents from the input using the prefixed variable": function(err, res) {
@@ -2517,7 +2517,7 @@ vows.describe('firejs @each built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEach", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEach", contextBase ,null)
 						})
 					},
 					"it should iterate the last value in the block and return an array with converted documents from the input": function(err, res) {
@@ -2570,7 +2570,7 @@ vows.describe('firejs @each built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEach", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEach", contextBase ,null)
 						})
 					},
 					"it should return an empty array": function(err, res) {
@@ -2613,7 +2613,7 @@ vows.describe('firejs @if built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testIf", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
 						})
 					},
 					"it should return undefined": function(err, res) {
@@ -2652,7 +2652,7 @@ vows.describe('firejs @if built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testIf", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
 						})
 					},
 					"should return the input": function(err, res) {
@@ -2690,7 +2690,7 @@ vows.describe('firejs @if built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testIf", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
 						})
 					},
 					"should return undefined": function(err, res) {
@@ -2729,7 +2729,7 @@ vows.describe('firejs @if built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testIf", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
 						})
 					},
 					"should return false": function(err, res) {
@@ -2768,7 +2768,7 @@ vows.describe('firejs @if built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testIf", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
 						})
 					},
 					"should return false": function(err, res) {
@@ -2810,7 +2810,7 @@ vows.describe('firejs booleans').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testFalse", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testFalse", contextBase ,null)
 						})
 					},
 					"it should return false": function(err, res) {
@@ -2848,7 +2848,7 @@ vows.describe('firejs booleans').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testTrue", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testTrue", contextBase ,null)
 						})
 					},
 					"it should return true": function(err, res) {
@@ -2890,7 +2890,7 @@ vows.describe('firejs @unless built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testUnless", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testUnless", contextBase ,null)
 						})
 					},
 					"it should return the input": function(err, res) {
@@ -2929,7 +2929,7 @@ vows.describe('firejs @unless built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testUnless", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testUnless", contextBase ,null)
 						})
 					},
 					"should return true literal value": function(err, res) {
@@ -2968,7 +2968,7 @@ vows.describe('firejs @unless built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testUnless", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testUnless", contextBase ,null)
 						})
 					},
 					"should return true literal value": function(err, res) {
@@ -3006,7 +3006,7 @@ vows.describe('firejs @unless built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testUnless", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testUnless", contextBase ,null)
 						})
 					},
 					"should return undefined": function(err, res) {
@@ -3045,7 +3045,7 @@ vows.describe('firejs @unless built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testUnless", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testUnless", contextBase ,null)
 						})
 					},
 					"should return false": function(err, res) {
@@ -3084,7 +3084,7 @@ vows.describe('firejs @unless built-in expression').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testUnless", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testUnless", contextBase ,null)
 						})
 					},
 					"should return false": function(err, res) {
@@ -3127,7 +3127,7 @@ vows.describe('firejs @equals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEquals", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEquals", contextBase ,null)
 						})
 					},
 					"it should should return undefined": function(err, res) {
@@ -3165,7 +3165,7 @@ vows.describe('firejs @equals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEquals", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEquals", contextBase ,null)
 						})
 					},
 					"it should should true": function(err, res) {
@@ -3203,7 +3203,7 @@ vows.describe('firejs @equals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEquals", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEquals", contextBase ,null)
 						})
 					},
 					"it should return false": function(err, res) {
@@ -3241,7 +3241,7 @@ vows.describe('firejs @equals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEquals", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEquals", contextBase ,null)
 						})
 					},
 					"it should return true": function(err, res) {
@@ -3279,7 +3279,7 @@ vows.describe('firejs @equals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEquals", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEquals", contextBase ,null)
 						})
 					},
 					"it should return true": function(err, res) {
@@ -3317,7 +3317,7 @@ vows.describe('firejs @equals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEquals", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEquals", contextBase ,null)
 						})
 					},
 					"it should return true": function(err, res) {
@@ -3355,7 +3355,7 @@ vows.describe('firejs @equals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("testEquals", contextBase ,null)
+							runtime._testOnly_runExpressionByName("testEquals", contextBase ,null)
 						})
 					},
 					"it should return false": function(err, res) {
@@ -3393,7 +3393,7 @@ vows.describe('firejs @equals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("MainTest", contextBase ,null)
+							runtime._testOnly_runExpressionByName("MainTest", contextBase ,null)
 						})
 					},
 					"it should return true": function(err, res) {
@@ -3434,7 +3434,7 @@ vows.describe('firejs @notEquals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should should return undefined": function(err, res) {
@@ -3472,7 +3472,7 @@ vows.describe('firejs @notEquals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should should false": function(err, res) {
@@ -3510,7 +3510,7 @@ vows.describe('firejs @notEquals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should return true": function(err, res) {
@@ -3548,7 +3548,7 @@ vows.describe('firejs @notEquals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should return false": function(err, res) {
@@ -3586,7 +3586,7 @@ vows.describe('firejs @notEquals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should return false": function(err, res) {
@@ -3624,7 +3624,7 @@ vows.describe('firejs @notEquals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should return false": function(err, res) {
@@ -3662,7 +3662,7 @@ vows.describe('firejs @notEquals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should return true": function(err, res) {
@@ -3700,7 +3700,7 @@ vows.describe('firejs @notEquals').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should return false": function(err, res) {
@@ -3748,7 +3748,7 @@ vows.describe('firejs @increment').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should return an error": function(err, res) {
@@ -3788,7 +3788,7 @@ vows.describe('firejs @increment').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should bypass and set NaN in the variable": function(err, res) {
@@ -3828,7 +3828,7 @@ vows.describe('firejs @increment').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should should return NaN": function(err, res) {
@@ -3868,7 +3868,7 @@ vows.describe('firejs @increment').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should should return the sum": function(err, res) {
@@ -3916,7 +3916,7 @@ vows.describe('firejs @decrement').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should return an error": function(err, res) {
@@ -3956,7 +3956,7 @@ vows.describe('firejs @decrement').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should bypass and set NaN in the variable": function(err, res) {
@@ -3996,7 +3996,7 @@ vows.describe('firejs @decrement').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should should return NaN": function(err, res) {
@@ -4036,7 +4036,7 @@ vows.describe('firejs @decrement').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should should return the subtraction": function(err, res) {
@@ -4214,7 +4214,7 @@ vows.describe('firejs @input').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"it should return the input callback": function(err, res) {
@@ -4260,7 +4260,7 @@ vows.describe('firejs @input').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"it should return the input callback": function(err, res) {
@@ -4361,7 +4361,7 @@ vows.describe('firejs @undefined').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be undefined": function(err, res) {
@@ -4405,7 +4405,7 @@ vows.describe('firejs @raiseError').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"it should return an error": function(err, res) {
@@ -4455,7 +4455,7 @@ vows.describe('firejs loadedModules').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"it should return an error": function(err, res) {
@@ -4569,7 +4569,7 @@ vows.describe('firejs createVar').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"should not override the outer variable": function(err, res) {
@@ -4622,7 +4622,7 @@ vows.describe('firejs createVar').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"should not override the outer variable": function(err, res) {
@@ -4667,7 +4667,7 @@ vows.describe('firejs createVar').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be a structure with the member x and y": function(err, res) {
@@ -4713,7 +4713,7 @@ vows.describe('firejs @index').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should bypass the undefined value": function(err, res) {
@@ -4752,7 +4752,7 @@ vows.describe('firejs @index').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should bypass the null value": function(err, res) {
@@ -4793,7 +4793,7 @@ vows.describe('firejs @index').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should return the value of the property": function(err, res) {
@@ -4832,7 +4832,7 @@ vows.describe('firejs @index').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"it should return the value of the given index in the array": function(err, res) {
@@ -4871,7 +4871,7 @@ vows.describe('firejs @index').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should bypass the undefined value": function(err, res) {
@@ -4910,7 +4910,7 @@ vows.describe('firejs @index').addBatch({
 							if(initError) {
 								self.callback(initError, null)
 							}
-							runtime.runExpressionByName("TestMain", contextBase ,null)
+							runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 						})
 					},
 					"it should bypass the value": function(err, res) {
@@ -4951,7 +4951,7 @@ vows.describe('firejs @index').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"it should return the value of the property": function(err, res) {
@@ -4989,7 +4989,7 @@ vows.describe('firejs @index').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"it should return the value of the given index in the array": function(err, res) {
@@ -5156,7 +5156,7 @@ vows.describe('firejs - initial last result').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be the initialized value of the caller expression": function(err, res) {
@@ -5199,7 +5199,7 @@ vows.describe('firejs - @isEmpty').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be true": function(err, res) {
@@ -5239,7 +5239,7 @@ vows.describe('firejs - @isEmpty').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be false": function(err, res) {
@@ -5278,7 +5278,7 @@ vows.describe('firejs - @isEmpty').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be false": function(err, res) {
@@ -5321,7 +5321,7 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be false": function(err, res) {
@@ -5361,7 +5361,7 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be true": function(err, res) {
@@ -5400,7 +5400,7 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be true": function(err, res) {
@@ -5440,7 +5440,7 @@ vows.describe('firejs - @isNotEmpty').addBatch({
 						if(initError) {
 							self.callback(initError, null)
 						}
-						runtime.runExpressionByName("TestMain", contextBase ,null)
+						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 					})
 				},
 				"the result should be false": function(err, res) {
@@ -5493,7 +5493,7 @@ vows.describe('firejs - @parentResult').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"the result should be returned value using the parentResult value": function(err, res) {
@@ -5538,7 +5538,7 @@ vows.describe('firejs - @test').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"it should match the last result": function(err, res) {
@@ -5579,7 +5579,7 @@ vows.describe('firejs - @test').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"it should match the last result": function(err, res) {
@@ -5621,7 +5621,7 @@ vows.describe('firejs - @test').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"it should match the last result": function(err, res) {
@@ -5663,7 +5663,7 @@ vows.describe('firejs - @test').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"it should match the hint path": function(err, res) {
@@ -5705,7 +5705,7 @@ vows.describe('firejs - @test').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"it should not match the hint path": function(err, res) {
@@ -5749,7 +5749,7 @@ vows.describe('firejs - null json body on implementation').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"the result should be null": function(err, res) {
@@ -5790,7 +5790,7 @@ vows.describe('firejs - @getModuleConfig').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"the result should be the configuration for the current environment": function(err, res) {
@@ -5835,7 +5835,7 @@ vows.describe('firejs - @hint').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,{
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,{
 						_hint: "Hint for the root expression"
 					})
 				})
@@ -5881,7 +5881,7 @@ vows.describe('firejs - @concat').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"the result should be null": function(err, res) {
@@ -5921,7 +5921,7 @@ vows.describe('firejs - @concat').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"the result should be an array with the non-array value at the end of the original array": function(err, res) {
@@ -5961,7 +5961,7 @@ vows.describe('firejs - @concat').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"the result should be an array with the items of all given arrays": function(err, res) {
@@ -6003,7 +6003,7 @@ vows.describe('firejs - @concat').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"the result should be an array with the items of all given arrays": function(err, res) {
@@ -6044,7 +6044,7 @@ vows.describe('firejs - @concat').addBatch({
 					if(initError) {
 						self.callback(initError, null)
 					}
-					runtime.runExpressionByName("TestMain", contextBase ,null)
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
 				})
 			},
 			"the result should be a concatenated array": function(err, res) {

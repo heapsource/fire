@@ -52,12 +52,12 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 			console.trace()
 			this.errorCallback("_testOnly_runJSONObjectFromJSON runtime init error:" + initErr)
 		}
-		runtime.runExpressionByName("_testOnly_runJSONObjectFromJSON", contextBase, null)
+		runtime._testOnly_runExpressionByName("_testOnly_runJSONObjectFromJSON", contextBase, null)
 	})
 }
 
 
-Runtime.prototype.runExpressionInstance = function(expressionInstance, block_context_base, context_block_overrides) {
+Runtime.prototype._testOnly_runExpressionInstance = function(expressionInstance, block_context_base, context_block_overrides) {
 	//console.warn("block_context_base",block_context_base)
 	//console.warn("context_block_overrides",context_block_overrides)
 	/*if(expFunc === undefined || expFunc == null || typeof(expFunc) != 'function') {
@@ -180,7 +180,7 @@ Runtime.prototype.runExpressionInstance = function(expressionInstance, block_con
 };
 
 
-Runtime.prototype.runExpressionByName = function(expressionName, base_context, context_overrides) {
+Runtime.prototype._testOnly_runExpressionByName = function(expressionName, base_context, context_overrides) {
 	//console.warn("Calling expression with name ", expressionName, " context_overrides ", context_overrides)
 	var expDefinition = this.loadedExpressionsMeta[expressionName]
 	if(expDefinition == undefined) {
@@ -193,7 +193,7 @@ Runtime.prototype.runExpressionByName = function(expressionName, base_context, c
 	}
 	var expObject = expDefinition.implementation
 	var expressionObject = new expObject()
-	this.runExpressionInstance(expressionObject, base_context, context_overrides)
+	this._testOnly_runExpressionInstance(expressionObject, base_context, context_overrides)
 }
 
 
