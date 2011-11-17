@@ -5,10 +5,11 @@ var Runtime = jsonCode.Runtime
 var Expression = jsonCode.Expression
 var exec  = require('child_process').exec
 var CompilationError = require('../src/CompilationError.js')
-jsonCode.exportTestOnlyFunctions();
+
 
 var fs = require('fs'),
 path = require('path')
+require('./runtimeExtensions.js')
 
 function getTempTestOutputFileName(filename) {
 	return "/tmp/" + filename
@@ -57,31 +58,7 @@ vows.describe('firejs').addBatch({
 			assert.isNull(err)
 		}
 	},
-'When I have a JSON with regular keys and expression keys at the same level': {
-	topic: function() {
-		return {
-			"@return": 2,
-			"someOtherRegularKey": 3
-		};    
-	},
-	"when I compile it": {
-		" I should get JS1001 error": function(topic) {
-			var test = function() {
-				jsonCode._testOnly_compileExpressionFuncFromJSON(topic, "someFileWithMixedKeys.js",undefined,"");
-			};
-			assert.throws(function() {
-				test()
-				}, jsonCode.Error)
-				try {
-					test();
-				}catch(ex) {
-					//console.log(ex)
-					assert.equal(ex.code, "JS1001")
-				}
-			}
-		} 
-	}
-	,
+
 	"When I have a key called '@return' and I ask for the pure expression name": {
 		topic: function() {
 			return "@return"

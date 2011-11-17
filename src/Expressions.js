@@ -256,28 +256,5 @@ function setVarCore(runtime, bag, path, value, forceCreate) {
 	runtime.getPaths().runWrite(bag, path, value, forceCreate)
 }
 
-Expression.prototype.runExp = function(exp, context_block_overrides) {
-	//console.warn("Calling expression ", exp)
-	if(typeof(exp) == 'function') {
-		this._blockContext._runtime.runExpressionFunc(exp, this._blockContext, context_block_overrides )
-	} else if(typeof(exp) == 'string') {
-		this._blockContext._runtime.runExpressionByName(exp, this._blockContext, context_block_overrides )
-	} else {
-		throwInternalError("exp must be a expression name or a function")
-	}
-}
-
-var TEST_PRINT_TRACE_ON_INTERNAL_ERROR = false
-
-function throwInternalError(msg) {
-	if(TEST_PRINT_TRACE_ON_INTERNAL_ERROR)
-	{
-		console.trace()
-	}
-	throw "fire.js internal error, " + msg
-}
-
 module.exports.Expression = Expression
 module.exports.setVarCore = setVarCore
-module.exports.TEST_PRINT_TRACE_ON_INTERNAL_ERROR = TEST_PRINT_TRACE_ON_INTERNAL_ERROR
-module.exports.throwInternalError = throwInternalError

@@ -3,7 +3,6 @@ var assert = require('assert')
 var jsonCode = require('../src/core.js')
 var FireError = require('../src/core.js').Error
 var Runtime = jsonCode.Runtime
-jsonCode.exportTestOnlyFunctions();
 
 var globalContextBase = {};
 globalContextBase._resultCallback = function(res) {}

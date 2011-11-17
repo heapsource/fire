@@ -75,21 +75,20 @@ module.exports = function() {
 				process.exit(0)
 				} else 
 				{
-					var contextBase = {};
-					contextBase._resultCallback = function(res) {
+					var expDef = runtime.getExpressionDefinition(expressionName)
+					var exp = new(expDef.implementation)
+					exp.runtime = runtime
+					exp.resultCallback = function(res) {
 						if(!(res instanceof fire.IgnoreOutput)) {
 							sys.print(JSON.stringify(res))
 						}
 						process.exit(0)
 					}
-					contextBase._loopCallback = function() {};
-					contextBase._inputExpression  = function() {};
-					contextBase._variables = {};   
-					contextBase._errorCallback =  function(err) {
+					exp.errorCallback = function(err) {
 						console.error(err)
 						process.exit(1)
-					};
-					runtime.runExpressionByName(expressionName, contextBase ,null)
+					}
+					exp.run()
 				}
 			}
 

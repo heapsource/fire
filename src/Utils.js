@@ -10,7 +10,7 @@ module.exports.endsWith = endsWith
 
 
 /*
-	Returns the files with a specific extension. Return the file name and not the path.
+	Returns the files with a specific extension. Returns the file name and not the path.
 */
 module.exports.getFilesWithExtension = function(absoluteDirPath, extension) {
 	var fileNames = fs.readdirSync(absoluteDirPath)
