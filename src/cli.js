@@ -27,7 +27,7 @@ var path = require('path')
 var sys = require('sys')
 var fs = require('fs')
 var util = require('util')
-var constants = require('constants')
+
 module.exports = function() {
 	var pureArgs = process.argv.slice(2)
 	var noArgs = pureArgs.length == 0
@@ -73,7 +73,7 @@ module.exports = function() {
 						error: (err.toJSONObject ? err.toJSONObject() : err.toString())
 					}))
 				}
-				process.exit(constants.INITIALIZATION_ERROR_STATUS_CODE)
+				process.exit(fire.INITIALIZATION_ERROR_EXIT_CODE)
 			}
 			if(pureArgs.indexOf('--print-expressions') != -1) {
 				var expressions = []
@@ -90,6 +90,22 @@ module.exports = function() {
 			} else 
 				{
 					var expDef = runtime.getExpressionDefinition(expressionName)
+					if(!expDef) {
+						var msg = "Main Expression '" + expressionName + "' can not be found"
+						if(!process.parsedArgv['porcelain-errors']) {
+							console.error("Fire.JS CLI Error")
+							console.error(msg)
+						} else {
+							console.error(JSON.stringify({
+								type: "MainExpressionNotFound",
+								error: {
+									message: msg,
+									expressionName: expressionName
+								}
+							}))
+						}
+						process.exit(fire.MAIN_EXPRESSION_NOT_FOUND_ERROR_EXIT_CODE)
+					}
 					var exp = new(expDef.implementation)
 					exp.runtime = runtime
 					exp.resultCallback = function(res) {

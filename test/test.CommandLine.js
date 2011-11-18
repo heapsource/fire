@@ -226,5 +226,61 @@ vows.describe('firejs command line utility').addBatch({
 			assert.deepEqual(JSON.parse(output.stdout), [
 			"--something", 'true'])
 		}
+	},
+	"When I run an application using package.json and there is no main script matching the name of the app": {
+		topic: function() {
+			var self = this
+			var processResult = null
+			var child = exec('bin/./firejs test/commandLineDirs/invalidMainPackageJson/package.json', function (error, stdout, stderr) {
+				processResult = {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				}
+			});
+			child.on("exit", function(code, signal) {
+				processResult.code = code
+				self.callback(null, processResult)
+			})
+		},
+		"The exit code should be MAIN_EXPRESSION_NOT_FOUND_ERROR_EXIT_CODE": function(output){
+			assert.strictEqual(output.code, fire.MAIN_EXPRESSION_NOT_FOUND_ERROR_EXIT_CODE)
+			},
+		"Stderr should have a human readable message": function(output){
+			assert.isNotNull(output.stdout)
+			assert.equal(output.stderr, "Fire.JS CLI Error\nMain Expression 'SuperApp.Main' can not be found\n")
+		}
+	},
+	"When I run an application with porcelain errors using package.json and there is no main script matching the name of the app": {
+		topic: function() {
+			var self = this
+			var processResult = null
+			var child = exec('bin/./firejs test/commandLineDirs/invalidMainPackageJson/package.json --porcelain-errors', function (error, stdout, stderr) {
+				processResult = {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				}
+			});
+			child.on("exit", function(code, signal) {
+				processResult.code = code
+				self.callback(null, processResult)
+			})
+		},
+		"The exit code should be MAIN_EXPRESSION_NOT_FOUND_ERROR_EXIT_CODE": function(output){
+			assert.strictEqual(output.code, fire.MAIN_EXPRESSION_NOT_FOUND_ERROR_EXIT_CODE)
+		},
+		"stderr JSON document error type should be MainExpressionNotFound": function(output){
+			var stderr = JSON.parse(output.stderr)
+			assert.equal(stderr.type, "MainExpressionNotFound")
+		},
+		"stderr JSON document error message should be the human readable message": function(output){
+			var stderr = JSON.parse(output.stderr)
+			assert.equal(stderr.error.message, "Main Expression \'SuperApp.Main\' can not be found")
+		},
+		"stderr JSON document expressionName should be the name of the main expression that the CLI failed to execute": function(output){
+			var stderr = JSON.parse(output.stderr)
+			assert.equal(stderr.error.expressionName, "SuperApp.Main")
+		}
 	}
 }).export(module);
