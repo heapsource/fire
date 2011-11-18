@@ -26,7 +26,8 @@ var fire = require('fire')
 var path = require('path')
 var sys = require('sys')
 var fs = require('fs')
-
+var util = require('util')
+var constants = require('constants')
 module.exports = function() {
 	var pureArgs = process.argv.slice(2)
 	var noArgs = pureArgs.length == 0
@@ -58,8 +59,21 @@ module.exports = function() {
 		var self = this
 		var initializationFinished = function(err) {
 			if(err) {
-				console.error(err.toString())
-				process.exit(1)
+				var UnknownConstructor = "<unknown>"
+				var errorType = ((typeof(err) === 'object' && err.constructor) ? (err.constructor.name || UnknownConstructor) : "UnknownConstructor")
+				if(!process.parsedArgv['porcelain-errors']) {
+					console.error("Fire.JS Runtime Initialization Error")
+					console.error({
+						type: errorType,
+						error: err
+					})
+				} else {
+					console.error(JSON.stringify({
+						type: errorType,
+						error: (err.toJSONObject ? err.toJSONObject() : err.toString())
+					}))
+				}
+				process.exit(constants.INITIALIZATION_ERROR_STATUS_CODE)
 			}
 			if(pureArgs.indexOf('--print-expressions') != -1) {
 				var expressions = []
@@ -73,7 +87,7 @@ module.exports = function() {
 				}
 				sys.print(JSON.stringify(expressions))
 				process.exit(0)
-				} else 
+			} else 
 				{
 					var expDef = runtime.getExpressionDefinition(expressionName)
 					var exp = new(expDef.implementation)
@@ -85,7 +99,7 @@ module.exports = function() {
 						process.exit(0)
 					}
 					exp.errorCallback = function(err) {
-						console.error(err)
+						console.error(util.inspect(err))
 						process.exit(1)
 					}
 					exp.run()

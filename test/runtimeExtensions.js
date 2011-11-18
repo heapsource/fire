@@ -49,8 +49,8 @@ function _testOnly_runJSONObjectFromJSON(jsonBlock, variables, inputCallback, lo
 	*/
 	runtime.load(function(initErr) {
 		if(initErr) {
-			console.trace()
-			this.errorCallback("_testOnly_runJSONObjectFromJSON runtime init error:" + initErr)
+			//console.trace()
+			contextBase._errorCallback("_testOnly_runJSONObjectFromJSON runtime init error:" + initErr)
 		}
 		runtime._testOnly_runExpressionByName("_testOnly_runJSONObjectFromJSON", contextBase, null)
 	})

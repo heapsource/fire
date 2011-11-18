@@ -60,7 +60,8 @@ function Runtime() {
 
 
 Runtime.prototype.getExpressionDefinition = function(name) {
-	return this.loadedExpressionsMeta[name] || this.JSONDefinitions[name]
+	var res = this.loadedExpressionsMeta[name] || (this.JSONDefinitions[name] || null)
+	return res
 }
 
 /*

@@ -53,6 +53,9 @@ Compiler.prototype.generateCodeBlockChain = function(iterator, runTargetName) {
 		var hintValue = Ast.getHintFromSpecialKey(headerValue)
 		
 		var expDefinition = this.runtime.getExpressionDefinition(expressionName)
+		if(!expDefinition) {
+			throw new CompilationError(self.currentlyCompiledRootExpression.sourceUri, expNode.getPath(), "Expression '" + expressionName + "' can not be found.",  'ExpressionNotFound')
+		}
 		var supportHints = expDefinition.flags && expDefinition.flags.indexOf("hint") != -1
 		if(!supportHints &&  hintValue) {
 			throw new CompilationError(self.currentlyCompiledRootExpression.sourceUri, expNode.getPath(), "Expression '" + expressionName + "' does not support hints",  'UnsupportedHint')

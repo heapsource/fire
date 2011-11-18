@@ -127,10 +127,10 @@ vows.describe('firejs').addBatch({
 					}
 				});
 			},
-			"the result should not be null" : function(err, expressionResult) {
+			"the result should not be null" : function(expressionResult) {
 				assert.isNotNull(expressionResult.result)
 			},
-			"the result should be 2" : function(err, expressionResult) {
+			"the result should be 2" : function(expressionResult) {
 				assert.equal(expressionResult.result, 2);
 			}
 		}
@@ -558,17 +558,17 @@ vows.describe('firejs').addBatch({
 						}
 					});
 				},
-				"the result should not be null" : function(err, expressionResult) {
+				"the result should not be null" : function(expressionResult) {
 					assert.isNotNull(expressionResult.result)
 				},
-				"the result should be the array with the result of all expressions as items, the last result in the expression block" : function(err, expressionResult) {
+				"the result should be the array with the result of all expressions as items, the last result in the expression block" : function(expressionResult) {
 					assert.deepEqual(expressionResult.result, [1,{
 						x:64.2,
 						y: 934.1
 					}
 						]);
 				},
-				"the result callback should be called only once":  function(err, expressionResult) {
+				"the result callback should be called only once":  function(expressionResult) {
 					assert.equal(expressionResult.count, 1)
 				}
 			}
@@ -622,10 +622,10 @@ vows.describe('firejs variables scopes').addBatch({
 					}
 				});
 			},
-			"the result should not be null" : function(error, expressionResult) {
+			"the result should not be null" : function(expressionResult) {
 				assert.isNotNull(expressionResult.result)
 			},
-			"the result should be an object with the variable value on it, the last result in the expression block" : function(error, expressionResult) {
+			"the result should be an object with the variable value on it, the last result in the expression block" : function(expressionResult) {
 				assert.deepEqual(expressionResult.result, {
 					x:22.3,
 					y:56.2
@@ -679,10 +679,10 @@ vows.describe('firejs variables scopes').addBatch({
 					}
 				});
 			},
-			"the result should be undefined" : function(err, expressionResult) {
+			"the result should be undefined" : function(expressionResult) {
 				assert.equal(expressionResult.result, undefined)
 			},
-			"the result should be undefined, the value of an undefined variable" : function(err, expressionResult) {
+			"the result should be undefined, the value of an undefined variable" : function(expressionResult) {
 				assert.deepEqual(expressionResult.result, undefined);
 			}
 		}

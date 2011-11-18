@@ -98,10 +98,10 @@ vows.describe('firejs command line utility').addBatch({
 			}))
 		}
 	},
-	"When I run the command line in a project with a failing initializer": {
+	"When I run the command line in a project with a failing initializer and --porcelain-errors": {
 		topic: function() {
 			var self = this
-				exec('bin/./firejs test/commandLineDirs/failingInitializer/failingInitializer.Main.fjson', function (error, stdout, stderr) {
+				exec('bin/./firejs --porcelain-errors test/commandLineDirs/failingInitializer/failingInitializer.Main.fjson', function (error, stdout, stderr) {
 					self.callback(null, {
 						error: error, 
 						stdout: stdout, 
@@ -110,7 +110,10 @@ vows.describe('firejs command line utility').addBatch({
 				});
 		},
 		"I should see the error description in the stderr": function(output){
-			assert.equal(output.stderr,"fire.js runtime initializer 'failingInitializer.Init' failed with error: 'fire.js runtime error: Can not find the right configuration'\n")
+			var initErrorInfo = JSON.parse(output.stderr)
+			assert.equal(initErrorInfo.type, "InitializerError")
+			assert.equal(initErrorInfo.error.expression.name, "failingInitializer.Init")
+			assert.equal(initErrorInfo.error.error, "fire.js runtime error: Can not find the right configuration")
 			assert.isNotNull(output.stdout)
 			assert.isEmpty(output.stdout)
 		}

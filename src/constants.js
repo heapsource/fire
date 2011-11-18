@@ -6,3 +6,4 @@ module.exports.DEFAULT_ENVIRONMENT = "development"
 module.exports.INITIALIZERS_DIR_NAME = "initializers"
 module.exports.VIRTUAL_EXPRESSION_URI_PROTOCOL = "virtual"
 module.exports.FILE_EXPRESSION_URI_PROTOCOL = "fs"
+module.exports.INITIALIZATION_ERROR_STATUS_CODE = 1

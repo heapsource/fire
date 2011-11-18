@@ -74,7 +74,10 @@ Expression.prototype.runInput = function(onResult) {
 
 Expression.prototype.runInputFromTarget = function(target, onResult) {
 	var self = this
-	
+	if(typeof(onResult) !== 'function') {
+		console.trace()
+		throw "runInputFromTarget requires a function as callback"
+	}
 	if(target.createInputExpression) {
 		target.inputExpression = target.createInputExpression()
 		target.inputExpression.resultCallback = function(res, parent) {
