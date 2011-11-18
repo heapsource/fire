@@ -104,10 +104,10 @@ module.exports.executeApplication = function(argv) {
 		console.log("usage: firejs TheProject.Main.fjson")
 		console.log("usage: firejs package.json")
 		console.log("options:")
-		console.log("	--print-expressions: print all the expression names and flags loaded by the runtime as a JSON document to stdout")
-		console.log("	--porcelain-errors: prints Runtime Initialization errors to stderr in JSON format")
+		console.log("	--print-expressions: prints all the expression names and flags loaded by the runtime as a JSON document to stdout")
+		console.log("	--porcelain-errors: prints errors to stderr in JSON format")
 		console.log("")
-		console.log("Copyright (C) 2011 Firebase and Contributors. http://firejs.firebase.co")
+		console.log("Copyright (C) 2011 Firebase.co and Contributors. http://firejs.firebase.co")
 	}
 }
 
