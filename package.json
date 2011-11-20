@@ -12,17 +12,14 @@
     "repository":
     {
         "type": "git",
-        "url": "http://github.com/firejs/firejs.git"
+        "url": "https://github.com/firejs/firejs.git"
     },
     "bugs": {
 		"email": "firejs@firebase.co",
         "url": "https://github.com/firejs/firejs/issues"
     },
     "keywords": ["JSON", "framework", "runtime"],
-    "repository": {
-		"type": "git",
-		"url": "git://github.com/firejs/firejs.git"
-	},
+	"contributors"  : [{ "name": "Johan Hernandez", "email": "johan@firebase.co" }],
 	"dependencies": {
 		"nopt": ">= 1.0.10"
 	},

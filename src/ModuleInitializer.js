@@ -1,6 +1,6 @@
 var path = require('path')
 var constants = require('./constants.js')
-function ModuleInitializer(thirdPartyModule, moduleInit) {
+function ModuleInitializer(thirdPartyModule, moduleInit, moduleRequire) {
 	if(moduleInit && typeof(moduleInit) != 'function') {
 		throw new "moduleInit must be a function"
 	}
@@ -8,6 +8,7 @@ function ModuleInitializer(thirdPartyModule, moduleInit) {
 	this.thirdPartyModule.exports.ignition = thirdPartyModule.exports.ignition || {}
 	this.thirdPartyModule.exports.ignition.expressions = thirdPartyModule.exports.ignition.expressions || []
 	this.thirdPartyModule.exports.ignition.init = moduleInit
+	this.thirdPartyModule.exports.ignition.moduleRequire = moduleRequire
 	
 	var moduleDirName = this.moduleDirName = path.dirname(thirdPartyModule.filename)
 	var moduleManifestFile = path.join(moduleDirName, constants.DEFAULT_MANIFEST_FILE_NAME)

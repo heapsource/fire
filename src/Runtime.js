@@ -293,7 +293,7 @@ Runtime.prototype.loadModuleInstance = function(fireModule, fictionalName) {
 	}
 	if(fireModule.ignition) {
 		if(fireModule.ignition.manifestFile) {
-			this._mergeWithManifestFile(fireModule.ignition.manifestFile)
+			this._mergeWithManifestFile(fireModule.ignition.manifestFile, fireModule.ignition.moduleRequire)
 		}
 		if(fireModule.ignition.initializersDir) {
 			this.registerInitializersDir(fireModule.ignition.initializersDir)
@@ -309,21 +309,28 @@ Runtime.prototype.loadModuleInstance = function(fireModule, fictionalName) {
 	return true
 }
 
-Runtime.prototype.loadNamedModule = function(moduleName) {
-	var fireModule = this.moduleRequire(moduleName)
+Runtime.prototype.loadNamedModule = function(moduleName, moduleRequire) {
+	var fireModule = moduleRequire ? moduleRequire(moduleName) : this.moduleRequire(moduleName)
 	this.loadModuleInstance(fireModule, moduleName)
 }
 
-Runtime.prototype._loadManifestFile = function(manifestFile) {
-	var jsonStr = fs.readFileSync(manifestFile, 'utf8')
-	return JSON.parse(jsonStr)
-}
-
-Runtime.prototype._mergeWithManifestFile = function(manifestFile) {
+Runtime.prototype._mergeWithManifestFile = function(manifestFile, moduleRequire) {
 	var manifestDirName = path.resolve(path.dirname(manifestFile))
 	var self = this
-	var manifest = this._loadManifestFile(manifestFile)
+	var jsonStr = fs.readFileSync(manifestFile, 'utf8')
+	var manifest = JSON.parse(jsonStr)
 	if(manifest) {
+		if(moduleRequire) {
+			if(manifest.modules && (manifest.modules instanceof Array)) {
+				for(var i = 0; i < manifest.modules.length; i++) {
+					var moduleName = manifest.modules[i]
+					manifest.modules[i] = {
+						name: moduleName,
+						require: moduleRequire
+					}
+				}
+			} 
+		}
 		mergeWith(self.mergedManifest, manifest)
 		// STEP 2. Extract additional script directories and append them to the main array.
 		if(manifest && manifest.scriptDirectories) {
@@ -354,8 +361,13 @@ Runtime.prototype.loadFromManifestFile = function(manifestFile, initializationCa
 Runtime.prototype._loadModules = function(modulesList) {
 	for(var i = 0;i < modulesList.length;i++) {
 		var currentModuleCount = modulesList.length
-		var moduleName = modulesList[i]
-		this.loadNamedModule(moduleName)
+		var moduleInfo = modulesList[i]
+		if(typeof(moduleInfo) === 'string') {
+			this.loadNamedModule(moduleInfo)
+		}
+		else {
+			this.loadNamedModule(moduleInfo.name, moduleInfo.require)
+		}
 		// Check if new modules has been added to the list
 		if(currentModuleCount != modulesList.length) {
 			i = 0

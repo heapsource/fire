@@ -282,5 +282,26 @@ vows.describe('firejs command line utility').addBatch({
 			var stderr = JSON.parse(output.stderr)
 			assert.equal(stderr.error.expressionName, "SuperApp.Main")
 		}
+	},
+	"When I run an application with expressions from a deferred module": {
+		topic: function() {
+			var self = this
+			var processResult = null
+			var child = exec('bin/./firejs test/commandLineDirs/deferredSubModuleLoading/package.json --porcelain-errors', function (error, stdout, stderr) {
+				processResult = {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				}
+			});
+			child.on("exit", function(code, signal) {
+				processResult.code = code
+				self.callback(null, processResult)
+			})
+		},
+		"the application should be able to execute the app smoothly": function(output){
+			assert.isEmpty(output.stderr)
+			assert.equal(output.stdout, '"From Sub Sub"')
+		}
 	}
 }).export(module);
