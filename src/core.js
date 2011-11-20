@@ -61,8 +61,14 @@ require.extensions[constants.DEFAULT_SCRIPT_EXTENSION] = loaderFunction
 /*
  * Fire.js Ignitable Modules are absolutely in love with this function. 
  */
-module.exports.enableModule = function(thirdPartyModule, moduleInit, moduleRequire) {
-	return new ModuleInitializer(thirdPartyModule, moduleInit, moduleRequire)
+module.exports.igniteModule = function(thirdPartyModule, thirdPartyRequire) {
+	if(!thirdPartyModule || (typeof(thirdPartyModule) !== 'object')) {
+		throw "thirdPartyModule object is required"
+	}
+	if(!thirdPartyRequire || (typeof(thirdPartyRequire) !== 'function')) {
+		throw "thirdPartyRequire function is required"
+	}
+	return new ModuleInitializer(thirdPartyModule, thirdPartyRequire)
 }
 
 module.exports.inferExpressionNameByFileName = function(fileName) {
