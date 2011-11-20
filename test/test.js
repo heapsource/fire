@@ -2279,7 +2279,7 @@ vows.describe('firejs manifests').addBatch({
 				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"))
 				})
 		},
-		"the load from manifest should fail with message": function() {
+		"the load from manifest should fail with message since the initializer will look for the configuration": function() {
 			require.paths.unshift(path.join(__dirname,'manifests/testConfigMissing/node_modules')); // because we are testing in a different directory
 			var runtime = new Runtime()
 			

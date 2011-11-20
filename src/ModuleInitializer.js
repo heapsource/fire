@@ -1,13 +1,10 @@
 var path = require('path')
 var constants = require('./constants.js')
-function ModuleInitializer(thirdPartyModule, moduleInit, moduleRequire) {
-	if(moduleInit && typeof(moduleInit) != 'function') {
-		throw new "moduleInit must be a function"
-	}
+function ModuleInitializer(thirdPartyModule, moduleRequire) {
 	this.thirdPartyModule = thirdPartyModule
 	this.thirdPartyModule.exports.ignition = thirdPartyModule.exports.ignition || {}
 	this.thirdPartyModule.exports.ignition.expressions = thirdPartyModule.exports.ignition.expressions || []
-	this.thirdPartyModule.exports.ignition.init = moduleInit
+	//this.thirdPartyModule.exports.ignition.init = moduleInit
 	this.thirdPartyModule.exports.ignition.moduleRequire = moduleRequire
 	
 	var moduleDirName = this.moduleDirName = path.dirname(thirdPartyModule.filename)
@@ -23,6 +20,14 @@ function ModuleInitializer(thirdPartyModule, moduleInit, moduleRequire) {
 	
 	// automatically add the root of the module as a scripts directory.
 	this.exportScriptsDir('.')
+	Object.defineProperty(this, "initializer", {
+		get: function() {
+			return this.thirdPartyModule.exports.ignition.init
+		},
+		set: function(value) {
+			this.thirdPartyModule.exports.ignition.init = value
+		}
+	})
 }
 
 ModuleInitializer.prototype.exportExpressions = function(expDefArray) {
