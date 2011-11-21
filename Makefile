@@ -8,3 +8,5 @@ run-tests-spec:
 
 install-npm:
 	npm install . -g
+
+travis: run-tests-spec
