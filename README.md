@@ -1,64 +1,81 @@
 # fire.js
+[![Build Status](https://secure.travis-ci.org/firejs/firejs.png)](http://travis-ci.org/firejs/firejs)
 
-fire.js is an experimental Framework that uses JSON structures to simplify the definition of complex behaviors from asynchronous sources in Node.js.
-
-The goal is to reuse "building blocks" called "expressions" so you can define behavior on the server side without dealing with the infamous *Javascript asynchronous spaghetti code*.
-
-The Runtime takes a JSON document and compiles it to asynchronous Javascript:
-
-    JSON Document -> Deserialization -> Compilation to Javascript -> Execution
+Fire.js is an experimental framework that aims to reduce the amount of javascript code and callbacks when developing in Node.js by the orchestration of tiny building blocks called Expressions defined in JSON documents.
 
 ### Example
 
-Example JSON Structure using a [MongoDB](http://www.mongodb.org/) database:
+Example JSON app using a [MongoDB](http://www.mongodb.org/) database and the [MongoDB expressions](https://github.com/firebaseco/mongodb-expressions):
+
+`MongoApp.fjson`
 
     {
-	    "enabledEmails": {
-			"@Mongo.Find(users)": {
-				"enabled": true
+		"name": "MongoApp.Main",
+		"json": {
+		    "enabledEmails": {
+				"@Mongo.Find(users)": {
+					"conditions": {
+						"enabled": true	
+					}
+				},
+				"@each": {
+					"@get(CurrentItem.email)": null
+				}
 			},
-			"@each": {
-				"@get(CurrentItem.email)": null
+			"disabledEmails": {
+				"@Mongo.Find(users)": {
+					"conditions": {
+						"enabled": false
+					}
+				},
+				"@each": {
+					"@get(CurrentItem.email)": null
+				}
 			}
-		},
-		"disabledEmails": {
-			"@Mongo.Find(users)": {
-				"enabled": false
-			},
-			"@each": {
-				"@get(CurrentItem.email)": null
-			}
-		}
-    }
+	    }
+	}
 
 The result will be:
 
 	{
-		"enabledEmails": [...],
-		"disabledEmails": [...]
+		"enabledEmails": ["email1@example.com", "email2@example.com", "email3@example.com"],
+		"disabledEmails": ["email4@example.com", "email5@example.com", "email6@example.com"]
 	}
 
-### Is it a replacement for Javascript in Node.js?
+## Installation
 
-Definitely no. In fact, fire.js is itself written in Javascript, you can define your own expressions in Javascript and the runtime will compile all the JSON source code to Javascript, Node.JS will do the rest.
-	
-## More Information
+The easiest way to install fire.js is using the awesome Node Package Manager.
+
+    npm install -g fire
+
+The `firejs` command line utility should be ready to run your scripts.
+
+## Learn more
 
 + [Tutorials](https://github.com/firejs/firejs/wiki/Tutorials)
 
 + [Wiki](https://github.com/firejs/firejs/wiki)
 
++ [Official Blog](http://firejs.firebase.co)
+
++ [Fire.js IDE](https://github.com/firejs/fire-ide)
+
+## Supported Node Versions
+
+* 0.4.5 and above
+* 0.5
+* 0.6
 
 ## Cloning the Repository
 
     git clone https://github.com/firejs/firejs.git
 
 
-### Tests
+## Tests
 
-    make run-tests
+    npm test
 
-### Contributors
+## Contributors
 
 * Johan (author). Email: *johan@firebase.co*
 
