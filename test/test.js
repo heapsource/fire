@@ -11,6 +11,12 @@ var fs = require('fs'),
 path = require('path')
 require('./runtimeExtensions.js')
 
+// Test Only Extension. Load .testjs files that are regular javascript files but that are loaded in the desired directory to avoid using require.paths that was deprecated in Node.js 0.5
+require.extensions[".testjs"] = function (module, filename) {
+  var content = fs.readFileSync(filename, 'utf8');
+  module._compile(content, filename);
+}
+
 function getTempTestOutputFileName(filename) {
 	return "/tmp/" + filename
 }
@@ -2217,9 +2223,7 @@ vows.describe('firejs @get paths').addBatch({
 vows.describe('firejs manifests').addBatch({
 	'Having a Runtime with no configuration': {
 		topic: function() {
-			require.paths.unshift(path.join(__dirname,'manifests/testModules/node_modules')); // because we are testing in a different directory
-			
-			return new Runtime()
+			return require('./manifests/testModules/runtimeLoader.testjs')(Runtime, path.join(__dirname,'manifests/testModules'))
 		},
 		"when I set up a runtime with a manifest with two modules ": {
 			topic:function(runtime) {
@@ -2273,16 +2277,13 @@ vows.describe('firejs manifests').addBatch({
 	},
 	'when I set up a runtime with a manifest and missing configuration for a module': {
 		"the load from manifest should fail": function() {
-			require.paths.unshift(path.join(__dirname,'manifests/testConfigMissing/node_modules')); // because we are testing in a different directory
-			var runtime = new Runtime()
+			var runtime = require('./manifests/testConfigMissing/runtimeLoader.testjs')(Runtime, path.join(__dirname,'manifests/testConfigMissing'))
 			assert.throws(function() {
 				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"))
 				})
 		},
 		"the load from manifest should fail with message since the initializer will look for the configuration": function() {
-			require.paths.unshift(path.join(__dirname,'manifests/testConfigMissing/node_modules')); // because we are testing in a different directory
-			var runtime = new Runtime()
-			
+			var runtime = require('./manifests/testConfigMissing/runtimeLoader.testjs')(Runtime, path.join(__dirname,'manifests/testConfigMissing'))
 			try {
 				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"))
 			}catch(moduleErrorMsg) {
@@ -2352,10 +2353,8 @@ function tempChangeEnv(envName, call) {
 vows.describe('firejs configurations').addBatch({
 	'Working in a custom environment': {
 		topic: function() {
-			require.paths.unshift(path.join(__dirname,'manifests/testConfig/node_modules')); // because we are testing in a different directory
-			
 			return tempChangeEnv("customEnv1", function() {
-				return new Runtime()
+				return require('./manifests/testConfig/runtimeLoader.testjs')(Runtime, path.join(__dirname,'manifests/testConfig'))
 			})
 		},
 		"when I set up a runtime": {
@@ -4420,8 +4419,7 @@ vows.describe('firejs @raiseError').addBatch({
 vows.describe('firejs loadedModules').addBatch({
 	'Having a Runtime which loads two modules': {
 		topic: function() {
-			require.paths.unshift(path.join(__dirname,'loadedModules/node_modules')); // because we are testing in a different directory
-			return new Runtime()
+			return require('./loadedModules/runtimeLoader.testjs')(Runtime, path.join(__dirname,'loadedModules'))
 		},
 		"when we register it": {
 			topic:function(runtime) {
@@ -4461,7 +4459,7 @@ vows.describe('firejs loadedModules').addBatch({
 				"it should return an error": function(err, res) {
 					assert.isNull(err)
 					assert.equal(res.res, "Loaded Expression Two Result")
-					assert.deepEqual(res.runtime.getModules(),[require("loadedModule1"),require("loadedModule2")])
+					assert.deepEqual(res.runtime.getModules(),[res.runtime.moduleRequire("loadedModule1"),res.runtime.moduleRequire("loadedModule2")])
 					assert.equal(res.runtime.getModules()[0].superName, "Super Module One")
 					assert.equal(res.runtime.getModules()[1].superName, "Super Module Two")
 				}

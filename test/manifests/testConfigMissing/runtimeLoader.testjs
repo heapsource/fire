@@ -1,0 +1,7 @@
+//Since Node.js 0.5 doesn't support require.paths, this file can be be used to load the runtime in tests where the the module or ignition files loading precision is sensitive to current directory.
+module.exports = function(Runtime, baseDir) {
+	var runtime = new Runtime()
+	runtime.setBaseDir(baseDir)
+	runtime.moduleRequire = require
+	return runtime
+}

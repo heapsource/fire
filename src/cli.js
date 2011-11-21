@@ -24,7 +24,7 @@
 
 var fire = require('fire')
 var path = require('path')
-var sys = require('sys')
+var sys = require('util')
 var fs = require('fs')
 var util = require('util')
 
