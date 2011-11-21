@@ -12,7 +12,7 @@
     "repository":
     {
         "type": "git",
-        "url": "https://github.com/firejs/firejs.git"
+        "url": "https://github.com/firejs/firejs"
     },
     "bugs": {
 		"email": "firejs@firebase.co",

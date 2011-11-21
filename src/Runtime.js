@@ -382,7 +382,6 @@ Runtime.prototype._compile = function(finished) {
 	var self = this
 	var compiler = new Compiler(this);
 	compiler.expSynTable = this.expSynTable
-	compiler.outputFile = "/tmp/" + process.pid + ".js"
 	var toCompile = []
 	var expressions = this.JSONDefinitions.toArray()
 	for(var i = 0; i < expressions.length; i++) {

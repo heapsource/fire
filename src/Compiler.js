@@ -34,13 +34,13 @@ function Compiler(runtime) {
 	this.typeDefinitions = []
 	this.currentlyCompiledRootExpression = null
 }
-Compiler.prototype.outputFile = null
+
 Compiler.prototype.expSynTable = null
 Compiler.prototype.load = function() {
 	/*console.warn("===")
 	console.warn(this.buffer.toString())
 	console.warn("===")*/
-	var loadIntoRuntime = vm.runInThisContext(this.buffer.toString(), this.outputFile, true)
+	var loadIntoRuntime = vm.runInThisContext(this.buffer.toString(), "FireJSApp.virtual.js", true)
 	loadIntoRuntime(this.runtime, Expression)
 	
 }
@@ -251,8 +251,6 @@ Compiler.prototype.compile = function(expressions, callback) {
 	}
 	var self = this
 	
-	/*console.warn("Compiler.compile")
-	console.warn("compiling to ", this.outputFile)*/
 	this.buffer.writeLine("(function(Runtime, Expression){")
 	//this.buffer.writeLine("var List = {}")
 	this.iterator = new Iterator(this.typeDefinitions)
@@ -270,7 +268,6 @@ Compiler.prototype.compile = function(expressions, callback) {
 				}
 			} else {
 				self.buffer.writeLine("})")
-				fs.writeFileSync(self.outputFile, self.buffer.toString())
 				self.load()
 				callback()
 			}
