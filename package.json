@@ -27,7 +27,7 @@
         "vows": ">= 0.5.11"
     },
     "engines": {
-        "node": ">= 0.1.98"
+        "node": ">= 0.4.7"
     },
 	"scripts": {
 		"test": "make"
