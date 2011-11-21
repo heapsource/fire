@@ -12,11 +12,11 @@
     "repository":
     {
         "type": "git",
-        "url": "https://github.com/firejs/firejs"
+        "url": "https://github.com/firejs/fire"
     },
     "bugs": {
 		"email": "firejs@firebase.co",
-        "url": "https://github.com/firejs/firejs/issues"
+        "url": "https://github.com/firejs/fire/issues"
     },
     "keywords": ["JSON", "framework", "runtime"],
 	"contributors"  : [{ "name": "Johan Hernandez", "email": "johan@firebase.co" }],
@@ -35,7 +35,7 @@
 	"licenses" : [
 		{
 			"type" : "MIT", 
-			"url" : "https://github.com/firejs/firejs/blob/master/LICENSE"
+			"url" : "https://github.com/firejs/fire/blob/master/LICENSE"
 		}
 	]
 }

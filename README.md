@@ -1,5 +1,5 @@
 # fire.js
-[![Build Status](https://secure.travis-ci.org/firejs/firejs.png)](http://travis-ci.org/firejs/firejs)
+[![Build Status](https://secure.travis-ci.org/firejs/fire.png)](http://travis-ci.org/firejs/fire)
 
 Fire.js is an experimental framework that aims to reduce the amount of javascript code and callbacks when developing in Node.js by the orchestration of tiny building blocks called Expressions defined in JSON documents.
 
@@ -52,9 +52,9 @@ The `firejs` command line utility should be ready to run your scripts.
 
 ## Learn more
 
-+ [Tutorials](https://github.com/firejs/firejs/wiki/Tutorials)
++ [Tutorials](https://github.com/firejs/fire/wiki/Tutorials)
 
-+ [Wiki](https://github.com/firejs/firejs/wiki)
++ [Wiki](https://github.com/firejs/fire/wiki)
 
 + [Official Blog](http://firejs.firebase.co)
 
@@ -68,7 +68,7 @@ The `firejs` command line utility should be ready to run your scripts.
 
 ## Cloning the Repository
 
-    git clone https://github.com/firejs/firejs.git
+    git clone https://github.com/firejs/fire.git
 
 
 ## Tests
