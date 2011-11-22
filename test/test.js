@@ -6054,6 +6054,116 @@ vows.describe('firejs - @concat').addBatch({
 	}
 }).export(module)
 
+vows.describe('firejs - runInput parent').addBatch({
+	'When I use an expression that runs a dynamic input value': {
+		topic: function() {
+			var runtime = new Runtime()
+			var SampleDynamicExp = function(){};
+			SampleDynamicExp.prototype = new Expression()
+			SampleDynamicExp.prototype.execute = function() {
+				this.end("Hello from Input")
+			}
+			runtime.registerWellKnownExpressionDefinition({
+				name:"SampleDynamicExp",
+				implementation: SampleDynamicExp
+			})
+			var TestRunInput = function(){};
+			TestRunInput.prototype = new Expression()
+			TestRunInput.prototype.execute = function() {
+				this.runInput(function(res, parent) {
+					parent.end(res)
+				})
+			}
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestRunInput",
+				implementation: TestRunInput
+			})
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@TestRunInput": {
+						"@SampleDynamicExp": null
+					}
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be the input value": function(err, res) {
+				assert.isNull(err)
+				assert.deepEqual(res, "Hello from Input")
+			}
+		}
+	},
+	'When I use an expression that runs a static input value': {
+		topic: function() {
+			var runtime = new Runtime()
+			var TestRunInput = function(){};
+			TestRunInput.prototype = new Expression()
+			TestRunInput.prototype.execute = function() {
+				this.runInput(function(res, parent) {
+					parent.end(res)
+				})
+			}
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestRunInput",
+				implementation: TestRunInput
+			})
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@TestRunInput": "Hello from Input"
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"the result should be the input value": function(err, res) {
+				assert.isNull(err)
+				assert.deepEqual(res, "Hello from Input")
+			}
+		}
+	}
+}).export(module)
+
 vows.describe('firejs - Exported Types').addBatch({
 	"Firejs module should export the type CompilationError": function() {
 		assert.equal(jsonCode.CompilationError, CompilationError)

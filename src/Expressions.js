@@ -88,7 +88,7 @@ Expression.prototype.runInputFromTarget = function(target, onResult) {
 		}
 		target.inputExpression.run(this)
 	} else {
-		onResult(target.input)
+		onResult(target.input, this)
 	}
 }
 
