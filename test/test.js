@@ -5,6 +5,7 @@ var Runtime = jsonCode.Runtime
 var Expression = jsonCode.Expression
 var exec  = require('child_process').exec
 var CompilationError = require('../src/CompilationError.js')
+var RuntimeError = require('../src/RuntimeError.js')
 
 
 var fs = require('fs'),
@@ -6053,8 +6054,11 @@ vows.describe('firejs - @concat').addBatch({
 	}
 }).export(module)
 
-vows.describe('firejs - Compilation Errors').addBatch({
+vows.describe('firejs - Exported Types').addBatch({
 	"Firejs module should export the type CompilationError": function() {
 		assert.equal(jsonCode.CompilationError, CompilationError)
+	},
+	"Firejs module should export the type RuntimeError": function() {
+		assert.equal(jsonCode.RuntimeError, RuntimeError)
 	}
 }).export(module)
