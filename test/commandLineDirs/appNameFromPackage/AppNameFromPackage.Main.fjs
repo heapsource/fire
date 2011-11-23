@@ -1,0 +1,9 @@
+var fire = require('fire')
+function AppNameFromPackage(){};
+AppNameFromPackage.prototype = new fire.Expression();
+AppNameFromPackage.prototype.execute = function() {
+	this.end(this.runtime.applicationName)
+}
+
+module.exports.name = "AppNameFromPackage.Main"
+module.exports.implementation = AppNameFromPackage

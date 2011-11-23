@@ -1,0 +1,6 @@
+{
+	"name": "AppNameFromOtherName",
+	"json": {
+		"@ReturnAppName": null
+	}
+}

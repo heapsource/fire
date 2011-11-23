@@ -34,10 +34,12 @@ module.exports = function() {
 	var mainScriptPath = module.filename
 	var mainScriptDirName = path.dirname(mainScriptPath)
 	var expressionName = null
+	var applicationName = ''
 	if(path.basename(mainScriptPath) == "package.json") {
 		// Read package.json
 		var packageJson = JSON.parse(fs.readFileSync(mainScriptPath, 'utf8'))
 		expressionName = packageJson.name + ".Main"
+		applicationName = packageJson.name
 	} else {
 		// Exec the app.
 		var expressionName = fire.inferExpressionNameByFileName(path.basename(mainScriptPath))
@@ -45,12 +47,15 @@ module.exports = function() {
 			throw "The file '" + mainScriptPath+ "' was not recognized as a fire script due file name extension incompatibility"
 			return
 		}
+		var appNameSeparator = expressionName.indexOf('.')
+		applicationName = appNameSeparator == -1 ? expressionName : expressionName.substring(0,appNameSeparator)
 	}
 	
 
 	//require.paths.unshift(path.join(mainScriptDirName,'node_modules'))
 
 	var runtime = new fire.Runtime()
+	runtime.applicationName = applicationName
 	runtime.moduleRequire = function(moduleName) {
 		return require(moduleName)
 	}

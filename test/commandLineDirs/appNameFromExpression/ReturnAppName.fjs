@@ -1,0 +1,9 @@
+var fire = require('fire')
+function ReturnAppName(){};
+ReturnAppName.prototype = new fire.Expression();
+ReturnAppName.prototype.execute = function() {
+	this.end(this.runtime.applicationName)
+}
+
+module.exports.name = "ReturnAppName"
+module.exports.implementation = ReturnAppName

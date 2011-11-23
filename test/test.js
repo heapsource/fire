@@ -6172,3 +6172,23 @@ vows.describe('firejs - Exported Types').addBatch({
 		assert.equal(jsonCode.RuntimeError, RuntimeError)
 	}
 }).export(module)
+
+
+vows.describe('firejs - applicationName').addBatch({
+	'When I create a runtime and I dont specify an application name': {
+		topic: function() {
+			var self = this
+			var runtime = new Runtime()
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				}
+				self.callback(null, runtime)
+			})
+		},
+		"the application name should be the PID of the process": function(err, runtime) {
+			assert.isNull(err)
+			assert.strictEqual(runtime.applicationName, process.pid.toString())
+		}
+	}
+}).export(module)

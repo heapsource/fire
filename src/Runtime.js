@@ -56,6 +56,7 @@ function Runtime() {
 	}
 	this.baseDir = '.'
 	this.JSONDefinitions = new RuntimeDictionary()
+	this.applicationName = ''
 }
 
 
@@ -141,6 +142,9 @@ Runtime.prototype.registerWellKnownExpressionDir = function(absoluteDirPath) {
 Prepares the Runtime to Run. Since the introduction of initializer expressions, you can provide a callback to know when the initialization finishes. If no callback is provided no initialization will be executed.
 */
 Runtime.prototype.load = function(initializationCallback) {
+	if(!this.applicationName) {
+		this.applicationName = process.pid.toString()
+	}
 	this.scriptDirectories.push({
 		path: this.pathFromBaseDir('.')
 	})

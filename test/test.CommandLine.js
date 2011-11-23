@@ -305,3 +305,69 @@ vows.describe('firejs command line utility').addBatch({
 		}
 	}
 }).export(module);
+
+vows.describe('firejs - applicationName').addBatch({
+	"When I run an application from command line using package.json": {
+		topic: function() {
+			var self = this
+			var processResult = null
+			var child = exec('bin/./firejs test/commandLineDirs/appNameFromPackage/package.json --porcelain-errors', function (error, stdout, stderr) {
+				processResult = {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				}
+			});
+			child.on("exit", function(code, signal) {
+				processResult.code = code
+				self.callback(null, processResult)
+			})
+		},
+		"the application name should be the name found in package.json": function(output){
+			assert.isEmpty(output.stderr)
+			assert.equal(output.stdout, '"AppNameFromPackage"')
+		}
+	},
+	"When I run an application from command line using main expression file": {
+		topic: function() {
+			var self = this
+			var processResult = null
+			var child = exec('bin/./firejs test/commandLineDirs/appNameFromExpression/AppNameFromMainExpression.Main.fjson --porcelain-errors', function (error, stdout, stderr) {
+				processResult = {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				}
+			});
+			child.on("exit", function(code, signal) {
+				processResult.code = code
+				self.callback(null, processResult)
+			})
+		},
+		"the application name should be the first part of the main expression": function(output){
+			assert.isEmpty(output.stderr)
+			assert.equal(output.stdout, '"AppNameFromMainExpression"')
+		}
+	},
+	"When I run an application from command line using a non main expression file": {
+		topic: function() {
+			var self = this
+			var processResult = null
+			var child = exec('bin/./firejs test/commandLineDirs/appNameFromExpression/AppNameFromOtherName.fjson --porcelain-errors', function (error, stdout, stderr) {
+				processResult = {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				}
+			});
+			child.on("exit", function(code, signal) {
+				processResult.code = code
+				self.callback(null, processResult)
+			})
+		},
+		"the application name should be name of the main expression": function(output){
+			assert.isEmpty(output.stderr)
+			assert.equal(output.stdout, '"AppNameFromOtherName"')
+		}
+	}
+}).export(module);
