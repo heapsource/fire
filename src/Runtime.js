@@ -327,10 +327,10 @@ Runtime.prototype._replaceTokensInManifest = function() {
 	}
 	replaceInObject = function(val) {
 		/*
-		Thanks to Kingpin13 and rewt from #regex at Freenode for helping out with these Regular Expressions
-		*/
+		 * Thanks to Kingpin13, courpse and rewt from #regex at Freenode for helping out with these Regular Expressions
+		 */
 		if(typeof(val) === 'string') {
-			var tokenReplacements = (val).match(/\{\{([^|]+)(?:\|(.*?))?\}\}/ig)
+			var tokenReplacements = val.match(/\{\{(.*?)\}\}/g)
 			if(tokenReplacements) {
 				for(var i = 0;i < tokenReplacements.length;i++) {
 					var token = tokenReplacements[i]
