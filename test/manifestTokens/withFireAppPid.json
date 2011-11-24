@@ -1,0 +1,3 @@
+{
+	"withFireAppPid": "Running on {{FIRE_APP_PID|0}}"
+}

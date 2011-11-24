@@ -170,6 +170,7 @@ Runtime.prototype.load = function(initializationCallback) {
 			if(configurations) {
 				self.configurations = configurations[self.environmentName]
 			}
+			this._replaceTokensInManifest()
 			this.events.emit('load', this)
 			this.events.removeAllListeners('load')
 
@@ -317,8 +318,50 @@ Runtime.prototype.loadNamedModule = function(moduleName, moduleRequire) {
 	var fireModule = moduleRequire ? moduleRequire(moduleName) : this.moduleRequire(moduleName)
 	this.loadModuleInstance(fireModule, moduleName)
 }
-
+Runtime.prototype._replaceTokensInManifest = function() {
+	var replaceInObject = null
+	var SpecialEnv = {
+		FIRE_APP_NAME: this.applicationName,
+		FIRE_ENV_NAME: this.environmentName,
+		FIRE_APP_PID: process.pid
+	}
+	replaceInObject = function(val) {
+		/*
+		Thanks to Kingpin13 and rewt from #regex at Freenode for helping out with these Regular Expressions
+		*/
+		if(typeof(val) === 'string') {
+			var tokenReplacements = (val).match(/\{\{([^|]+)(?:\|(.*?))?\}\}/ig)
+			if(tokenReplacements) {
+				for(var i = 0;i < tokenReplacements.length;i++) {
+					var token = tokenReplacements[i]
+					var tokenMatch = (/\{\{([^|]+)(?:\|(.*?))?\}\}/ig).exec(token)
+					var envKey = tokenMatch[1]
+					var defaultValue = tokenMatch[2] || ''
+					var envVal = SpecialEnv[envKey] || process.env[envKey] || defaultValue
+					while(val.indexOf(token) != -1){
+						val = val.replace(token, envVal)
+					}
+				}
+			}
+		}else if(typeof(val) == 'object') {
+			if(val instanceof Array) {
+				for(var i = 0;i < val.length;i++) {
+					val[i] = replaceInObject(val[i])
+				}
+			} else {
+				var keys = Object.keys(val)
+				for(var i = 0;i < keys.length;i++) {
+					var key = keys[i]
+					val[key] = replaceInObject(val[key])
+				}
+			}
+		}
+		return val
+	}
+	replaceInObject(this.mergedManifest)
+}
 Runtime.prototype._mergeWithManifestFile = function(manifestFile, moduleRequire) {
+	
 	var manifestDirName = path.resolve(path.dirname(manifestFile))
 	var self = this
 	var jsonStr = fs.readFileSync(manifestFile, 'utf8')

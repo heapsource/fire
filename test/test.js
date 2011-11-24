@@ -6192,3 +6192,137 @@ vows.describe('firejs - applicationName').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe('firejs - Manifest Tokens').addBatch({
+	'When I use a manifest with special token FIRE_APP_NAME': {
+		topic: function() {
+			var self = this
+			var runtime = new Runtime()
+			runtime.applicationName = "SuperApplication"
+			runtime._mergeWithManifestFile(path.join(__dirname, "manifestTokens/withFireAppName.json"))
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"It should be replaced with the Application Name": function(err, runtime) {
+			assert.isNull(err)
+			assert.strictEqual(runtime.mergedManifest.testFireAppName, "SuperApplication is the current Application")
+		}
+	},
+	'When I use a manifest with special token FIRE_ENV_NAME': {
+		topic: function() {
+			var self = this
+			var runtime = new Runtime()
+			runtime.environmentName = "MySuperProduction"
+			runtime._mergeWithManifestFile(path.join(__dirname, "manifestTokens/withFireEnvName.json"))
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"It should be replaced with the Environment Name": function(err, runtime) {
+			assert.isNull(err)
+			assert.strictEqual(runtime.mergedManifest.testFireEnvName, "MySuperProduction is the current environment name")
+		}
+	},
+	'When I use a manifest with special token FIRE_APP_PID': {
+		topic: function() {
+			var self = this
+			var runtime = new Runtime()
+			runtime._mergeWithManifestFile(path.join(__dirname, "manifestTokens/withFireAppPid.json"))
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"It should be replaced with the Process PID": function(err, runtime) {
+			assert.isNull(err)
+			assert.strictEqual(runtime.mergedManifest.withFireAppPid, "Running on " + process.pid)
+		}
+	},
+	'When I use a manifest with a value from process.env': {
+		topic: function() {
+			process.env["SOME_TEST_KEY"] = "SOME TEST VALUE"
+			var self = this
+			var runtime = new Runtime()
+			runtime._mergeWithManifestFile(path.join(__dirname, "manifestTokens/withProcessEnv.json"))
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"It should be replaced with the Process PID": function(err, runtime) {
+			assert.isNull(err)
+			assert.strictEqual(runtime.mergedManifest.withProcessEnv, process.env["SOME_TEST_KEY"])
+		}
+	},
+	'When I use a manifest with a token that is not special and is not in process.env': {
+		topic: function() {
+			var self = this
+			var runtime = new Runtime()
+			runtime._mergeWithManifestFile(path.join(__dirname, "manifestTokens/testUnknownToken.json"))
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"It should return the default value": function(err, runtime) {
+			assert.isNull(err)
+			assert.strictEqual(runtime.mergedManifest.testUnknownToken, "Too bad it can't be magic xD")
+		}
+	},
+	'When I use a manifest with a token on first leve, arrays and subObjects': {
+		topic: function() {
+			var self = this
+			var runtime = new Runtime()
+			runtime._mergeWithManifestFile(path.join(__dirname, "manifestTokens/withDepth.json"))
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"The values should be replaced accordingly": function(err, runtime) {
+			assert.isNull(err)
+			assert.strictEqual(runtime.mergedManifest.firstLevel, "SimpleUnknownDefaultValue")
+			assert.strictEqual(runtime.mergedManifest.secondLevel.anotherKey, "AnotherUnknownDefaultValue")
+			assert.strictEqual(runtime.mergedManifest.secondLevel.thirdLevel[0], "ArrayUnknownDefaultValue")
+		}
+	},
+	'When I use a manifest with unknown keys and no default value': {
+		topic: function() {
+			var self = this
+			var runtime = new Runtime()
+			runtime._mergeWithManifestFile(path.join(__dirname, "manifestTokens/testUnknownWithNoDefault.json"))
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"The values should be replaced with a blank string": function(err, runtime) {
+			assert.isNull(err)
+			assert.strictEqual(runtime.mergedManifest.testUnknownWithNoDefault, "This  can not be found")
+		}
+	},
+}).export(module)

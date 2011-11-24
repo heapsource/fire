@@ -1,0 +1,9 @@
+{
+	"firstLevel": "{{SimpleUnknownKey|SimpleUnknownDefaultValue}}",
+	"secondLevel": {
+		"anotherKey": "{{AnotherUnknownKey|AnotherUnknownDefaultValue}}",
+		"thirdLevel": [
+			"{{ArrayUnknownKey|ArrayUnknownDefaultValue}}"
+		]
+	}
+}

@@ -1,0 +1,3 @@
+{
+	"testFireEnvName": "{{FIRE_ENV_NAME|}} is the current environment name"
+}
