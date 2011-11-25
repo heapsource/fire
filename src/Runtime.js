@@ -138,11 +138,15 @@ Runtime.prototype.registerWellKnownExpressionDir = function(absoluteDirPath) {
 		this.registerWellKnownExpressionFile(absoluteFileName)
 	}, this)
 }
-
+Runtime.prototype.loaded = false
 /*
 Prepares the Runtime to Run. Since the introduction of initializer expressions, you can provide a callback to know when the initialization finishes. If no callback is provided no initialization will be executed.
 */
 Runtime.prototype.load = function(initializationCallback) {
+	if(this.loaded) {
+		throw "Runtime already initialized"
+	}
+	this.loaded = true
 	if(!this.applicationName) {
 		this.applicationName = process.pid.toString()
 	}

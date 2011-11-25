@@ -4420,51 +4420,50 @@ vows.describe('firejs @raiseError').addBatch({
 
 vows.describe('firejs loadedModules').addBatch({
 	'Having a Runtime which loads two modules': {
-		topic: function() {
-			return require('./loadedModules/runtimeLoader.testjs')(Runtime, path.join(__dirname,'loadedModules'))
-		},
-		"when we register it": {
-			topic:function(runtime) {
-				runtime.loadFromManifestFile(path.join(__dirname,"loadedModules/ignition.manifest.json"))
-				runtime.registerWellKnownExpressionDefinition({
-					name:"TestMain",
-					json: {
-						"@loadedExpression1": null,
-						"@loadedExpression2": null
-					}
-				})
-				return runtime
-			},
-			"when I use getLoadedModules it should return the list of modules": {
-				topic: function(runtime) {
-					var self = this
-					var contextBase = {};
-					contextBase._resultCallback = function(res) {
-						self.callback(null, {
-							res:res,
-							runtime:runtime
-						})
-					}
-					contextBase._loopCallback = function() {};
-					contextBase._inputExpression  = function() {};
-					contextBase._variables = {};            
-					contextBase._errorCallback =  function(err) {
-						self.callback(err, null)
-					};
-					runtime.load(function(initError) {
-						if(initError) {
-							self.callback(initError, null)
-						}
-						runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
-					})
-				},
-				"it should return an error": function(err, res) {
-					assert.isNull(err)
-					assert.equal(res.res, "Loaded Expression Two Result")
-					assert.deepEqual(res.runtime.getModules(),[res.runtime.moduleRequire("loadedModule1"),res.runtime.moduleRequire("loadedModule2")])
-					assert.equal(res.runtime.getModules()[0].superName, "Super Module One")
-					assert.equal(res.runtime.getModules()[1].superName, "Super Module Two")
+		topic:function() {
+			var self = this
+			var runtime = require('./loadedModules/runtimeLoader.testjs')(Runtime, path.join(__dirname,'loadedModules'))
+			runtime.registerWellKnownExpressionDefinition({
+				name:"loadedModulesTestMain",
+				json: {
+					"@loadedExpression1": null,
+					"@loadedExpression2": null
 				}
+			})
+			runtime.loadFromManifestFile(path.join(__dirname,"loadedModules/ignition.manifest.json"),function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				}
+				else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"when I use getLoadedModules it should return the list of modules": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, {
+						res:res,
+						runtime:runtime
+					})
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};            
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				//console.warn('runtime', runtime)
+				runtime._testOnly_runExpressionByName("loadedModulesTestMain", contextBase ,null)
+			},
+			"it should return an error": function(err, res) {
+				assert.isNull(err)
+				assert.equal(res.res, "Loaded Expression Two Result")
+				assert.deepEqual(res.runtime.getModules(),[res.runtime.moduleRequire("loadedModule1"),res.runtime.moduleRequire("loadedModule2")])
+				assert.equal(res.runtime.getModules()[0].superName, "Super Module One")
+				assert.equal(res.runtime.getModules()[1].superName, "Super Module Two")
 			}
 		}
 	}
@@ -6329,4 +6328,28 @@ vows.describe('firejs - Manifest Tokens').addBatch({
 			assert.strictEqual(runtime.mergedManifest.testUnknownWithNoDefault, "This  can not be found")
 		}
 	},
+}).export(module)
+
+vows.describe('firejs - Runtime Load Twice').addBatch({
+	'When I successfully load a runtime': {
+		topic: function() {
+			var self = this
+			var runtime = new Runtime()
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"If I try to load the same instance again it should throw an error": function(err, runtime) {
+			assert.isNull(err)
+			assert.throws(function() {
+				runtime.load(function(initError) {
+					
+				}, String)
+			})
+		}
+	}
 }).export(module)

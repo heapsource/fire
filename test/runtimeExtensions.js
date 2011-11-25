@@ -184,7 +184,7 @@ Runtime.prototype._testOnly_runExpressionByName = function(expressionName, base_
 	//console.warn("Calling expression with name ", expressionName, " context_overrides ", context_overrides)
 	var expDefinition = this.loadedExpressionsMeta[expressionName]
 	if(expDefinition == undefined) {
-		throw new Error('JS1002', "Expression '" + expressionName +  "' is not registered or was not loaded.");
+		throw "Expression '" + expressionName +  "' is not registered or was not loaded.";
 	}
 	
 	var supportHints = expDefinition.flags && expDefinition.flags.indexOf("hint") != -1

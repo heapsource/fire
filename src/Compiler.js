@@ -250,7 +250,6 @@ Compiler.prototype.compile = function(expressions, callback) {
 		});
 	}
 	var self = this
-	
 	this.buffer.writeLine("(function(Runtime, Expression){")
 	//this.buffer.writeLine("var List = {}")
 	this.iterator = new Iterator(this.typeDefinitions)
