@@ -39,6 +39,7 @@ module.exports.InitializerError = require('./InitializerError.js')
 module.exports.IgnoreOutput = require('./IgnoreOutput')
 module.exports.Runtime = require('./Runtime.js')
 module.exports.RuntimeError = require('./RuntimeError.js')
+module.exports.ModuleInitializerError = require('./ModuleInitializerError.js')
 
 /*
  * Export Constants

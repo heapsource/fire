@@ -4,6 +4,7 @@ var PathCache = require('../src/Paths').PathCache
 var AstEntryType = require('../src/Paths').AstEntryType
 var exec  = require('child_process').exec
 var fire = require('../src/core.js')
+var path = require('path')
 
 vows.describe('firejs command line utility').addBatch({
 	"When I run the command line with no args": {
@@ -370,4 +371,74 @@ vows.describe('firejs - applicationName').addBatch({
 			assert.equal(output.stdout, '"AppNameFromOtherName"')
 		}
 	}
+}).export(module);
+
+
+vows.describe('firejs - Module Initializer Errors').addBatch({
+	"When I run an application with porcelain errors and a module returns an error": {
+		topic: function() {
+			var self = this
+			var processResult = null
+			var child = exec('bin/./firejs test/manifests/testConfigMissing/testConfigMissing.Main.fjson --porcelain-errors', function (error, stdout, stderr) {
+				processResult = {
+					error: error, 
+					stdout: stdout, 
+					stderr: stderr
+				}
+			});
+			child.on("exit", function(code, signal) {
+				processResult.code = code
+				self.callback(null, processResult)
+			})
+		},
+		"The exit code should be INITIALIZATION_ERROR_EXIT_CODE": function(output){
+			assert.strictEqual(output.code, fire.INITIALIZATION_ERROR_EXIT_CODE)
+		},
+		"stderr JSON document error type should be ModuleInitializerError": function(output){
+			var stderr = JSON.parse(output.stderr)
+			assert.equal(stderr.type, "ModuleInitializerError")
+		},
+		"stderr JSON document error modulePath should contain the path to the failing module": function(output){
+			var stderr = JSON.parse(output.stderr)
+			assert.equal(stderr.error.modulePath, path.join(__dirname,"manifests/testConfigMissing/node_modules/module1/main.js") )
+		},
+		"stderr JSON document error should contain the error message": function(output){
+			var stderr = JSON.parse(output.stderr)
+			assert.equal(stderr.error.error, "database connection info is missing")
+		}
+	},
+}).export(module);
+
+vows.describe('firejs - Module Initializer and Initializer Expressions').addBatch({
+	"When I run an application that return values from module initializer, module initializer expression and app initializer expressions": {
+		topic: function() {
+			var self = this
+			var processResult = null
+			var child = exec('bin/./firejs test/commandLineDirs/moduleInitExpInit/package.json --porcelain-errors', function (error, stdout, stderr) {
+				processResult = {
+					error: error,
+					stdout: stdout,
+					stderr: stderr
+				}
+			});
+			child.on("exit", function(code, signal) {
+				processResult.code = code
+				self.callback(null, processResult)
+			})
+		},
+		"The exit code should be 0": function(output){
+			assert.strictEqual(output.code, 0)
+		},
+		"stderr should be empty": function(output){
+			assert.isEmpty(output.stderr)
+		},
+		"stdout JSON document should contain the values from module initializer, module initializer expression and app initializer expressions": function(output){
+			var stdout = JSON.parse(output.stdout)
+			assert.deepEqual(stdout, {
+				"moduleInitValue": "Module Initializer",
+				"moduleInitExpValue": "Module Expression Initializer",
+				"appInitValue":"App Initializer Expression"
+			})
+		}
+	},
 }).export(module);

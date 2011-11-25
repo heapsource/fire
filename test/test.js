@@ -6,6 +6,7 @@ var Expression = jsonCode.Expression
 var exec  = require('child_process').exec
 var CompilationError = require('../src/CompilationError.js')
 var RuntimeError = require('../src/RuntimeError.js')
+var ModuleInitializerError = require('../src/ModuleInitializerError.js')
 
 
 var fs = require('fs'),
@@ -2277,19 +2278,19 @@ vows.describe('firejs manifests').addBatch({
 		}
 	},
 	'when I set up a runtime with a manifest and missing configuration for a module': {
-		"the load from manifest should fail": function() {
+		topic: function() {
+			var self = this
 			var runtime = require('./manifests/testConfigMissing/runtimeLoader.testjs')(Runtime, path.join(__dirname,'manifests/testConfigMissing'))
-			assert.throws(function() {
-				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"))
-				})
+			runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"), function(initError) {
+				self.callback(null, initError)
+			})
 		},
-		"the load from manifest should fail with message since the initializer will look for the configuration": function() {
-			var runtime = require('./manifests/testConfigMissing/runtimeLoader.testjs')(Runtime, path.join(__dirname,'manifests/testConfigMissing'))
-			try {
-				runtime.loadFromManifestFile(path.join(__dirname,"manifests/testConfigMissing/ignition.manifest.json"))
-			}catch(moduleErrorMsg) {
-				assert.equal(moduleErrorMsg,"database connection info is missing")
-			}
+		"the load from manifest should fail": function(err, initError) {
+			assert.isNotNull(initError)
+			assert.equal(initError.module.ignition.path, path.join(__dirname,"manifests/testConfigMissing/node_modules/module1/main.js") )
+		},
+		"the load from manifest should fail with message since the initializer will look for the configuration": function(err, initError) {
+			assert.equal(initError.error,"database connection info is missing")
 		}
 	}
 }).export(module);
@@ -6170,6 +6171,9 @@ vows.describe('firejs - Exported Types').addBatch({
 	},
 	"Firejs module should export the type RuntimeError": function() {
 		assert.equal(jsonCode.RuntimeError, RuntimeError)
+	},
+	"Firejs module should export the type ModuleInitializerError": function() {
+		assert.equal(jsonCode.ModuleInitializerError, ModuleInitializerError)
 	}
 }).export(module)
 

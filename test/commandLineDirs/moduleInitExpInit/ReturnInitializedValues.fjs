@@ -1,0 +1,15 @@
+var fire = require('fire')
+
+function ReturnInitializedValues(){}
+ReturnInitializedValues.prototype = new fire.Expression()
+ReturnInitializedValues.prototype.execute = function() {
+	this.end({
+		moduleInitValue: this.runtime._moduleInitValue,
+		moduleInitExpValue: this.runtime._moduleInitExpValue,
+		appInitValue: this.runtime._appInitValue
+	})
+}
+module.exports = {
+	"name": "ReturnInitializedValues",
+	"implementation": ReturnInitializedValues
+}

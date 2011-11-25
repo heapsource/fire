@@ -1,0 +1,12 @@
+var fire = require('fire')
+
+function appInitExpInitAppInit(){}
+appInitExpInitAppInit.prototype = new fire.Expression()
+appInitExpInitAppInit.prototype.execute = function() {
+	this.runtime._appInitValue = "App Initializer Expression"
+	this.finish()
+}
+module.exports = {
+	"name": "appInitExpInitAppInit",
+	"implementation": appInitExpInitAppInit
+}

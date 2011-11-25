@@ -6,6 +6,7 @@ function ModuleInitializer(thirdPartyModule, moduleRequire) {
 	this.thirdPartyModule.exports.ignition.expressions = thirdPartyModule.exports.ignition.expressions || []
 	//this.thirdPartyModule.exports.ignition.init = moduleInit
 	this.thirdPartyModule.exports.ignition.moduleRequire = moduleRequire
+	this.thirdPartyModule.exports.ignition.path = thirdPartyModule.filename
 	
 	var moduleDirName = this.moduleDirName = path.dirname(thirdPartyModule.filename)
 	var moduleManifestFile = path.join(moduleDirName, constants.DEFAULT_MANIFEST_FILE_NAME)

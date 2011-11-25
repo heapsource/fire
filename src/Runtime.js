@@ -31,6 +31,7 @@ var Compiler = require('./Compiler.js')
 var url = require('url')
 var mergeWith = require('./mergeWith.js')
 var InitializerError = require('./InitializerError.js')
+var ModuleInitializerError = require('./ModuleInitializerError.js')
 
 function Runtime() {
 	this.loadedExpressions = {}; // Contains a member per expression implementation <Function>
@@ -152,12 +153,7 @@ Runtime.prototype.load = function(initializationCallback) {
 	var self = this
 	this.loadManifestModules()
 	
-	// Intialize all the Modules
-	this.loadedModules.forEach(function(fireModule) {
-		if(fireModule.ignition && fireModule.ignition.init) {
-			fireModule.ignition.init(self)
-		}
-	})
+	
 	// STEP 4. Load scripts. This must be after the Modules so the modules have a change to specify additional directories.
 	this.scanScriptsDirs()
 	this._compile(function(compilationError) {
@@ -173,24 +169,64 @@ Runtime.prototype.load = function(initializationCallback) {
 			this._replaceTokensInManifest()
 			this.events.emit('load', this)
 			this.events.removeAllListeners('load')
-
-			var initializeExpressions = []
-		
-			this.loadedExpressionsMeta.names().forEach(function(expName) {
-				var expDef = this.loadedExpressionsMeta[expName]
-				if(expDef.initialize && expDef.initialize.indexOf(this.environmentName) != -1) {
-					// it's a initializer for the current environment
-					initializeExpressions.push(expDef)
-				}
-			}, this)
-			if(initializationCallback) {
-				if(initializeExpressions.length > 0) {
-					var initIterator = new Iterator(initializeExpressions)
-					this._runNextInitializer(initIterator, initializationCallback)
-				} else {
-					initializationCallback(null)
+			
+			var runInitExpressions = function() {
+				var initializeExpressions = []
+				self.loadedExpressionsMeta.names().forEach(function(expName) {
+					var expDef = this.loadedExpressionsMeta[expName]
+					if(expDef.initialize && expDef.initialize.indexOf(self.environmentName) != -1) {
+						// it's a initializer for the current environment
+						initializeExpressions.push(expDef)
+					}
+				}, self)
+				if(initializationCallback) {
+					if(initializeExpressions.length > 0) {
+						var initIterator = new Iterator(initializeExpressions)
+						self._runNextInitializer(initIterator, initializationCallback)
+					} else {
+						initializationCallback(null)
+					}
 				}
 			}
+			
+			var initializableModules = []
+			this.loadedModules.forEach(function(fireModule) {
+				if(fireModule.ignition && fireModule.ignition.init) {
+					initializableModules.push(fireModule)
+				}
+			}, this)
+			
+			// Initialize all the Modules
+			if(initializationCallback) {
+				if(initializableModules.length > 0) {
+					var initIterator = new Iterator(initializableModules)
+					this._runNextModuleInitializer(initIterator, function(err) {
+						if(err) {
+							initializationCallback(err)
+						} else {
+							runInitExpressions()
+						}
+					})
+				} else {
+					runInitExpressions()
+				}
+			}
+		}
+	})
+}
+
+Runtime.prototype._runNextModuleInitializer = function(iterator, finishCallback) {
+	var self = this
+	if(!iterator.next()) {
+		finishCallback()
+		return
+	}
+	var fireModule = iterator.current()
+	fireModule.ignition.init(this, function(err) {
+		if(err) {
+			finishCallback(new ModuleInitializerError(fireModule, err))
+		} else {
+			self._runNextModuleInitializer(iterator, finishCallback)
 		}
 	})
 }
