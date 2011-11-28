@@ -440,5 +440,36 @@ vows.describe('firejs - Module Initializer and Initializer Expressions').addBatc
 				"appInitValue":"App Initializer Expression"
 			})
 		}
-	},
+	}
+}).export(module);
+
+
+vows.describe('firejs - --print-manifest').addBatch({
+	"When I run an application with --print-manifest": {
+		topic: function() {
+			var self = this
+			var processResult = null
+			var child = exec('bin/./firejs test/commandLineDirs/printManifest/package.json --print-manifest', function (error, stdout, stderr) {
+				processResult = {
+					error: error,
+					stdout: stdout,
+					stderr: stderr
+				}
+			});
+			child.on("exit", function(code, signal) {
+				processResult.code = code
+				self.callback(null, processResult)
+			})
+		},
+		"The exit code should be 0": function(output){
+			assert.strictEqual(output.code, 0)
+		},
+		"stderr should be empty": function(output){
+			assert.isEmpty(output.stderr)
+		},
+		"stdout JSON document should contain the merged manifest": function(output){
+			var stdout = JSON.parse(output.stdout)
+			assert.equal(stdout.manifestProperty, "Manifest Value")
+		}
+	}
 }).export(module);

@@ -91,10 +91,12 @@ var nopt = require('nopt')
 module.exports.executeApplication = function(argv) {
 	process.parsedArgv = nopt({
 		"print-expressions" : Boolean,
-		"porcelain-errors" : Boolean
+		"porcelain-errors" : Boolean,
+		"print-manifest": Boolean
 	},
 	{
-		"pe": ["--print-expressions", true]
+		"pe": ["--print-expressions", true],
+		"pm": ["--print-manifest", true]
 	},argv, 0)
 	var noArgs = process.parsedArgv.argv.remain.length == 0
 	if(noArgs) {
@@ -114,6 +116,7 @@ module.exports.executeApplication = function(argv) {
 		console.log("options:")
 		console.log("	--print-expressions: prints all the expression names and flags loaded by the runtime as a JSON document to stdout")
 		console.log("	--porcelain-errors: prints errors to stderr in JSON format")
+		console.log("	--print-manifest: prints the merged manifest as a JSON document to stdout")
 		console.log("")
 		console.log("Copyright (C) 2011 Firebase.co and Contributors. http://firejs.firebase.co")
 	}

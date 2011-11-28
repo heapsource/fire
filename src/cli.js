@@ -30,6 +30,7 @@ var util = require('util')
 
 module.exports = function() {
 	var pureArgs = process.argv.slice(2)
+	var parsedArgv = process.parsedArgv
 	var noArgs = pureArgs.length == 0
 	var mainScriptPath = module.filename
 	var mainScriptDirName = path.dirname(mainScriptPath)
@@ -80,7 +81,7 @@ module.exports = function() {
 				}
 				process.exit(fire.INITIALIZATION_ERROR_EXIT_CODE)
 			}
-			if(pureArgs.indexOf('--print-expressions') != -1) {
+			if(parsedArgv['print-expressions'] == true) {
 				var expressions = []
 				var expNames = Object.keys(runtime.loadedExpressionsMeta)
 				for(var i = 0; i < expNames.length; i++) {
@@ -92,7 +93,12 @@ module.exports = function() {
 				}
 				sys.print(JSON.stringify(expressions))
 				process.exit(0)
-			} else 
+			}
+			else if(parsedArgv['print-manifest'] == true) {
+				sys.print(JSON.stringify(runtime.mergedManifest))
+				process.exit(0)
+			}
+			else 
 				{
 					var expDef = runtime.getExpressionDefinition(expressionName)
 					if(!expDef) {
