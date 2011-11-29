@@ -6353,3 +6353,162 @@ vows.describe('firejs - Runtime Load Twice').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe('firejs - @push').addBatch({
+	'When I use @push to add an string to an array in last result': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@scopeSet(array)": [],
+					"@return": {
+						"pushResult": {
+							"@return": {
+								"@get(array)": null
+							},
+							"@push": "foo"
+						},
+						"array": {
+							"@get(array)": null
+						}
+					}
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"there should be no errors": function(err, res) {
+				assert.isNull(err)
+			},
+			"the result of the push should be 0 since is the index of the inserted item which turns to be the first": function(err, res) {
+				assert.strictEqual(res.pushResult, 0)
+			},
+			"the array length should be 1": function(err, res) {
+				assert.strictEqual(res.array.length, 1)
+			},
+			"the value should be in the array": function(err, res) {
+				assert.strictEqual(res.array[0], "foo")
+			}
+		}
+	},
+	'When I use @push to add an string to a hint path': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@scopeSet(array)": [],
+					"@return": {
+						"pushResult": {
+							"@push(array)": "foo"
+						},
+						"array": {
+							"@get(array)": null
+						}
+					}
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"there should be no errors": function(err, res) {
+				assert.isNull(err)
+			},
+			"the result of the push should be 0 since is the index of the inserted item which turns to be the first": function(err, res) {
+				assert.strictEqual(res.pushResult, 0)
+			},
+			"the array length should be 1": function(err, res) {
+				assert.strictEqual(res.array.length, 1)
+			},
+			"the value should be in the array": function(err, res) {
+				assert.strictEqual(res.array[0], "foo")
+			}
+		}
+	},
+	'When I use @push to add an string to a hint path that is not an Array': {
+		topic: function() {
+			var runtime = new Runtime()
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+					"@scopeSet(array)": "not an array",
+					"@return": {
+						"pushResult": {
+							"@push(array)": "foo"
+						},
+						"array": {
+							"@get(array)": null
+						}
+					}
+				}
+			})
+			return runtime
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"there should be no errors": function(err, res) {
+				assert.isNull(err)
+			},
+			"the result of the push should be undefined since the push never ocurred": function(err, res) {
+				assert.strictEqual(res.pushResult, undefined)
+			}
+		}
+	}
+}).export(module)
