@@ -115,7 +115,7 @@ Compiler.prototype.generateCodeHashChainExpressions = function(iterator, target)
 	var self = this
 	if(iterator.next()) {
 		var propNode = iterator.current()
-		if(propNode.isPureValue()) {
+		if(propNode.areChildrenPureValues()) {
 			this.buffer.writeLine("hashResult[" + JSON.stringify(propNode.value) + "] = "+ JSON.stringify(propNode.children[0].value))
 			if(iterator.isLast()) {
 				this.buffer.writeLine(target + ".finish()")
@@ -123,24 +123,44 @@ Compiler.prototype.generateCodeHashChainExpressions = function(iterator, target)
 				this.generateCodeHashChainExpressions(iterator, target)
 			}
 		}else {
-			// Generate Anonymous Expression Block
-			this.buffer.writeLine("var exp = new Expression()")
-			this.buffer.writeLine("exp.execute = function() {")
-			this.buffer.indent()
-			this.generateAstNodeCode(propNode.children[0])
-			this.buffer.unindent()
-			this.buffer.writeLine("}")
-			this.buffer.writeLine("exp.resultCallback = function(res, parent) {")
-			this.buffer.indent()
-			this.buffer.writeLine("parent.getCurrentResult()[" + JSON.stringify(propNode.value) + "] = res")
-			if(iterator.isLast()) {
-				this.buffer.writeLine("parent.finish()")
-			} else {
-				this.generateCodeHashChainExpressions(iterator, "parent")
-			}
-			this.buffer.unindent()
-			this.buffer.writeLine("}")
-			this.buffer.writeLine("exp.run(" + target + ")")
+      if(propNode.type == AstNodeType.delegate) {
+        // Generate constructor for the Delegate Expression and set it in the property.
+        this.buffer.writeLine("hashResult[" + JSON.stringify(propNode.value) + "] = function() {");
+        this.buffer.indent();
+        this.buffer.writeLine("var exp = new Expression()");
+        this.buffer.writeLine("exp.execute = function() {");
+        this.buffer.indent();
+        this.generateAstNodeCode(propNode.children[0]);
+        this.buffer.unindent();
+        this.buffer.writeLine("}");
+        this.buffer.writeLine("return exp;");
+        this.buffer.unindent();
+        this.buffer.writeLine("};");
+        if(iterator.isLast()) {
+          this.buffer.writeLine(target + ".finish()");
+        } else {
+          this.generateCodeHashChainExpressions(iterator, target);
+        }
+      } else {
+        // Generate Anonymous Expression Block
+        this.buffer.writeLine("var exp = new Expression()")
+        this.buffer.writeLine("exp.execute = function() {")
+        this.buffer.indent()
+        this.generateAstNodeCode(propNode.children[0])
+        this.buffer.unindent()
+        this.buffer.writeLine("}")
+        this.buffer.writeLine("exp.resultCallback = function(res, parent) {")
+        this.buffer.indent()
+        this.buffer.writeLine("parent.getCurrentResult()[" + JSON.stringify(propNode.value) + "] = res")
+        if(iterator.isLast()) {
+          this.buffer.writeLine("parent.finish()")
+        } else {
+          this.generateCodeHashChainExpressions(iterator, "parent")
+        }
+        this.buffer.unindent()
+        this.buffer.writeLine("}")
+        this.buffer.writeLine("exp.run(" + target + ")")
+      }
 		}
 	}
 }
@@ -193,7 +213,7 @@ Compiler.prototype.generateAstNodeCode = function(astNode) {
 			var iterator = new Iterator(astNode.children)
 			this.generateCodeBlockChain(iterator, "this")
 		} 
-		else if(astNode.type == AstNodeType.hash) {
+		else if(astNode.type == AstNodeType.hash || astNode.type == AstNodeType.composite_hash) {
 			this.generateCodeHashChain(astNode)
 		}
 		else if(astNode.type == AstNodeType.array) {
@@ -201,6 +221,7 @@ Compiler.prototype.generateAstNodeCode = function(astNode) {
 		}
 		else {
 			console.trace()
+			console.warn("can compile code yet for type " + astNode.type);
 			throw "can compile code yet for type " + astNode.type
 		}
 	}

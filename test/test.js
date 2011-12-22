@@ -6512,3 +6512,197 @@ vows.describe('firejs - @push').addBatch({
 		}
 	}
 }).export(module)
+
+vows.describe("delegates").addBatch({
+  'When I use delegates in a document with an expression that returns the literal message of the delegate': {
+		topic: function() {
+			var runtime = new Runtime()
+      var execDel = function() {};
+      execDel.prototype = new Expression();
+      execDel.prototype.execute = function() {
+        this.runInput(function(res, parent) {
+          parent.end(res['#msg']);
+        });
+      };
+      runtime.registerWellKnownExpressionDefinition({
+        name: "execDel",
+        implementation: execDel
+      });
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+          "@execDel": {
+            "#msg": "This is the message"
+          }
+				}
+			})
+			return runtime;
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"there should be no errors": function(err, res) {
+				assert.isNull(err)
+			},
+      "since the delegate value is a literal the type should match the literal type and not a function": function(res) {
+        assert.typeOf(res, 'string');
+      },
+			"the result should be the literal value given in the delegate": function(err, res) {
+				assert.strictEqual(res, "This is the message")
+			}
+		}
+	},
+  'When I use delegates in a document with an expression that returns the result of the block passed to the delegate': {
+		topic: function() {
+			var runtime = new Runtime()
+      var execDel = function() {};
+      execDel.prototype = new Expression();
+      execDel.prototype.execute = function() {
+        this.runInput(function(res, parent) {
+          var result = {
+            del: res['#msg']
+          };
+          var expression =  res['#msg']();
+          expression.resultCallback = function(res, parent) {
+            result.res = res;
+            parent.end(result);
+          };
+          expression.run(parent);
+        });
+      };
+      runtime.registerWellKnownExpressionDefinition({
+        name: "execDel",
+        implementation: execDel
+      });
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+          "@execDel": {
+            "#msg": {
+              "@concat": ["Hello", " ", "World"]
+            }
+          }
+				}
+			})
+			return runtime;
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"there should be no errors": function(err, res) {
+				assert.isNull(err);
+			},
+      "since the delegate value is a literal the type should match the literal type and not a function": function(res) {
+        assert.isFunction(res.del);
+      },
+			"the result should be the literal value given in the delegate": function(err, res) {
+				assert.strictEqual(res.res, "Hello World");
+			}
+		}
+	},
+  'When I use delegates in a document with an expression that returns the result of the object with nested block passed to the delegate': {
+		topic: function() {
+			var runtime = new Runtime()
+      var execDel = function() {};
+      execDel.prototype = new Expression();
+      execDel.prototype.execute = function() {
+        this.runInput(function(res, parent) {
+          var result = {
+            del: res['#msg']
+          };
+          var expression =  res['#msg']();
+          expression.resultCallback = function(res, parent) {
+            result.res = res;
+            parent.end(result);
+          };
+          expression.run(parent);
+        });
+      };
+      runtime.registerWellKnownExpressionDefinition({
+        name: "execDel",
+        implementation: execDel
+      });
+			runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+          "@execDel": {
+            "#msg": {
+              greetings: {
+                "@concat": ["Hello", " ", "World"]
+              },
+              favNumber: 4324
+            }
+          }
+				}
+			})
+			return runtime;
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"there should be no errors": function(err, res) {
+				assert.isNull(err);
+			},
+      "since the delegate value is a dynamic object the type of the delegate value should be a function": function(res) {
+        assert.isFunction(res.del);
+      },
+			"the result should be the value given in the delegate": function(err, res) {
+				assert.strictEqual(res.res.greetings, "Hello World");
+				assert.strictEqual(res.res.favNumber, 4324);
+			}
+		}
+	}
+
+
+}).export(module);

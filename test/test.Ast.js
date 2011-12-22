@@ -390,3 +390,54 @@ vows.describe('AST - Node Paths').addBatch({
 	}
 }).export(module)
 
+vows.describe('AST - Delegate Parsing').addBatch({
+  "When I parse a document with a delegate property": {
+    topic: function() {
+      var doc = {"#json": {"@return": 1}};
+      var ast = new Tree();
+      ast.parse(doc);
+      return ast;
+    },
+    "the root node of the ast should be of 'composite_hash' type":  function(ast) {
+      assert.isNotNull(ast.getRootNode());
+      assert.strictEqual(ast.getRootNode().type, AstNodeType.composite_hash);
+    },
+    "the first node should be of 'delegate' type":  function(ast) {
+      assert.strictEqual(ast.getRootNode().children[0].type, AstNodeType.delegate);
+    },
+    "the value of the first node should be '#json'":  function(ast) {
+      assert.strictEqual(ast.getRootNode().children[0].value, "#json");
+    },
+    "the sub-node of the first node should be of 'block' type":  function(ast) {
+      assert.strictEqual(ast.getRootNode().children[0].children[0].type, AstNodeType.block);
+    }
+  },
+  "When I parse a document with a delegate property and a literal property": {
+    topic: function() {
+      var doc = {"#json": {"@return": 1}, "message": "Super Message"};
+      var ast = new Tree();
+      ast.parse(doc);
+      return ast;
+    },
+    "the root node of the ast should be of 'composite_hash' type":  function(ast) {
+      assert.isNotNull(ast.getRootNode());
+      assert.strictEqual(ast.getRootNode().type, AstNodeType.composite_hash);
+    },
+    "the first node should be of 'delegate' type":  function(ast) {
+      assert.strictEqual(ast.getRootNode().children[0].type, AstNodeType.delegate);
+    },
+    "the value of the first node should be '#json'":  function(ast) {
+      assert.strictEqual(ast.getRootNode().children[0].value, "#json");
+    },
+    "the sub-node of the first node should be of 'block' type":  function(ast) {
+      assert.strictEqual(ast.getRootNode().children[0].children[0].type, AstNodeType.block);
+    },
+    "the second node should be of 'property' type":  function(ast) {
+      assert.strictEqual(ast.getRootNode().children[1].type, AstNodeType.property);
+    },
+    "the value of the second node should be 'message'":  function(ast) {
+      assert.strictEqual(ast.getRootNode().children[1].value, "message");
+    }
+  }
+
+}).export(module)
