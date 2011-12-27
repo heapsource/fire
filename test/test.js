@@ -6702,7 +6702,91 @@ vows.describe("delegates").addBatch({
 				assert.strictEqual(res.res.favNumber, 4324);
 			}
 		}
+	},
+  'When I use @trigger to execute a delegate and the hint path points to a literal delegate': {
+		topic: function() {
+			var runtime = new Runtime()
+      runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+          "@scopeSet(input)": {
+            "#message": "Hello World"
+          },
+          "@trigger(input.#message)": null
+				}
+			})
+			return runtime;
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"there should not be error": function(err, res) {
+				assert.isNull(err);
+			},
+			"the result should be the result of the delegate": function(err, res) {
+				assert.strictEqual(res, "Hello World");
+			}
+		}
+	},
+  'When I use @trigger to execute a delegate and the hint path points to a delegate block': {
+		topic: function() {
+			var runtime = new Runtime()
+      runtime.registerWellKnownExpressionDefinition({
+				name:"TestMain",
+				json: {
+          "@scopeSet(input)": {
+            "#message": {
+              "@return": "Hello World"
+            }
+          },
+          "@trigger(input.#message)": null
+				}
+			})
+			return runtime;
+		},
+		"and we execute": {
+			topic: function(runtime) {
+				var self = this
+				var contextBase = {};
+				contextBase._resultCallback = function(res) {
+					self.callback(null, res)
+				}
+				contextBase._loopCallback = function() {};
+				contextBase._inputExpression  = function() {};
+				contextBase._variables = {};        
+				contextBase._errorCallback =  function(err) {
+					self.callback(err, null)
+				};
+				runtime.load(function(initError) {
+					if(initError) {
+						self.callback(initError, null)
+					}
+					runtime._testOnly_runExpressionByName("TestMain", contextBase ,null)
+				})
+			},
+			"there should not be error": function(err, res) {
+				assert.isNull(err);
+			},
+			"the result should be the result of the delegate": function(err, res) {
+				assert.strictEqual(res, "Hello World");
+			}
+		}
 	}
-
-
 }).export(module);
