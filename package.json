@@ -1,7 +1,7 @@
 {
     "name": "fire",
     "description": "An experimental Framework that uses JSON structures to simplify the definition of complex behaviors from asynchronous sources in Node.js",
-    "version": "0.1.0",
+    "version": "0.1.1",
 	"homepage": "http://firejs.firebase.co",
     "author": "Firebase.co <npm@firebase.co> (http://www.firebase.co)",
     "main": "./index.js",

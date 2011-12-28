@@ -7132,7 +7132,383 @@ vows.describe('firejs @xif built-in expression').addBatch({
 					name:"testIf",
 					json: {
 						"@set(contactFound)" : true,
-						"@xif(contactFound)": null
+						"@xif(contactFound)": {
+              "@undefined": null 
+            }
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return undefined": function(res) {
+					 	assert.isUndefined(res);
+					}
+			}
+		}
+	},
+}).export(module);
+
+vows.describe('firejs @xunless built-in expression').addBatch({
+	'Having a JSON document with a @xunless expression, no hint and no result in the block': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name: "testIf",
+					json: {
+						"@xunless": {
+              "#then": "Condition met!",
+              "#else": "Condition not met dude"
+            }
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #then delegate": function(res) {
+					 	assert.strictEqual(res, 'Condition met!');
+					}
+			}
+		}
+	},
+	'Having a JSON block with a @xunless expression in which current result is false': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@return": false,
+						"@xunless": {
+              "#then": "Got them!"
+            }
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #then delegate": function(err, res) {
+					 	assert.equal(res,"Got them!")
+					}
+			}
+		}
+	},
+	'Having a JSON block with a @xunless expression with a path that doesn not exist': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic: function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@xunless(doesntExist)": {
+              "#then": "The path exists!",
+              "#else": "The path doesn't exists"
+            }
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this;
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						};
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null);
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null);
+						})
+					},
+					"it should return the #then delegate since the condition was met": function(err, res) {
+					 	assert.strictEqual(res, "The path exists!");
+					}
+			}
+		}
+	},
+	'Having a JSON block with a @xunless expression with a path that returns false': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : false,
+						"@xunless(contactFound)": {
+              "#then": "Sorry, contact not found"
+            }
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #then delegate since the condition was met": function(err, res) {
+					 	assert.strictEqual(res, 'Sorry, contact not found');
+					}
+			}
+		}
+	},
+	'Having a JSON block with a @xunless expression with a path that returns true': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : true,
+						"@xunless(contactFound)": {
+              "#else": "Got them!"
+            }
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #else delegate": function(res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	},
+  'Having a JSON block with a @xunless expression using a path that returns false and blocks as delegates': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : false,
+						"@xunless(contactFound)": {
+              "#then": {
+                "@concat": ["Sorry, contact ", "not found"]
+              }
+            }
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #then delegate since the condition was met": function(res) {
+					 	assert.strictEqual(res, 'Sorry, contact not found');
+					}
+			}
+		}
+	},
+  'Having a JSON block with a @xunless expression with a path that returns true and blocks as delegates': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : true,
+						"@xunless(contactFound)": {
+              "#else": {
+                "@concat": ["Got ", "them!"]
+              }
+            }
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #else delegate": function(res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	},
+  'Having a JSON block with a @xunless expression using a path that returns false and null input': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : false,
+						"@xunless(contactFound)": null
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return undefined": function(res) {
+					 	assert.isUndefined(res);
+					}
+			}
+		}
+	},
+  'Having a JSON block with a @xunless expression using a path that returns false and undefined input': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : false,
+						"@xunless(contactFound)": {
+              "@undefined": null
+            }
 					}
 				});
 				return runtime;
