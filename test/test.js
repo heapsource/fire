@@ -6790,3 +6790,297 @@ vows.describe("delegates").addBatch({
 		}
 	}
 }).export(module);
+
+vows.describe('firejs @xif built-in expression').addBatch({
+	'Having a JSON document with a @xif expression, no hint and no result in the block': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name: "testIf",
+					json: {
+						"@xif": {
+              "#then": "Got them!",
+              "#else": "Condition not met dude"
+            }
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #else delegate": function(res) {
+					 	assert.strictEqual(res, 'Condition not met dude');
+					}
+			}
+		}
+	},
+	'Having a JSON block with a @xif expression in which current result is true': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@return": true,
+						"@xif": {
+              "#then": "Got them!"
+            }
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #then delegate": function(err, res) {
+					 	assert.equal(res,"Got them!")
+					}
+			}
+		}
+	},
+	'Having a JSON block with a @xif expression with a path that doesn not exist': {
+		topic: function() {
+			return new Runtime()
+		},
+		"when we register it": {
+			topic: function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@xif(doesntExist)": {
+              "#then": "The path exists!",
+              "#else": "The path doesn't exists"
+            }
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this;
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						};
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null);
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null);
+						})
+					},
+					"it should return the #else delegate since the condition was not met": function(err, res) {
+					 	assert.strictEqual(res, "The path doesn't exists");
+					}
+			}
+		}
+	},
+	'Having a JSON block with a @xif expression with a path that returns false': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : false,
+						"@xif(contactFound)": {
+              "#else": "Sorry, contact not found"
+            }
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #else delegate since the condition was not met": function(err, res) {
+					 	assert.strictEqual(res, 'Sorry, contact not found');
+					}
+			}
+		}
+	},
+	'Having a JSON block with a @xif expression with a path that returns true': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : true,
+						"@xif(contactFound)": {
+              "#then": "Got them!"
+            }
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #then delegate": function(res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	},
+  'Having a JSON block with a @xif expression using a path that returns false and blocks as delegates': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : false,
+						"@xif(contactFound)": {
+              "#else": {
+                "@concat": ["Sorry, contact ", "not found"]
+              }
+            }
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #else delegate since the condition was not met": function(res) {
+					 	assert.strictEqual(res, 'Sorry, contact not found');
+					}
+			}
+		}
+	},
+  'Having a JSON block with a @xif expression with a path that returns true and blocks as delegates': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : true,
+						"@xif(contactFound)": {
+              "#then": {
+                "@concat": ["Got ", "them!"]
+              }
+            }
+					}
+				})
+				return runtime
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return the #then delegate": function(res) {
+					 	assert.equal(res, "Got them!")
+					}
+			}
+		}
+	}
+}).export(module);
