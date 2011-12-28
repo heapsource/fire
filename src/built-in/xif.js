@@ -27,6 +27,9 @@ Xif.prototype = new Expression();
 Xif.prototype.execute = function() {
   // run the input...
   this.runInput(function(res, parent) {
+    if(!res) {
+      return parent.end(undefined);
+    }
     var met = parent.hasHint() ? parent.getHintVariableValue() : parent.getParentResult();
     if(met) {
       // Return '#then' delegate result

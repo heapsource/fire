@@ -7082,5 +7082,83 @@ vows.describe('firejs @xif built-in expression').addBatch({
 					}
 			}
 		}
-	}
+	},
+  'Having a JSON block with a @xif expression using a path that returns true and null input': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : true,
+						"@xif(contactFound)": null
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return undefined": function(res) {
+					 	assert.isUndefined(res);
+					}
+			}
+		}
+	},
+  'Having a JSON block with a @xif expression using a path that returns true and undefined input': {
+		topic: function() {
+			return new Runtime();
+		},
+		"when we register it": {
+			topic:function(runtime) {
+				runtime.registerWellKnownExpressionDefinition({
+					name:"testIf",
+					json: {
+						"@set(contactFound)" : true,
+						"@xif(contactFound)": null
+					}
+				});
+				return runtime;
+			},
+			"and execute it": {
+					topic: function(runtime) {
+						var self = this
+						var contextBase = {};
+						contextBase._resultCallback = function(res) {
+							self.callback(null, res)
+						}
+						contextBase._loopCallback = function() {};
+						contextBase._inputExpression  = function() {};
+						contextBase._variables = {};            
+						contextBase._errorCallback =  function() {};
+						runtime.load(function(initError) {
+							if(initError) {
+								return self.callback(initError, null)
+							}
+							runtime._testOnly_runExpressionByName("testIf", contextBase ,null)
+						})
+					},
+					"it should return undefined": function(res) {
+					 	assert.isUndefined(res);
+					}
+			}
+		}
+	},
 }).export(module);
