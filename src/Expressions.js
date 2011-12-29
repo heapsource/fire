@@ -114,17 +114,6 @@ Expression.prototype.run = function(callingParent) {
 			this.vars._parent = this.parent.vars
 		}
 		this.runtime = this.parent.runtime
-		var self = this
-		if(!this.errorCallback) {
-			this.errorCallback = function(err) {
-				self.parent.bubbleUpError(err)
-			} 
-		}
-		if(!this.loopCallback) {
-			this.loopCallback = function(payload) {
-				self.parent.loopControl(payload)
-			} 
-		}
 	}
 	this.execute()
 }
@@ -132,14 +121,16 @@ Expression.prototype.run = function(callingParent) {
 Expression.prototype.raiseError = function(err) {
 	//console.warn("raiseError:", err)
 	var errorInfo = new RuntimeError(this._blockContext, err)
-	this.bubbleUpError(errorInfo)
+	this.propagateError(errorInfo)
 }
 
-Expression.prototype.bubbleUpError = function(errorInfo) {
-	if(!this.errorCallback) {
+Expression.prototype.propagateError = function(errorInfo) {
+	if(this.errorCallback) {
+		this.errorCallback(errorInfo, this.parent, this);
+  } else if(this.parent) {
+    this.parent.propagateError(errorInfo);
+	} else {
 		throw "errorCallback not implemented"
-	}else {
-		this.errorCallback(errorInfo)
 	}
 }
 Expression.prototype.getError = function() {
@@ -166,11 +157,17 @@ Expression.prototype.clearParentError = function() {
 }
 
 Expression.prototype.loopControl = function(payload) {
-	if(!this.loopCallback) {
+  this.propagateLoopControl(payload);
+}
+
+Expression.prototype.propagateLoopControl = function(payload) {
+  if(this.loopCallback) {
+    this.loopCallback(payload, this.parent, this);
+  } else if(this.parent) {
+    this.parent.propagateLoopControl(payload);
+  } else {
 		throw "loopCallback not implemented"
-	}else {
-		this.loopCallback(payload)
-	}
+  }
 }
 
 Expression.prototype.bypass = function() {

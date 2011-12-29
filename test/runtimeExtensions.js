@@ -151,15 +151,9 @@ Runtime.prototype._testOnly_runExpressionInstance = function(expressionInstance,
 	for(var i = 0; i < localVarsKeys.length; i++) {
 		expressionInstance.vars[localVarsKeys[i]] = localVariables[localVarsKeys[i]]
 	}
-	expressionInstance.resultCallback = function(res, parent) {
-		_blockContext._resultCallback(res)
-	}
-	expressionInstance.errorCallback = function(err) {
-		_blockContext._errorCallback(err)
-	}
-	expressionInstance.loopCallback = function(payload) {
-		_blockContext._loopCallback(payload)
-	}
+	expressionInstance.resultCallback = _blockContext._resultCallback;
+	expressionInstance.errorCallback = _blockContext._errorCallback;
+	expressionInstance.loopCallback = _blockContext._loopCallback;
 	expressionInstance.createInputExpression = function() {
 		var exp = new Expression()
 		exp.execute = function() {

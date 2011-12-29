@@ -1523,7 +1523,86 @@ vows.describe('firejs error handling').addBatch({
 				}
 			}
 		}
-	}
+	},
+  "Having a JSON code that raises an error in a sub expression": {
+      topic: function(topic) {
+        var self = this
+        var runtime = new Runtime()
+        var parentExp = function(){};
+        parentExp.prototype = new Expression();
+        parentExp.prototype.onPrepareInput = function() {
+          var self = this;
+          this.inputExpression.errorCallback = function(error, parent, exp) {
+            self.end({
+              error: error,
+              parent: parent,
+              superParent: self,
+              exp: exp,
+              inputExpImpl: self.inputExpression.constructor
+            });
+          }
+          this._superInputExp = this.inputExpression;
+        }
+        parentExp.prototype.execute = function() {
+          this.runInput(function() {
+            // Do nothing, the body raises an error anyway.
+          });
+        }
+        runtime.registerWellKnownExpressionDefinition({
+          name: "SuperParentExp",
+          implementation: parentExp
+        });
+        runtime.registerWellKnownExpressionDefinition({
+          name: "Test",
+          json: {
+            "@SuperParentExp": {
+              "@raiseError": "My error"
+            }
+          }
+        });
+        runtime.load(function(initError) {
+          if(initError) {
+            self.callback(initError, null)
+          } else {
+            var contextBase = {};
+            var result = {
+              count: 0,
+              rootExpImpl: runtime.getExpressionDefinition('Test').implementation,
+              superParentImpl: parentExp
+            }
+            contextBase._resultCallback = function(res) {
+              result.count++
+                result.result = res
+              self.callback(null, result)
+            }
+            contextBase._loopCallback = function() {
+              self.callback("_loopCallback reached", null)
+            };
+            contextBase._inputExpression  = function() {
+              self.callback("_inputExpression reached", null)
+            };
+            contextBase._variables = {};        
+            contextBase._errorCallback =  function(err, parent, exp) {
+              self.callback(err, result);
+            };
+            runtime._testOnly_runExpressionByName("Test", contextBase ,null)
+          }
+        });
+      },
+      "an error should be raised": function(res) {
+        assert.equal(res.result.error.error, 'My error')
+      },
+      "the exp argument in the errorCallback should be instance of the input block expression": function(res) {
+        assert.isNotNull(res.result.exp);
+        assert.isTrue(res.result.exp instanceof res.result.inputExpImpl);
+      },
+      "the parent argument in the errorCallback should be instance of calling expression": function(res) {
+        assert.isTrue(res.result.parent instanceof res.superParentImpl);
+      },
+      "the parent argument in the errorCallback should be the same calling expression": function(res) {
+        assert.equal(res.parent, res.superParent);
+      }
+    }
 }).export(module);
 
 
@@ -1810,6 +1889,85 @@ vows.describe('firejs loop control').addBatch({
 			}
 		}
 	},
+  "Having a JSON code that perfoms a loop control in a sub expression": {
+      topic: function(topic) {
+        var self = this
+        var runtime = new Runtime()
+        var parentExp = function(){};
+        parentExp.prototype = new Expression();
+        parentExp.prototype.onPrepareInput = function() {
+          var self = this;
+          this.inputExpression.loopCallback = function(payload, parent, exp) {
+            self.end({
+              payload: payload,
+              parent: parent,
+              superParent: self,
+              exp: exp,
+              inputExpImpl: self.inputExpression.constructor
+            });
+          }
+          this._superInputExp = this.inputExpression;
+        }
+        parentExp.prototype.execute = function() {
+          this.runInput(function() {
+            // Do nothing, the body performs a loop control anyway.
+          });
+        }
+        runtime.registerWellKnownExpressionDefinition({
+          name: "SuperParentExp",
+          implementation: parentExp
+        });
+        runtime.registerWellKnownExpressionDefinition({
+          name: "Test",
+          json: {
+            "@SuperParentExp": {
+              "@break": null
+            }
+          }
+        });
+        runtime.load(function(initError) {
+          if(initError) {
+            self.callback(initError, null)
+          } else {
+            var contextBase = {};
+            var result = {
+              count: 0,
+              rootExpImpl: runtime.getExpressionDefinition('Test').implementation,
+              superParentImpl: parentExp
+            }
+            contextBase._resultCallback = function(res) {
+              result.count++
+                result.result = res
+              self.callback(null, result)
+            }
+            contextBase._loopCallback = function() {
+              self.callback("_loopCallback reached", null)
+            };
+            contextBase._inputExpression  = function() {
+              self.callback("_inputExpression reached", null)
+            };
+            contextBase._variables = {};        
+            contextBase._errorCallback =  function(err, parent, exp) {
+              self.callback(err, result);
+            };
+            runtime._testOnly_runExpressionByName("Test", contextBase ,null)
+          }
+        });
+      },
+      "the payload should be the loop control payload": function(res) {
+        assert.equal(res.result.payload, 'break')
+      },
+      "the exp argument in the loopCallback should be instance of the input block expression": function(res) {
+        assert.isNotNull(res.result.exp);
+        assert.isTrue(res.result.exp instanceof res.result.inputExpImpl);
+      },
+      "the parent argument in the loopCallback should be instance of calling expression": function(res) {
+        assert.isTrue(res.result.parent instanceof res.superParentImpl);
+      },
+      "the parent argument in the loopCallback should be the same calling expression": function(res) {
+        assert.equal(res.parent, res.superParent);
+      }
+    },
 	'When I have a @break at the first level': {
 		topic: function() {
 			return  {
