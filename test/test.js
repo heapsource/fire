@@ -6411,6 +6411,24 @@ vows.describe('firejs - Manifest Tokens').addBatch({
 			assert.strictEqual(runtime.mergedManifest.withFireAppPid, "Running on " + process.pid)
 		}
 	},
+  'When I use a manifest with special token FIRE_BASE': {
+		topic: function() {
+			var self = this
+			var runtime = new Runtime()
+			runtime._mergeWithManifestFile(path.join(__dirname, "manifestTokens/withFireBase.json"))
+			runtime.load(function(initError) {
+				if(initError) {
+					self.callback(initError, null)
+				} else {
+					self.callback(null, runtime)
+				}
+			})
+		},
+		"It should be replaced with the runtime base dir": function(err, runtime) {
+			assert.isNull(err)
+			assert.strictEqual(runtime.mergedManifest.withFireBase, "Running on " + path.resolve(runtime.baseDir))
+		}
+	},
 	'When I use a manifest with a value from process.env': {
 		topic: function() {
 			process.env["SOME_TEST_KEY"] = "SOME TEST VALUE"

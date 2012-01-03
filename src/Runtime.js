@@ -55,7 +55,7 @@ function Runtime() {
 	this.mergedManifest = {
 		modules: []
 	}
-	this.baseDir = '.'
+	this.baseDir = path.resolve('.')
 	this.JSONDefinitions = new RuntimeDictionary()
 	this.applicationName = ''
 }
@@ -363,7 +363,8 @@ Runtime.prototype._replaceTokensInManifest = function() {
 	var SpecialEnv = {
 		FIRE_APP_NAME: this.applicationName,
 		FIRE_ENV_NAME: this.environmentName,
-		FIRE_APP_PID: process.pid
+		FIRE_APP_PID: process.pid,
+    FIRE_BASE: this.baseDir
 	}
 	replaceInObject = function(val) {
 		/*
