@@ -3,9 +3,16 @@
 		"module1"
 	],
 	"environments": {
+    "all": {
+      "module1": {
+        "server": "soome default value",
+        "configFromAll": 10
+      }
+    },
 		"customEnv1": {
 			"module1": {
-				"server": "127.0.0.1"
+				"server": "127.0.0.1",
+        "fromCustom": 100
 			}
 		}
 	}

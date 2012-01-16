@@ -58,6 +58,7 @@ function Runtime() {
 	this.baseDir = path.resolve('.')
 	this.JSONDefinitions = new RuntimeDictionary()
 	this.applicationName = ''
+  this.configurations = {};
 }
 
 
@@ -166,10 +167,16 @@ Runtime.prototype.load = function(initializationCallback) {
 		} else {
 			// STEP 1. Load Configurations from Manifest
 			// (Configurations must be loaded first so the ignition.init callback of all modules can work properly)
-			var configurations = this.mergedManifest.environments;
-			if(configurations) {
-				self.configurations = configurations[self.environmentName]
-			}
+			var mergedEnvironments = this.mergedManifest.environments || {};
+      if(mergedEnvironments['all']) {
+        // Merge configurations targeted for all environments.
+        mergeWith(this.configurations, mergedEnvironments['all']);
+      }
+      var currentEnvConfig = mergedEnvironments[self.environmentName] || {};
+      if(currentEnvConfig) {
+        // Merged configurations targeted for the current environment.
+        mergeWith(this.configurations, currentEnvConfig);
+      }
 			this._replaceTokensInManifest()
 			this.events.emit('load', this)
 			this.events.removeAllListeners('load')
@@ -322,9 +329,6 @@ Runtime.prototype.getModuleConfiguration = function(moduleName) {
 }
 
 Runtime.prototype.setModuleConfiguration = function(moduleName, value) {
-	if(this.configurations === undefined) {
-		this.configurations  = {}
-	}
 	this.configurations[moduleName] = value
 }
 
@@ -384,7 +388,7 @@ Runtime.prototype._replaceTokensInManifest = function() {
 					}
 				}
 			}
-		}else if(typeof(val) == 'object') {
+		}else if(typeof(val) == 'object' && val != null) {
 			if(val instanceof Array) {
 				for(var i = 0;i < val.length;i++) {
 					val[i] = replaceInObject(val[i])

@@ -2536,8 +2536,15 @@ vows.describe('firejs configurations').addBatch({
 						contextBase._errorCallback =  function() {};
 						runtime._testOnly_runExpressionByName("module1", contextBase ,null)
 					},
-					"it should work with the configurations": function(err, res) {
-					 	assert.equal(res, "Hello World with configurations, server configuration host is 127.0.0.1 is and the environment is customEnv1")
+					"it should load the configurations for the current environment merging with 'all'": function(err, res) {
+					 	assert.deepEqual(res, {
+                            config: {
+                              server: "127.0.0.1",
+                            configFromAll: 10,
+                            fromCustom: 100
+                            },
+                            environmentName: "customEnv1"
+            });
 					}
 				}
 			}
