@@ -23,6 +23,6 @@ function mergeWith(original, override) {
 		}
 		return original
 	}
-	return original
+	return override
 }
 module.exports = mergeWith

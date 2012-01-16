@@ -119,7 +119,7 @@ vows.describe('firejs mergeWith').addBatch({
     "with another object with arrays of complex objects for the same properties, the original object should have the merged properties and complemented properties": function() {
       var expectedObject = {
         "point1": {
-          "x": 20
+          "x": 140
         },
         "point2": {
           "x": 30,
@@ -143,6 +143,30 @@ vows.describe('firejs mergeWith').addBatch({
       };
       mergeWith(originalObject, mergeObject);
       assert.deepEqual(originalObject, expectedObject);
+    },
+    "with another object overriding non-object values": function() {
+      var expectedObject = {
+        "number": 3422,
+        "string": "Some String",
+        "boolean": false,
+        "null": null
+      };
+      var originalObject = {
+        "number": null,
+        "string": null,
+        "boolean": null,
+        "null": "Invalid null"
+      };
+      var mergeObject =  { 
+        "number": 3422,
+        "string": "Some String",
+        "boolean": false,
+        "null": null
+      };
+      mergeWith(originalObject, mergeObject);
+      assert.deepEqual(originalObject, expectedObject);
     }
+
   }
+
 }).export(module);
