@@ -34,10 +34,7 @@ Expression.prototype.end = function(res) {
 		var callback = this.resultCallback
 		var parent = this.parent
 		self.reset()
-		process.nextTick(function() {
-			callback(res, parent)
-		})
-		
+		callback(res, parent)	
 	}
 }
 Expression.prototype.setCurrentResult = function(res) {
