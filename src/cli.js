@@ -61,7 +61,7 @@ module.exports = function() {
 		return require(moduleName)
 	}
 	var manifestPath = path.join(mainScriptDirName, fire.DEFAULT_MANIFEST_FILE_NAME)
-	path.exists(manifestPath, function(manifestFound) {
+	fs.exists(manifestPath, function(manifestFound) {
 		var self = this
 		var initializationFinished = function(err) {
 			if(err) {
