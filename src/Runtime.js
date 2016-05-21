@@ -115,10 +115,10 @@ Runtime.prototype.scanScriptsDirs = function() {
  * Load directores for the current environment. The path must be absolute. If the path does not exists it will do nothing
  */
 Runtime.prototype.registerInitializersDir = function(initializersDirPath) {
-	if(path.existsSync(initializersDirPath)) {
+	if(fs.existsSync(initializersDirPath)) {
 		var envInitPath = path.join(initializersDirPath, this.environmentName);
 		
-		if(path.existsSync(envInitPath)) {
+		if(fs.existsSync(envInitPath)) {
 			this.scriptDirectories.push({
 				path: envInitPath,
 				attributes: {
